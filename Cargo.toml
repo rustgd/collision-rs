@@ -1,0 +1,36 @@
+[package]
+
+name = "collision"
+version = "0.9.0"
+authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
+        "Brian Heylin",
+        "Colin Sherratt",
+        "Dzmitry Malyshau",
+        "Erick Tryzelaar",
+        "Luqman Aden",
+        "Maik Klein",
+        "Mikko Perttunen",
+        "Pierre Krieger",
+        "Tomasz Stachowiak"
+]
+license = "Apache-2.0"
+description = "A collision extension to cgmath"
+
+documentation = "https://docs.rs/collision"
+homepage = "https://github.com/csherratt/collision-rs"
+repository = "https://github.com/csherratt/collision-rs"
+readme = "README.md"
+
+keywords = ["gamedev", "cgmath", "collision"]
+
+[lib]
+name = "collision"
+
+[features]
+default = ["rustc-serialize"]
+
+[dependencies]
+num = "0.1"
+approx = "0.1"
+cgmath = "0.12.0"
+rustc-serialize = { version = "0.3", optional = true }

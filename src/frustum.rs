@@ -115,12 +115,12 @@ impl<S: BaseFloat + 'static> Projection<S> for Perspective<S> {
 impl<S: BaseFloat> Projection<S> for Ortho<S> {
     fn to_frustum(&self) -> Frustum<S> {
         Frustum {
-            left:   Plane::from_abcd(S::one(), S::zero(), S::zero(), self.left.clone()),
-            right:  Plane::from_abcd(-S::one(), S::zero(), S::zero(), self.right.clone()),
-            bottom: Plane::from_abcd(S::zero(), S::one(), S::zero(), self.bottom.clone()),
-            top:    Plane::from_abcd(S::zero(), -S::one(), S::zero(), self.top.clone()),
-            near:   Plane::from_abcd(S::zero(), S::zero(), -S::one(), self.near.clone()),
-            far:    Plane::from_abcd(S::zero(), S::zero(), S::one(), self.far.clone()),
+            left:   Plane::from_abcd(S::one(), S::zero(), S::zero(), self.left),
+            right:  Plane::from_abcd(-S::one(), S::zero(), S::zero(), self.right),
+            bottom: Plane::from_abcd(S::zero(), S::one(), S::zero(), self.bottom),
+            top:    Plane::from_abcd(S::zero(), -S::one(), S::zero(), self.top),
+            near:   Plane::from_abcd(S::zero(), S::zero(), -S::one(), self.near),
+            far:    Plane::from_abcd(S::zero(), S::zero(), S::one(), self.far),
         }
     }
 }

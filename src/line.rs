@@ -17,7 +17,7 @@
 
 use std::marker::PhantomData;
 
-use cgmath::{BaseNum};
+use cgmath::BaseNum;
 use cgmath::{EuclideanSpace, Point2, Point3};
 use cgmath::{VectorSpace, Vector2, Vector3};
 
@@ -28,16 +28,18 @@ pub struct Line<S, V, P> {
     pub origin: P,
     pub dest: P,
     phantom_s: PhantomData<S>,
-    phantom_v: PhantomData<V>
+    phantom_v: PhantomData<V>,
 }
 
-impl<S: BaseNum, V: VectorSpace<Scalar=S>, P: EuclideanSpace<Scalar=S, Diff=V>>  Line<S, V, P> {
+impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff = V>> Line<S,
+                                                                                           V,
+                                                                                           P> {
     pub fn new(origin: P, dest: P) -> Line<S, V, P> {
         Line {
             origin: origin,
             dest: dest,
             phantom_v: PhantomData,
-            phantom_s: PhantomData
+            phantom_s: PhantomData,
         }
     }
 }

@@ -28,8 +28,11 @@ impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Plane<S>, Ray3<S>) {
         let (ref p, ref r) = *self;
 
         let t = -(p.d + r.origin.dot(p.n)) / r.direction.dot(p.n);
-        if t < Zero::zero() { None }
-        else { Some(r.origin + r.direction * t) }
+        if t < Zero::zero() {
+            None
+        } else {
+            Some(r.origin + r.direction * t)
+        }
     }
 }
 
@@ -41,8 +44,7 @@ impl<S: BaseFloat> Intersect<Option<Ray3<S>>> for (Plane<S>, Plane<S>) {
         let denom = d.dot(d);
         if ulps_eq!(denom, &S::zero()) {
             None
-        }
-        else {
+        } else {
             let p = (p2.n * p1.d - p1.n * p2.d).cross(d) / denom;
             Some(Ray3::new(Point3::from_vec(p), d))
         }
@@ -57,8 +59,7 @@ impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Plane<S>, Plane<S>, Plane<S
         let denom = p1.n.dot(u);
         if ulps_eq!(denom.abs(), &S::zero()) {
             None
-        }
-        else {
+        } else {
             let p = (u * p1.d + p1.n.cross(p2.n * p3.d - p3.n * p2.d)) / denom;
             Some(Point3::from_vec(p))
         }
@@ -89,14 +90,13 @@ impl<S: BaseFloat> Intersect<Option<Point2<S>>> for (Ray2<S>, Line2<S>) {
             let q2mp = Vector2::new(line.dest.x - p.x, line.dest.y - p.y);
             let dot_1 = qmp.dot(r);
             let dot_2 = q2mp.dot(r);
-            if (dot_1 <= S::zero() && dot_2 >= S::zero()) || (dot_1 >= S::zero() && dot_2 <= S::zero()) {
+            if (dot_1 <= S::zero() && dot_2 >= S::zero()) ||
+               (dot_1 >= S::zero() && dot_2 <= S::zero()) {
                 return Some(p);
-            }
-            else if dot_1 >= S::zero() && dot_2 >= S::zero() {
+            } else if dot_1 >= S::zero() && dot_2 >= S::zero() {
                 if dot_1 <= dot_2 {
                     return Some(q);
-                }
-                else {
+                } else {
                     return Some(line.dest);
                 }
             }
@@ -109,7 +109,7 @@ impl<S: BaseFloat> Intersect<Option<Point2<S>>> for (Ray2<S>, Line2<S>) {
         let u = cross_2 / cross_1;
 
         if S::zero() <= t && u >= S::zero() && u <= S::one() {
-            return Some(Point2::new(p.x + t*r.x, p.y + t*r.y));
+            return Some(Point2::new(p.x + t * r.x, p.y + t * r.y));
         }
 
         None

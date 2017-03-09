@@ -16,11 +16,11 @@
 //! Bounding sphere
 
 use bound::*;
-use intersect::Continuous;
+use intersect::{Continuous, Discrete};
 use Plane;
 use Ray3;
 use cgmath::{BaseFloat, EuclideanSpace};
-use cgmath::{InnerSpace, Point3};
+use cgmath::{InnerSpace, Point3, MetricSpace};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
@@ -44,6 +44,17 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Sphere<S>, Ray3<S>) {
         }
         let thc = (s.radius * s.radius - d2).sqrt();
         Some(r.origin + r.direction * (tca - thc))
+    }
+}
+
+impl<S: BaseFloat> Discrete for (Sphere<S>, Sphere<S>) {
+    fn intersects(&self) -> bool {
+        let (ref s1, ref s2) = *self;
+
+        let distance = s1.center.distance2(s2.center);
+        let radiuses = s1.radius + s2.radius;
+        
+        distance <= radiuses
     }
 }
 

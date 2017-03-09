@@ -18,7 +18,7 @@ extern crate collision;
 
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
-use collision::Intersect;
+use collision::Continuous;
 use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};

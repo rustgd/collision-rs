@@ -28,7 +28,7 @@ use cgmath::{BaseNum, BaseFloat, ElementWise};
 
 use {Ray2, Ray3, Plane};
 use bound::{Bound, Relation};
-use intersect::Continuous;
+use intersect::{Continuous, Discrete};
 
 pub trait MinMax {
     fn min(a: Self, b: Self) -> Self;
@@ -323,6 +323,20 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Ray3<S>, Aabb3<S>) {
         }
     }
 }
+
+impl<S: BaseFloat> Discrete for (Aabb2<S>, Aabb2<S>) {
+    // TODO: i don't like current implementation
+    fn intersects(&self) -> bool {
+        let (ref a, ref b) = *self;
+
+        if (a.max().x <= b.min().x) || (a.min().x >= b.max().x) || (a.max().y <= b.min().y) ||
+           (a.min().y >= b.min().y) {
+            return false;
+        }
+        true
+    }
+}
+
 
 impl<S: BaseFloat + 'static> Bound<S> for Aabb3<S> {
     fn relate_plane(self, plane: Plane<S>) -> Relation {

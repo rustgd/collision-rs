@@ -1,6 +1,6 @@
 # collision-rs
 
-[![Build Status](https://travis-ci.org/csherratt/collision.svg?branch=master)](https://travis-ci.org/csherratt/collision-rs)
+[![Build Status](https://travis-ci.org/kvark/collision.svg?branch=master)](https://travis-ci.org/kvark/collision-rs)
 [![Documentation](https://docs.rs/collision/badge.svg)](https://docs.rs/collision)
 [![Version](https://img.shields.io/crates/v/collision.svg)](https://crates.io/crates/collision)
 [![License](https://img.shields.io/crates/l/collision.svg)](https://github.com/csherratt/collision-rs/blob/master/LICENSE)

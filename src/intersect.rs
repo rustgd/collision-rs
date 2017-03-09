@@ -22,6 +22,10 @@ pub trait Continuous<Result> {
     fn intersection(&self) -> Option<Result>;
 }
 
+pub trait Discrete {
+    fn intersects(&self) -> bool;
+}
+
 
 impl<S: BaseFloat> Continuous<Point3<S>> for (Plane<S>, Ray3<S>) {
     fn intersection(&self) -> Option<Point3<S>> {

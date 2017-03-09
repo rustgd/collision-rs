@@ -28,7 +28,7 @@ use cgmath::{BaseNum, BaseFloat, ElementWise};
 
 use {Ray2, Ray3, Plane};
 use bound::{Bound, Relation};
-use intersect::Intersect;
+use intersect::Continuous;
 
 pub trait MinMax {
     fn min(a: Self, b: Self) -> Self;
@@ -249,7 +249,7 @@ impl<S: BaseNum> fmt::Debug for Aabb3<S> {
     }
 }
 
-impl<S: BaseFloat> Intersect<Option<Point2<S>>> for (Ray2<S>, Aabb2<S>) {
+impl<S: BaseFloat> Continuous<Point2<S>> for (Ray2<S>, Aabb2<S>) {
     fn intersection(&self) -> Option<Point2<S>> {
         let (ref ray, ref aabb) = *self;
 
@@ -286,7 +286,7 @@ impl<S: BaseFloat> Intersect<Option<Point2<S>>> for (Ray2<S>, Aabb2<S>) {
     }
 }
 
-impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Ray3<S>, Aabb3<S>) {
+impl<S: BaseFloat> Continuous<Point3<S>> for (Ray3<S>, Aabb3<S>) {
     fn intersection(&self) -> Option<Point3<S>> {
         let (ref ray, ref aabb) = *self;
 

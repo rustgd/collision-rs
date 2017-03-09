@@ -16,7 +16,7 @@
 //! Bounding sphere
 
 use bound::*;
-use intersect::Intersect;
+use intersect::Continuous;
 use Plane;
 use Ray3;
 use cgmath::{BaseFloat, EuclideanSpace};
@@ -29,7 +29,7 @@ pub struct Sphere<S: BaseFloat> {
     pub radius: S,
 }
 
-impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Sphere<S>, Ray3<S>) {
+impl<S: BaseFloat> Continuous<Point3<S>> for (Sphere<S>, Ray3<S>) {
     fn intersection(&self) -> Option<Point3<S>> {
         let (ref s, ref r) = *self;
 

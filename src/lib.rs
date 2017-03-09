@@ -48,6 +48,7 @@ pub use bound::*;
 pub use cylinder::Cylinder;
 pub use frustum::{Frustum, FrustumPoints, Projection};
 pub use intersect::Continuous;
+pub use intersect::Discrete;
 pub use obb::*;
 pub use sphere::Sphere;
 pub use plane::Plane;

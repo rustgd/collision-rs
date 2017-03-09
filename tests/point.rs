@@ -21,7 +21,6 @@ extern crate cgmath;
 extern crate collision;
 
 use cgmath::{Point3, Vector3};
-use cgmath::{ApproxEq};
 use collision::{Bound, Relation, Plane};
 
 #[test]

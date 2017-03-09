@@ -112,6 +112,6 @@ impl<S: BaseFloat> Intersect<Option<Point2<S>>> for (Ray2<S>, Line2<S>) {
             return Some(Point2::new(p.x + t*r.x, p.y + t*r.y));
         }
 
-        return None;
+        None
     }
 }

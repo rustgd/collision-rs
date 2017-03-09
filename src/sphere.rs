@@ -35,10 +35,14 @@ impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Sphere<S>, Ray3<S>) {
 
         let l = s.center - r.origin;
         let tca = l.dot(r.direction);
-        if tca < S::zero() { return None; }
-        let d2 = l.dot(l) - tca*tca;
-        if d2 > s.radius*s.radius { return None; }
-        let thc = (s.radius*s.radius - d2).sqrt();
+        if tca < S::zero() {
+            return None;
+        }
+        let d2 = l.dot(l) - tca * tca;
+        if d2 > s.radius * s.radius {
+            return None;
+        }
+        let thc = (s.radius * s.radius - d2).sqrt();
         Some(r.origin + r.direction * (tca - thc))
     }
 }
@@ -48,7 +52,7 @@ impl<S: BaseFloat + 'static> Bound<S> for Sphere<S> {
         let dist = self.center.dot(plane.n) - plane.d;
         if dist > self.radius {
             Relation::In
-        } else if dist < - self.radius {
+        } else if dist < -self.radius {
             Relation::Out
         } else {
             Relation::Cross

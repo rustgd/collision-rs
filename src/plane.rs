@@ -16,10 +16,10 @@
 use std::fmt;
 
 use cgmath::{ApproxEq, BaseFloat};
-use cgmath::{Point3};
+use cgmath::Point3;
 use cgmath::{Vector3, Vector4};
 use cgmath::{EuclideanSpace, InnerSpace};
-use cgmath::{Zero};
+use cgmath::Zero;
 
 
 /// A 3-dimensional plane formed from the equation: `A*x + B*y + C*z - D = 0`.
@@ -59,18 +59,27 @@ impl<S: BaseFloat> Plane<S> {
     /// - `c`: the `z` component of the normal
     /// - `d`: the plane's distance value
     pub fn from_abcd(a: S, b: S, c: S, d: S) -> Plane<S> {
-        Plane { n: Vector3::new(a, b, c), d: d }
+        Plane {
+            n: Vector3::new(a, b, c),
+            d: d,
+        }
     }
 
     /// Construct a plane from the components of a four-dimensional vector
     pub fn from_vector4(v: Vector4<S>) -> Plane<S> {
-        Plane { n: Vector3::new(v.x, v.y, v.z), d: v.w }
+        Plane {
+            n: Vector3::new(v.x, v.y, v.z),
+            d: v.w,
+        }
     }
 
     /// Construct a plane from the components of a four-dimensional vector
     /// Assuming alternative representation: `A*x + B*y + C*z + D = 0`
     pub fn from_vector4_alt(v: Vector4<S>) -> Plane<S> {
-        Plane { n: Vector3::new(v.x, v.y, v.z), d: -v.w }
+        Plane {
+            n: Vector3::new(v.x, v.y, v.z),
+            d: -v.w,
+        }
     }
 
     /// Constructs a plane that passes through the the three points `a`, `b` and `c`
@@ -82,8 +91,9 @@ impl<S: BaseFloat> Plane<S> {
         // find the normal vector that is perpendicular to v1 and v2
         let n = v0.cross(v1);
 
-        if ulps_eq!(n, &Vector3::zero()) { None }
-        else {
+        if ulps_eq!(n, &Vector3::zero()) {
+            None
+        } else {
             // compute the normal and the distance to the plane
             let n = n.normalize();
             let d = -a.dot(n);
@@ -95,21 +105,24 @@ impl<S: BaseFloat> Plane<S> {
     /// Construct a plane from a point and a normal vector.
     /// The plane will contain the point `p` and be perpendicular to `n`.
     pub fn from_point_normal(p: Point3<S>, n: Vector3<S>) -> Plane<S> {
-        Plane { n: n, d: p.dot(n) }
+        Plane {
+            n: n,
+            d: p.dot(n),
+        }
     }
 
     /// Normalize a plane.
     pub fn normalize(&self) -> Option<Plane<S>> {
-        if ulps_eq!(self.n, &Vector3::zero()) { None }
-        else {
+        if ulps_eq!(self.n, &Vector3::zero()) {
+            None
+        } else {
             let denom = S::one() / self.n.magnitude();
-            Some(Plane::new(self.n * denom, self.d*denom))
+            Some(Plane::new(self.n * denom, self.d * denom))
         }
     }
 }
 
 impl<S> ApproxEq for Plane<S>
-    // where S: BaseFloat + ApproxEq<Epsilon=S>
     where S: BaseFloat
 {
     type Epsilon = S::Epsilon;
@@ -144,7 +157,11 @@ impl<S> ApproxEq for Plane<S>
 
 impl<S: BaseFloat> fmt::Debug for Plane<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}x + {:?}y + {:?}z - {:?} = 0",
-               self.n.x, self.n.y, self.n.z, self.d)
+        write!(f,
+               "{:?}x + {:?}y + {:?}z - {:?} = 0",
+               self.n.x,
+               self.n.y,
+               self.n.z,
+               self.d)
     }
 }

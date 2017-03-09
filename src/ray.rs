@@ -25,19 +25,19 @@ use cgmath::{VectorSpace, Vector2, Vector3};
 pub struct Ray<S, P, V> {
     pub origin: P,
     pub direction: V,
-    phantom_s: PhantomData<S>
+    phantom_s: PhantomData<S>,
 }
 
 impl<S, V, P> Ray<S, P, V>
     where S: BaseNum,
-          V: VectorSpace<Scalar=S>,
-          P: EuclideanSpace<Scalar=S, Diff=V>
+          V: VectorSpace<Scalar = S>,
+          P: EuclideanSpace<Scalar = S, Diff = V>
 {
     pub fn new(origin: P, direction: V) -> Ray<S, P, V> {
         Ray {
             origin: origin,
             direction: direction,
-            phantom_s: PhantomData
+            phantom_s: PhantomData,
         }
     }
 }

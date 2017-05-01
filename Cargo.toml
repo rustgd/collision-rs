@@ -27,10 +27,8 @@ keywords = ["gamedev", "cgmath", "collision"]
 name = "collision"
 
 [features]
-default = ["rustc-serialize"]
 
 [dependencies]
 num = "0.1"
 approx = "0.1"
-cgmath = "0.12.0"
-rustc-serialize = { version = "0.3", optional = true }
+cgmath = "0.14.0"

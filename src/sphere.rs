@@ -23,7 +23,6 @@ use cgmath::{BaseFloat, EuclideanSpace};
 use cgmath::{InnerSpace, Point3};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[cfg_attr(feature = "rustc-serialize", derive(RustcEncodable, RustcDecodable))]
 pub struct Sphere<S: BaseFloat> {
     pub center: Point3<S>,
     pub radius: S,

@@ -38,7 +38,6 @@ use cgmath::Zero;
 /// alternative, `A*x + B*y + C*z + D = 0`, because it tends to avoid
 /// superfluous negations (see _Real Time Collision Detection_, p. 55).
 #[derive(Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "rustc-serialize", derive(RustcEncodable, RustcDecodable))]
 pub struct Plane<S> {
     pub n: Vector3<S>,
     pub d: S,

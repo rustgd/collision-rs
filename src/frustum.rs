@@ -23,7 +23,6 @@ use cgmath::Point3;
 use cgmath::{PerspectiveFov, Ortho, Perspective};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "rustc-serialize", derive(RustcEncodable, RustcDecodable))]
 pub struct Frustum<S: BaseFloat> {
     pub left: Plane<S>,
     pub right: Plane<S>,
@@ -96,7 +95,6 @@ impl<S: BaseFloat + 'static> Frustum<S> {
 }
 
 #[derive(Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "rustc-serialize", derive(RustcEncodable, RustcDecodable))]
 pub struct FrustumPoints<S> {
     pub near_top_left: Point3<S>,
     pub near_top_right: Point3<S>,

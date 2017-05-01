@@ -23,7 +23,6 @@ use cgmath::{VectorSpace, Vector2, Vector3};
 
 /// A generic directed line segment from `origin` to `dest`.
 #[derive(Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "rustc-serialize", derive(RustcEncodable, RustcDecodable))]
 pub struct Line<S, V, P> {
     pub origin: P,
     pub dest: P,

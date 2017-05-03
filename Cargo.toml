@@ -1,7 +1,7 @@
 [package]
 
 name = "collision"
-version = "0.9.0"
+version = "0.10.0"
 authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
         "Brian Heylin",
         "Colin Sherratt",
@@ -31,4 +31,4 @@ name = "collision"
 [dependencies]
 num = "0.1"
 approx = "0.1"
-cgmath = "0.14.0"
+cgmath = "0.14"

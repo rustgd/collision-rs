@@ -23,6 +23,7 @@ use cgmath::{VectorSpace, Vector2, Vector3};
 
 /// A generic directed line segment from `origin` to `dest`.
 #[derive(Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Line<S, V, P> {
     pub origin: P,
     pub dest: P,

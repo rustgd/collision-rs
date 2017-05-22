@@ -19,6 +19,7 @@ use cgmath::Point3;
 use cgmath::Vector3;
 
 #[derive(Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Cylinder<S> {
     pub center: Point3<S>,
     pub axis: Vector3<S>,

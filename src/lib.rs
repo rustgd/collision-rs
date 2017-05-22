@@ -36,6 +36,12 @@ extern crate approx;
 extern crate cgmath;
 extern crate num;
 
+#[cfg(feature = "serde")]
+extern crate serde;
+#[cfg(feature = "serde_derive")]
+#[macro_use]
+extern crate serde_derive;
+
 // Re-exports
 pub use aabb::*;
 pub use bound::*;

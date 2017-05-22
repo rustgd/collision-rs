@@ -21,6 +21,7 @@ use cgmath::{VectorSpace, Vector2, Vector3};
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
 #[derive(Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Ray<S, P, V> {
     pub origin: P,
     pub direction: V,

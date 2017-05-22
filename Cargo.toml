@@ -27,8 +27,11 @@ keywords = ["gamedev", "cgmath", "collision"]
 name = "collision"
 
 [features]
+eders = ["serde", "serde_derive", "cgmath/eders"]
 
 [dependencies]
 num = "0.1"
 approx = "0.1"
 cgmath = "0.14"
+serde = { version = "1.0", optional = true }
+serde_derive = { version = "1.0", optional = true }

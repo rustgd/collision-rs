@@ -19,6 +19,7 @@ use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 
 #[derive(Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Obb2<S> {
     pub center: Point2<S>,
     pub axis: Vector2<S>,
@@ -26,6 +27,7 @@ pub struct Obb2<S> {
 }
 
 #[derive(Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Obb3<S> {
     pub center: Point3<S>,
     pub axis: Vector3<S>,

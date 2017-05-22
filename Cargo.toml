@@ -1,17 +1,19 @@
 [package]
 
 name = "collision"
-version = "0.10.0"
+version = "0.10.1"
 authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
         "Brian Heylin",
         "Colin Sherratt",
         "Dzmitry Malyshau",
         "Erick Tryzelaar",
+        "Ilya Bogdanov",
         "Luqman Aden",
         "Maik Klein",
         "Mikko Perttunen",
         "Pierre Krieger",
-        "Tomasz Stachowiak"
+        "Tomasz Stachowiak",
+        "Zeke Foppa"
 ]
 license = "Apache-2.0"
 description = "A collision extension to cgmath"

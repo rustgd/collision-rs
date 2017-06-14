@@ -47,13 +47,29 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Sphere<S>, Ray3<S>) {
     }
 }
 
+impl<S: BaseFloat> Discrete for (Sphere<S>, Ray3<S>) {
+    fn intersects(&self) -> bool {
+        let (ref s, ref r) = *self;
+        let l = s.center - r.origin;
+        let tca = l.dot(r.direction);
+        if tca < S::zero() {
+            return false;
+        }
+        let d2 = l.dot(l) - tca * tca;
+        if d2 > s.radius * s.radius {
+            return false;
+        }
+        return true;
+    }
+}
+
 impl<S: BaseFloat> Discrete for (Sphere<S>, Sphere<S>) {
     fn intersects(&self) -> bool {
         let (ref s1, ref s2) = *self;
 
         let distance = s1.center.distance2(s2.center);
         let radiuses = s1.radius + s2.radius;
-        
+
         distance <= radiuses
     }
 }

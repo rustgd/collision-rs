@@ -29,22 +29,36 @@ fn test_intersection() {
         center: Point3::new(0f64, 0f64, 0f64),
         radius: 1f64,
     };
-    let r0 = Ray::new(Point3::new(0f64, 0f64, 5f64),
-                      Vector3::new(0f64, 0f64, -5f64).normalize());
-    let r1 = Ray::new(Point3::new(1f64.cos(), 0f64, 5f64),
-                      Vector3::new(0f64, 0f64, -5f64).normalize());
-    let r2 = Ray::new(Point3::new(1f64, 0f64, 5f64),
-                      Vector3::new(0f64, 0f64, -5f64).normalize());
-    let r3 = Ray::new(Point3::new(2f64, 0f64, 5f64),
-                      Vector3::new(0f64, 0f64, -5f64).normalize());
-    assert_eq!((sphere, r0).intersection(),
-               Some(Point3::new(0f64, 0f64, 1f64)));
+    let r0 = Ray::new(
+        Point3::new(0f64, 0f64, 5f64),
+        Vector3::new(0f64, 0f64, -5f64).normalize(),
+    );
+    let r1 = Ray::new(
+        Point3::new(1f64.cos(), 0f64, 5f64),
+        Vector3::new(0f64, 0f64, -5f64).normalize(),
+    );
+    let r2 = Ray::new(
+        Point3::new(1f64, 0f64, 5f64),
+        Vector3::new(0f64, 0f64, -5f64).normalize(),
+    );
+    let r3 = Ray::new(
+        Point3::new(2f64, 0f64, 5f64),
+        Vector3::new(0f64, 0f64, -5f64).normalize(),
+    );
+    assert_eq!(
+        (sphere, r0).intersection(),
+        Some(Point3::new(0f64, 0f64, 1f64))
+    );
     assert!((sphere, r0).intersects());
-    assert_ulps_eq!((sphere, r1).intersection().unwrap(),
-                    &Point3::new(1f64.cos(), 0f64, 1f64.sin()));
+    assert_ulps_eq!(
+        (sphere, r1).intersection().unwrap(),
+        &Point3::new(1f64.cos(), 0f64, 1f64.sin())
+    );
     assert!((sphere, r1).intersects());
-    assert_eq!((sphere, r2).intersection(),
-               Some(Point3::new(1f64, 0f64, 0f64)));
+    assert_eq!(
+        (sphere, r2).intersection(),
+        Some(Point3::new(1f64, 0f64, 0f64))
+    );
     assert!((sphere, r2).intersects());
     assert_eq!((sphere, r3).intersection(), None);
     assert!(!(sphere, r3).intersects());
@@ -59,10 +73,16 @@ fn test_bound() {
     };
     let normal = vec3(0f32, 0.0, 1.0);
 
-    assert_eq!(sphere.relate_plane(Plane::from_point_normal(point, normal)),
-               Relation::Cross);
-    assert_eq!(sphere.relate_plane(Plane::from_point_normal(point + normal * -3.0, normal)),
-               Relation::In);
-    assert_eq!(sphere.relate_plane(Plane::from_point_normal(point + normal * 3.0, normal)),
-               Relation::Out);
+    assert_eq!(
+        sphere.relate_plane(Plane::from_point_normal(point, normal)),
+        Relation::Cross
+    );
+    assert_eq!(
+        sphere.relate_plane(Plane::from_point_normal(point + normal * -3.0, normal)),
+        Relation::In
+    );
+    assert_eq!(
+        sphere.relate_plane(Plane::from_point_normal(point + normal * 3.0, normal)),
+        Relation::Out
+    );
 }

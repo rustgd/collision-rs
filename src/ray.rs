@@ -29,9 +29,10 @@ pub struct Ray<S, P, V> {
 }
 
 impl<S, V, P> Ray<S, P, V>
-    where S: BaseNum,
-          V: VectorSpace<Scalar = S>,
-          P: EuclideanSpace<Scalar = S, Diff = V>
+where
+    S: BaseNum,
+    V: VectorSpace<Scalar = S>,
+    P: EuclideanSpace<Scalar = S, Diff = V>,
 {
     pub fn new(origin: P, direction: V) -> Ray<S, P, V> {
         Ray {

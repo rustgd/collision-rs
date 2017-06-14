@@ -61,9 +61,11 @@ impl<S: BaseFloat + 'static> Bound<S> for Point3<S> {
     fn relate_clip_space(self, projection: Matrix4<S>) -> Relation {
         use std::cmp::Ordering::*;
         let p = projection * self.to_homogeneous();
-        match (p.x.abs().partial_cmp(&p.w),
-               p.y.abs().partial_cmp(&p.w),
-               p.z.abs().partial_cmp(&p.w)) {
+        match (
+            p.x.abs().partial_cmp(&p.w),
+            p.y.abs().partial_cmp(&p.w),
+            p.z.abs().partial_cmp(&p.w),
+        ) {
             (Some(Less), Some(Less), Some(Less)) => Relation::In,
             (Some(Greater), _, _) |
             (_, Some(Greater), _) |

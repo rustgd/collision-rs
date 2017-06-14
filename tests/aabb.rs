@@ -25,8 +25,10 @@ use cgmath::{Vector2, Vector3};
 
 #[test]
 fn test_general() {
-    let aabb = Aabb2::new(Point2::new(-20isize, 30isize),
-                          Point2::new(10isize, -10isize));
+    let aabb = Aabb2::new(
+        Point2::new(-20isize, 30isize),
+        Point2::new(10isize, -10isize),
+    );
     assert_eq!(aabb.min(), Point2::new(-20isize, -10isize));
     assert_eq!(aabb.max(), Point2::new(10isize, 30isize));
     assert_eq!(aabb.dim(), Vector2::new(30isize, 40isize));
@@ -38,15 +40,25 @@ fn test_general() {
     assert!(!aabb.contains(Point2::new(50isize, 50isize)));
 
     assert_eq!(aabb.grow(Point2::new(0isize, 0isize)), aabb);
-    assert_eq!(aabb.grow(Point2::new(100isize, 100isize)),
-               Aabb2::new(Point2::new(-20isize, -10isize),
-                          Point2::new(100isize, 100isize)));
-    assert_eq!(aabb.grow(Point2::new(-100isize, -100isize)),
-               Aabb2::new(Point2::new(-100isize, -100isize),
-                          Point2::new(10isize, 30isize)));
+    assert_eq!(
+        aabb.grow(Point2::new(100isize, 100isize)),
+        Aabb2::new(
+            Point2::new(-20isize, -10isize),
+            Point2::new(100isize, 100isize),
+        )
+    );
+    assert_eq!(
+        aabb.grow(Point2::new(-100isize, -100isize)),
+        Aabb2::new(
+            Point2::new(-100isize, -100isize),
+            Point2::new(10isize, 30isize),
+        )
+    );
 
-    let aabb = Aabb3::new(Point3::new(-20isize, 30isize, 5isize),
-                          Point3::new(10isize, -10isize, -5isize));
+    let aabb = Aabb3::new(
+        Point3::new(-20isize, 30isize, 5isize),
+        Point3::new(10isize, -10isize, -5isize),
+    );
     assert_eq!(aabb.min(), Point3::new(-20isize, -10isize, -5isize));
     assert_eq!(aabb.max(), Point3::new(10isize, 30isize, 5isize));
     assert_eq!(aabb.dim(), Vector3::new(30isize, 40isize, 10isize));
@@ -61,17 +73,29 @@ fn test_general() {
     assert!(aabb.contains(Point3::new(-20isize, -10isize, -5isize)));
     assert!(!aabb.contains(Point3::new(-21isize, -11isize, -6isize)));
 
-    assert_eq!(aabb.add_v(Vector3::new(1isize, 2isize, 3isize)),
-               Aabb3::new(Point3::new(-19isize, 32isize, 8isize),
-                          Point3::new(11isize, -8isize, -2isize)));
+    assert_eq!(
+        aabb.add_v(Vector3::new(1isize, 2isize, 3isize)),
+        Aabb3::new(
+            Point3::new(-19isize, 32isize, 8isize),
+            Point3::new(11isize, -8isize, -2isize),
+        )
+    );
 
-    assert_eq!(aabb.mul_s(2isize),
-               Aabb3::new(Point3::new(-40isize, -20isize, -10isize),
-                          Point3::new(20isize, 60isize, 10isize)));
+    assert_eq!(
+        aabb.mul_s(2isize),
+        Aabb3::new(
+            Point3::new(-40isize, -20isize, -10isize),
+            Point3::new(20isize, 60isize, 10isize),
+        )
+    );
 
-    assert_eq!(aabb.mul_v(Vector3::new(1isize, 2isize, 3isize)),
-               Aabb3::new(Point3::new(-20isize, -20isize, -15isize),
-                          Point3::new(10isize, 60isize, 15isize)));
+    assert_eq!(
+        aabb.mul_v(Vector3::new(1isize, 2isize, 3isize)),
+        Aabb3::new(
+            Point3::new(-20isize, -20isize, -15isize),
+            Point3::new(10isize, 60isize, 15isize),
+        )
+    );
 }
 
 #[test]
@@ -94,8 +118,10 @@ fn test_parallel_ray3_should_not_intersect() {
     let ray_x = Ray::new(Point3::new(0.0f32, 0.0, 0.0), Vector3::new(1.0, 0.0, 0.0));
     let ray_y = Ray::new(Point3::new(0.0f32, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
     let ray_z = Ray::new(Point3::new(0.0f32, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
-    let ray_z_imprecise = Ray::new(Point3::new(0.0f32, 0.0, 0.0),
-                                   Vector3::new(0.0001, 0.0001, 1.0));
+    let ray_z_imprecise = Ray::new(
+        Point3::new(0.0f32, 0.0, 0.0),
+        Vector3::new(0.0001, 0.0001, 1.0),
+    );
 
     assert_eq!((ray_x, aabb).intersection(), None);
     assert_eq!((ray_y, aabb).intersection(), None);
@@ -106,25 +132,37 @@ fn test_parallel_ray3_should_not_intersect() {
 #[test]
 fn test_oblique_ray3_should_intersect() {
     let aabb = Aabb3::<f32>::new(Point3::new(1.0, 1.0, 1.0), Point3::new(5.0, 5.0, 5.0));
-    let ray1 = Ray::new(Point3::new(0.0f32, 0.0, 0.0),
-                        Vector3::new(1.0, 1.0, 1.0).normalize());
+    let ray1 = Ray::new(
+        Point3::new(0.0f32, 0.0, 0.0),
+        Vector3::new(1.0, 1.0, 1.0).normalize(),
+    );
     let ray2 = Ray::new(Point3::new(0.0f32, 6.0, 0.0), Vector3::new(1.0, -1.0, 1.0));
 
-    assert_eq!((ray1, aabb).intersection(),
-               Some(Point3::new(1.0, 1.0, 1.0)));
-    assert_eq!((ray2, aabb).intersection(),
-               Some(Point3::new(1.0, 5.0, 1.0)));
+    assert_eq!(
+        (ray1, aabb).intersection(),
+        Some(Point3::new(1.0, 1.0, 1.0))
+    );
+    assert_eq!(
+        (ray2, aabb).intersection(),
+        Some(Point3::new(1.0, 5.0, 1.0))
+    );
 }
 
 #[test]
 fn test_pointing_to_other_dir_ray3_should_not_intersect() {
     let aabb = Aabb3::<f32>::new(Point3::new(1.0, 1.0, 1.0), Point3::new(5.0, 5.0, 5.0));
-    let ray_x = Ray::new(Point3::new(0.0f32, 2.0, 2.0),
-                         Vector3::new(-1.0, 0.01, 0.01));
-    let ray_y = Ray::new(Point3::new(2.0f32, 0.0, 2.0),
-                         Vector3::new(0.01, -1.0, 0.01));
-    let ray_z = Ray::new(Point3::new(2.0f32, 2.0, 0.0),
-                         Vector3::new(0.01, 0.01, -1.0));
+    let ray_x = Ray::new(
+        Point3::new(0.0f32, 2.0, 2.0),
+        Vector3::new(-1.0, 0.01, 0.01),
+    );
+    let ray_y = Ray::new(
+        Point3::new(2.0f32, 0.0, 2.0),
+        Vector3::new(0.01, -1.0, 0.01),
+    );
+    let ray_z = Ray::new(
+        Point3::new(2.0f32, 2.0, 0.0),
+        Vector3::new(0.01, 0.01, -1.0),
+    );
 
     let ray_x2 = Ray::new(Point3::new(6.0f32, 2.0, 2.0), Vector3::new(1.0, 0.0, 0.0));
     let ray_y2 = Ray::new(Point3::new(2.0f32, 6.0, 2.0), Vector3::new(0.0, 1.0, 0.0));
@@ -150,19 +188,31 @@ fn test_pointing_to_box_dir_ray3_should_intersect() {
     let ray_y2 = Ray::new(Point3::new(2.0f32, 6.0, 2.0), Vector3::new(0.0, -1.0, 0.0));
     let ray_z2 = Ray::new(Point3::new(2.0f32, 2.0, 6.0), Vector3::new(0.0, 0.0, -1.0));
 
-    assert_eq!((ray_x, aabb).intersection(),
-               Some(Point3::new(1.0, 2.0, 2.0)));
-    assert_eq!((ray_y, aabb).intersection(),
-               Some(Point3::new(2.0, 1.0, 2.0)));
-    assert_eq!((ray_z, aabb).intersection(),
-               Some(Point3::new(2.0, 2.0, 1.0)));
+    assert_eq!(
+        (ray_x, aabb).intersection(),
+        Some(Point3::new(1.0, 2.0, 2.0))
+    );
+    assert_eq!(
+        (ray_y, aabb).intersection(),
+        Some(Point3::new(2.0, 1.0, 2.0))
+    );
+    assert_eq!(
+        (ray_z, aabb).intersection(),
+        Some(Point3::new(2.0, 2.0, 1.0))
+    );
 
-    assert_eq!((ray_x2, aabb).intersection(),
-               Some(Point3::new(5.0, 2.0, 2.0)));
-    assert_eq!((ray_y2, aabb).intersection(),
-               Some(Point3::new(2.0, 5.0, 2.0)));
-    assert_eq!((ray_z2, aabb).intersection(),
-               Some(Point3::new(2.0, 2.0, 5.0)));
+    assert_eq!(
+        (ray_x2, aabb).intersection(),
+        Some(Point3::new(5.0, 2.0, 2.0))
+    );
+    assert_eq!(
+        (ray_y2, aabb).intersection(),
+        Some(Point3::new(2.0, 5.0, 2.0))
+    );
+    assert_eq!(
+        (ray_z2, aabb).intersection(),
+        Some(Point3::new(2.0, 2.0, 5.0))
+    );
 }
 
 #[test]
@@ -171,9 +221,10 @@ fn test_corners() {
     assert!(corners.contains(&Point2::new(-5f32, 10.0)));
     assert!(corners.contains(&Point2::new(5f32, 5.0)));
 
-    let corners = Aabb3::new(Point3::new(-20isize, 30isize, 5isize),
-                             Point3::new(10isize, -10isize, -5isize))
-            .to_corners();
+    let corners = Aabb3::new(
+        Point3::new(-20isize, 30isize, 5isize),
+        Point3::new(10isize, -10isize, -5isize),
+    ).to_corners();
     assert!(corners.contains(&Point3::new(-20isize, 30isize, -5isize)));
     assert!(corners.contains(&Point3::new(10isize, 30isize, 5isize)));
     assert!(corners.contains(&Point3::new(10isize, -10isize, 5isize)));
@@ -182,12 +233,12 @@ fn test_corners() {
 #[test]
 fn test_bound() {
     let aabb = Aabb3::new(Point3::new(-5.0f32, 5.0, 0.0), Point3::new(5.0, 10.0, 1.0));
-    let plane1 = Plane::from_point_normal(Point3::new(0f32, 0.0, 0.0),
-                                          Vector3::new(0f32, 0.0, 1.0));
-    let plane2 = Plane::from_point_normal(Point3::new(-5.0f32, 4.0, 0.0),
-                                          Vector3::new(0f32, 1.0, 0.0));
-    let plane3 = Plane::from_point_normal(Point3::new(6.0f32, 0.0, 0.0),
-                                          Vector3::new(1f32, 0.0, 0.0));
+    let plane1 =
+        Plane::from_point_normal(Point3::new(0f32, 0.0, 0.0), Vector3::new(0f32, 0.0, 1.0));
+    let plane2 =
+        Plane::from_point_normal(Point3::new(-5.0f32, 4.0, 0.0), Vector3::new(0f32, 1.0, 0.0));
+    let plane3 =
+        Plane::from_point_normal(Point3::new(6.0f32, 0.0, 0.0), Vector3::new(1f32, 0.0, 0.0));
     assert_eq!(aabb.relate_plane(plane1), Relation::Cross);
     assert_eq!(aabb.relate_plane(plane2), Relation::In);
     assert_eq!(aabb.relate_plane(plane3), Relation::Out);

@@ -35,13 +35,14 @@ pub struct Frustum<S: BaseFloat> {
 
 impl<S: BaseFloat + 'static> Frustum<S> {
     /// Construct a frustum.
-    pub fn new(left: Plane<S>,
-               right: Plane<S>,
-               bottom: Plane<S>,
-               top: Plane<S>,
-               near: Plane<S>,
-               far: Plane<S>)
-               -> Frustum<S> {
+    pub fn new(
+        left: Plane<S>,
+        right: Plane<S>,
+        bottom: Plane<S>,
+        top: Plane<S>,
+        near: Plane<S>,
+        far: Plane<S>,
+    ) -> Frustum<S> {
         Frustum {
             left: left,
             right: right,
@@ -54,36 +55,50 @@ impl<S: BaseFloat + 'static> Frustum<S> {
 
     /// Extract frustum planes from a projection matrix.
     pub fn from_matrix4(mat: Matrix4<S>) -> Option<Frustum<S>> {
-        Some(Frustum::new(match Plane::from_vector4_alt(mat.row(3) + mat.row(0)).normalize() {
-                              Some(p) => p,
-                              None => return None,
-                          },
-                          match Plane::from_vector4_alt(mat.row(3) - mat.row(0)).normalize() {
-                              Some(p) => p,
-                              None => return None,
-                          },
-                          match Plane::from_vector4_alt(mat.row(3) + mat.row(1)).normalize() {
-                              Some(p) => p,
-                              None => return None,
-                          },
-                          match Plane::from_vector4_alt(mat.row(3) - mat.row(1)).normalize() {
-                              Some(p) => p,
-                              None => return None,
-                          },
-                          match Plane::from_vector4_alt(mat.row(3) + mat.row(2)).normalize() {
-                              Some(p) => p,
-                              None => return None,
-                          },
-                          match Plane::from_vector4_alt(mat.row(3) - mat.row(2)).normalize() {
-                              Some(p) => p,
-                              None => return None,
-                          }))
+        Some(Frustum::new(
+            match Plane::from_vector4_alt(mat.row(3) + mat.row(0))
+                .normalize() {
+                Some(p) => p,
+                None => return None,
+            },
+            match Plane::from_vector4_alt(mat.row(3) - mat.row(0))
+                .normalize() {
+                Some(p) => p,
+                None => return None,
+            },
+            match Plane::from_vector4_alt(mat.row(3) + mat.row(1))
+                .normalize() {
+                Some(p) => p,
+                None => return None,
+            },
+            match Plane::from_vector4_alt(mat.row(3) - mat.row(1))
+                .normalize() {
+                Some(p) => p,
+                None => return None,
+            },
+            match Plane::from_vector4_alt(mat.row(3) + mat.row(2))
+                .normalize() {
+                Some(p) => p,
+                None => return None,
+            },
+            match Plane::from_vector4_alt(mat.row(3) - mat.row(2))
+                .normalize() {
+                Some(p) => p,
+                None => return None,
+            },
+        ))
     }
 
     /// Find the spatial relation of a bound inside this frustum.
     pub fn contains<B: Bound<S> + Copy>(&self, bound: B) -> Relation {
-        [self.left, self.right, self.top, self.bottom, self.near, self.far]
-            .iter()
+        [
+            self.left,
+            self.right,
+            self.top,
+            self.bottom,
+            self.near,
+            self.far,
+        ].iter()
             .fold(Relation::In, |cur, p| {
                 use std::cmp::max;
                 let r = bound.relate_plane(*p);

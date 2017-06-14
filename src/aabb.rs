@@ -36,7 +36,8 @@ pub trait MinMax {
 }
 
 impl<S> MinMax for Point2<S>
-    where S: BaseNum
+where
+    S: BaseNum,
 {
     fn min(a: Point2<S>, b: Point2<S>) -> Point2<S> {
         Point2::new(a.x.partial_min(b.x), a.y.partial_min(b.y))
@@ -48,24 +49,31 @@ impl<S> MinMax for Point2<S>
 }
 
 impl<S> MinMax for Point3<S>
-    where S: BaseNum
+where
+    S: BaseNum,
 {
     fn min(a: Point3<S>, b: Point3<S>) -> Point3<S> {
-        Point3::new(a.x.partial_min(b.x),
-                    a.y.partial_min(b.y),
-                    a.z.partial_min(b.z))
+        Point3::new(
+            a.x.partial_min(b.x),
+            a.y.partial_min(b.y),
+            a.z.partial_min(b.z),
+        )
     }
 
     fn max(a: Point3<S>, b: Point3<S>) -> Point3<S> {
-        Point3::new(a.x.partial_max(b.x),
-                    a.y.partial_max(b.y),
-                    a.z.partial_max(b.z))
+        Point3::new(
+            a.x.partial_max(b.x),
+            a.y.partial_max(b.y),
+            a.z.partial_max(b.z),
+        )
     }
 }
 
-pub trait Aabb<S: BaseNum,
-               V: VectorSpace<Scalar = S> + ElementWise + Array<Element = S>,
-               P: EuclideanSpace<Scalar = S, Diff = V>>: Sized {
+pub trait Aabb<
+    S: BaseNum,
+    V: VectorSpace<Scalar = S> + ElementWise + Array<Element = S>,
+    P: EuclideanSpace<Scalar = S, Diff = V>,
+>: Sized {
     /// Create a new AABB using two points as opposing corners.
     fn new(p1: P, p2: P) -> Self;
 
@@ -101,7 +109,8 @@ pub trait Aabb<S: BaseNum,
 
     /// Returns a new AABB that is grown to include the given point.
     fn grow(&self, p: P) -> Self
-        where P: MinMax
+    where
+        P: MinMax,
     {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
     }
@@ -145,10 +154,12 @@ impl<S: BaseNum> Aabb2<S> {
     /// Compute corners.
     #[inline]
     pub fn to_corners(&self) -> [Point2<S>; 4] {
-        [self.min,
-         Point2::new(self.max.x, self.min.y),
-         Point2::new(self.min.x, self.max.y),
-         self.max]
+        [
+            self.min,
+            Point2::new(self.max.x, self.min.y),
+            Point2::new(self.min.x, self.max.y),
+            self.max,
+        ]
     }
 }
 
@@ -195,26 +206,32 @@ impl<S: BaseNum> Aabb3<S> {
     #[inline]
     pub fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> {
         Aabb3 {
-            min: Point3::new(p1.x.partial_min(p2.x),
-                             p1.y.partial_min(p2.y),
-                             p1.z.partial_min(p2.z)),
-            max: Point3::new(p1.x.partial_max(p2.x),
-                             p1.y.partial_max(p2.y),
-                             p1.z.partial_max(p2.z)),
+            min: Point3::new(
+                p1.x.partial_min(p2.x),
+                p1.y.partial_min(p2.y),
+                p1.z.partial_min(p2.z),
+            ),
+            max: Point3::new(
+                p1.x.partial_max(p2.x),
+                p1.y.partial_max(p2.y),
+                p1.z.partial_max(p2.z),
+            ),
         }
     }
 
     /// Compute corners.
     #[inline]
     pub fn to_corners(&self) -> [Point3<S>; 8] {
-        [self.min,
-         Point3::new(self.max.x, self.min.y, self.min.z),
-         Point3::new(self.min.x, self.max.y, self.min.z),
-         Point3::new(self.max.x, self.max.y, self.min.z),
-         Point3::new(self.min.x, self.min.y, self.max.z),
-         Point3::new(self.max.x, self.min.y, self.max.z),
-         Point3::new(self.min.x, self.max.y, self.max.z),
-         self.max]
+        [
+            self.min,
+            Point3::new(self.max.x, self.min.y, self.min.z),
+            Point3::new(self.min.x, self.max.y, self.min.z),
+            Point3::new(self.max.x, self.max.y, self.min.z),
+            Point3::new(self.min.x, self.min.y, self.max.z),
+            Point3::new(self.max.x, self.min.y, self.max.z),
+            Point3::new(self.min.x, self.max.y, self.max.z),
+            self.max,
+        ]
     }
 }
 
@@ -239,7 +256,7 @@ impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
         let v_min = p - self.min();
         let v_max = self.max() - p;
         v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() &&
-        v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
+            v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
     }
 }
 
@@ -274,11 +291,15 @@ impl<S: BaseFloat> Continuous<Point2<S>> for (Ray2<S>, Aabb2<S>) {
             None
         } else if tmax >= tmin {
             if tmin >= S::zero() {
-                Some(Point2::new(ray.origin.x + ray.direction.x * tmin,
-                                 ray.origin.y + ray.direction.y * tmin))
+                Some(Point2::new(
+                    ray.origin.x + ray.direction.x * tmin,
+                    ray.origin.y + ray.direction.y * tmin,
+                ))
             } else {
-                Some(Point2::new(ray.origin.x + ray.direction.x * tmax,
-                                 ray.origin.y + ray.direction.y * tmax))
+                Some(Point2::new(
+                    ray.origin.x + ray.direction.x * tmax,
+                    ray.origin.y + ray.direction.y * tmax,
+                ))
             }
         } else {
             None
@@ -310,13 +331,17 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Ray3<S>, Aabb3<S>) {
             None
         } else if tmax >= tmin {
             if tmin >= S::zero() {
-                Some(Point3::new(ray.origin.x + ray.direction.x * tmin,
-                                 ray.origin.y + ray.direction.y * tmin,
-                                 ray.origin.z + ray.direction.z * tmin))
+                Some(Point3::new(
+                    ray.origin.x + ray.direction.x * tmin,
+                    ray.origin.y + ray.direction.y * tmin,
+                    ray.origin.z + ray.direction.z * tmin,
+                ))
             } else {
-                Some(Point3::new(ray.origin.x + ray.direction.x * tmax,
-                                 ray.origin.y + ray.direction.y * tmax,
-                                 ray.origin.z + ray.direction.z * tmax))
+                Some(Point3::new(
+                    ray.origin.x + ray.direction.x * tmax,
+                    ray.origin.y + ray.direction.y * tmax,
+                    ray.origin.z + ray.direction.z * tmax,
+                ))
             }
         } else {
             None
@@ -330,7 +355,8 @@ impl<S: BaseFloat> Discrete for (Aabb2<S>, Aabb2<S>) {
         let (ref a, ref b) = *self;
 
         if (a.max().x <= b.min().x) || (a.min().x >= b.max().x) || (a.max().y <= b.min().y) ||
-           (a.min().y >= b.min().y) {
+            (a.min().y >= b.min().y)
+        {
             return false;
         }
         true

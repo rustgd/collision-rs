@@ -39,11 +39,15 @@ fn test_intersection() {
                       Vector3::new(0f64, 0f64, -5f64).normalize());
     assert_eq!((sphere, r0).intersection(),
                Some(Point3::new(0f64, 0f64, 1f64)));
+    assert!((sphere, r0).intersects());
     assert_ulps_eq!((sphere, r1).intersection().unwrap(),
                     &Point3::new(1f64.cos(), 0f64, 1f64.sin()));
+    assert!((sphere, r1).intersects());
     assert_eq!((sphere, r2).intersection(),
                Some(Point3::new(1f64, 0f64, 0f64)));
+    assert!((sphere, r2).intersects());
     assert_eq!((sphere, r3).intersection(), None);
+    assert!(!(sphere, r3).intersects());
 }
 
 #[test]

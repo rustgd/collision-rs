@@ -41,6 +41,7 @@ fn test_ray_intersection() {
     let p0 = Plane::from_abcd(1f64, 0f64, 0f64, -7f64);
     let r0: Ray3<f64> = Ray::new(Point3::new(2f64, 3f64, 4f64),
                                  Vector3::new(1f64, 1f64, 1f64).normalize());
+    assert!((p0, r0).intersects());
     assert_eq!((p0, r0).intersection(), Some(Point3::new(7f64, 8f64, 9f64)));
 
     let p1 = Plane::from_points(Point3::new(5f64, 0f64, 5f64),
@@ -50,6 +51,7 @@ fn test_ray_intersection() {
     let r1: Ray3<f64> = Ray::new(Point3::new(0f64, 0f64, 0f64),
                                  Vector3::new(-1f64, 0f64, 0f64).normalize());
     assert_eq!((p1, r1).intersection(), None); // r1 points away from p1
+    assert!(!(p1, r1).intersects());
 }
 
 #[test]
@@ -58,6 +60,7 @@ fn test_plane2_intersection() {
     let p1 = Plane::new(Vector3::unit_y(), 2.0f64);
     let ray = (p0, p1).intersection();
     assert!(ray.is_some());
+    assert!((p0, p1).intersects());
 
     let ray = ray.unwrap();
     assert_ulps_eq!(ray.origin.x, &1.0f64);
@@ -71,6 +74,7 @@ fn test_plane2_intersection() {
     let p1 = Plane::new(Vector3::unit_y(), 2.0f64);
     let ray = (p0, p1).intersection();
     assert!(ray.is_none());
+    assert!(!(p0, p1).intersects());
 }
 
 #[test]
@@ -80,6 +84,7 @@ fn test_plane3_intersection() {
     let p2 = Plane::new(Vector3::unit_z(), 3.0f64);
     let point = (p0, p1, p2).intersection();
     assert!(point.is_some());
+    assert!((p0, p1, p2).intersects());
 
     let point = point.unwrap();
     assert_ulps_eq!(point.x, &1.0f64);
@@ -91,4 +96,5 @@ fn test_plane3_intersection() {
     let p2 = Plane::new(Vector3::unit_z(), 3.0f64);
     let point = (p0, p1, p2).intersection();
     assert!(point.is_none());
+    assert!(!(p0, p1, p2).intersects());
 }

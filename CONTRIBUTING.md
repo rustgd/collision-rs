@@ -16,8 +16,7 @@ done the following things first:
 4. All of the following commands completed without errors.
    * `cargo build`
    * `cargo test --all`
-5. You have granted non-exclusive right to your source code under both
-   the [Apache License 2.0][la]
+5. You have granted non-exclusive right to your source code under the [Apache License 2.0][la]
 
 [la]: LICENSE
 [st]: tests/frustum.rs

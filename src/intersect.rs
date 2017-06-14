@@ -121,7 +121,8 @@ impl<S: BaseFloat> Continuous<Point2<S>> for (Ray2<S>, Line2<S>) {
             let dot_1 = qmp.dot(r);
             let dot_2 = q2mp.dot(r);
             if (dot_1 <= S::zero() && dot_2 >= S::zero()) ||
-               (dot_1 >= S::zero() && dot_2 <= S::zero()) {
+                (dot_1 >= S::zero() && dot_2 <= S::zero())
+            {
                 return Some(p);
             } else if dot_1 >= S::zero() && dot_2 >= S::zero() {
                 if dot_1 <= dot_2 {

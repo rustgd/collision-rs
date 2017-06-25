@@ -25,6 +25,7 @@ use std::fmt;
 use cgmath::{EuclideanSpace, Point2, Point3};
 use cgmath::{VectorSpace, Array, Vector2, Vector3};
 use cgmath::{BaseNum, BaseFloat, ElementWise};
+use cgmath::{Transform};
 
 use {Ray2, Ray3, Plane};
 use bound::{Bound, Relation};
@@ -102,25 +103,34 @@ pub trait Aabb<
         self.min() + self.dim() / two
     }
 
-    /// Tests whether a point is cointained in the box, inclusive for min corner
+    /// Tests whether a point is contained in the box, inclusive for min corner
     /// and exclusive for the max corner.
     #[inline]
     fn contains(&self, p: P) -> bool;
 
     /// Returns a new AABB that is grown to include the given point.
     fn grow(&self, p: P) -> Self
-    where
-        P: MinMax,
+    where P: MinMax
     {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
     }
 
+    /// Returns the union of this AABB with another one.
+    #[inline]
+    fn union(&self, other: &Self) -> Self
+    where P: MinMax
+    {
+        self.grow(other.min()).grow(other.max())
+    }
+
     /// Add a vector to every point in the AABB, returning a new AABB.
+    #[inline]
     fn add_v(&self, v: V) -> Self {
         Aabb::new(self.min() + v, self.max() + v)
     }
 
     /// Multiply every point in the AABB by a scalar, returning a new AABB.
+    #[inline]
     fn mul_s(&self, s: S) -> Self {
         Aabb::new(self.min() * s, self.max() * s)
     }
@@ -160,6 +170,18 @@ impl<S: BaseNum> Aabb2<S> {
             Point2::new(self.min.x, self.max.y),
             self.max,
         ]
+    }
+
+    /// Apply an arbitrary transform to the corners of this bounding box,
+    /// return a new conservative bound.
+    pub fn transform<T>(&self, transform: &T) -> Self
+    where T: Transform<Point2<S>>,
+    {
+        let base = Self::new(transform.transform_point(self.min),
+                             transform.transform_point(self.max));
+        self.to_corners()[1..3].iter().fold(base, |u, &corner| {
+            u.grow(transform.transform_point(corner))
+        })
     }
 }
 
@@ -233,6 +255,18 @@ impl<S: BaseNum> Aabb3<S> {
             self.max,
         ]
     }
+
+    /// Apply an arbitrary transform to the corners of this bounding box,
+    /// return a new conservative bound.
+    pub fn transform<T>(&self, transform: &T) -> Self
+    where T: Transform<Point3<S>>,
+    {
+        let base = Self::new(transform.transform_point(self.min),
+                             transform.transform_point(self.max));
+        self.to_corners()[1..7].iter().fold(base, |u, &corner| {
+            u.grow(transform.transform_point(corner))
+        })
+    }
 }
 
 impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
@@ -287,22 +321,11 @@ impl<S: BaseFloat> Continuous<Point2<S>> for (Ray2<S>, Aabb2<S>) {
             tmax = tmax.min(ty1.max(ty2));
         }
 
-        if tmin < S::zero() && tmax < S::zero() {
+        if (tmin < S::zero() && tmax < S::zero()) || tmax < tmin {
             None
-        } else if tmax >= tmin {
-            if tmin >= S::zero() {
-                Some(Point2::new(
-                    ray.origin.x + ray.direction.x * tmin,
-                    ray.origin.y + ray.direction.y * tmin,
-                ))
-            } else {
-                Some(Point2::new(
-                    ray.origin.x + ray.direction.x * tmax,
-                    ray.origin.y + ray.direction.y * tmax,
-                ))
-            }
         } else {
-            None
+            let t = if tmin >= S::zero() { tmin } else { tmax };
+            Some(ray.origin + ray.direction * t)
         }
     }
 }
@@ -327,39 +350,21 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Ray3<S>, Aabb3<S>) {
             tmax = tmax.min(t1.max(t2));
         }
 
-        if tmin < S::zero() && tmax < S::zero() {
+        if (tmin < S::zero() && tmax < S::zero()) || tmax < tmin {
             None
-        } else if tmax >= tmin {
-            if tmin >= S::zero() {
-                Some(Point3::new(
-                    ray.origin.x + ray.direction.x * tmin,
-                    ray.origin.y + ray.direction.y * tmin,
-                    ray.origin.z + ray.direction.z * tmin,
-                ))
-            } else {
-                Some(Point3::new(
-                    ray.origin.x + ray.direction.x * tmax,
-                    ray.origin.y + ray.direction.y * tmax,
-                    ray.origin.z + ray.direction.z * tmax,
-                ))
-            }
         } else {
-            None
+            let t = if tmin >= S::zero() { tmin } else { tmax };
+            Some(ray.origin + ray.direction * t)
         }
     }
 }
 
 impl<S: BaseFloat> Discrete for (Aabb2<S>, Aabb2<S>) {
-    // TODO: i don't like current implementation
     fn intersects(&self) -> bool {
-        let (ref a, ref b) = *self;
+        let (a0, a1) = (self.0.min(), self.0.max());
+        let (b0, b1) = (self.1.min(), self.1.max());
 
-        if (a.max().x <= b.min().x) || (a.min().x >= b.max().x) || (a.max().y <= b.min().y) ||
-            (a.min().y >= b.min().y)
-        {
-            return false;
-        }
-        true
+        a1.x > b0.x && a0.x < b1.x && a1.y > b0.y && a0.y < b1.y
     }
 }
 

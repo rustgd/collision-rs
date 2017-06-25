@@ -15,6 +15,7 @@
 
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
+//#![warn(missing_docs)] //TODO
 
 //! Computer graphics-centric math.
 //!
@@ -36,9 +37,9 @@ extern crate approx;
 extern crate cgmath;
 extern crate num;
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "eders")]
 extern crate serde;
-#[cfg(feature = "serde_derive")]
+#[cfg(feature = "eders")]
 #[macro_use]
 extern crate serde_derive;
 

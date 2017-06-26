@@ -33,7 +33,7 @@ pub struct Frustum<S: BaseFloat> {
     pub far: Plane<S>,
 }
 
-impl<S: BaseFloat + 'static> Frustum<S> {
+impl<S: BaseFloat> Frustum<S> {
     /// Construct a frustum.
     pub fn new(
         left: Plane<S>,
@@ -90,7 +90,7 @@ impl<S: BaseFloat + 'static> Frustum<S> {
     }
 
     /// Find the spatial relation of a bound inside this frustum.
-    pub fn contains<B: Bound<S> + Copy>(&self, bound: B) -> Relation {
+    pub fn contains<B: Bound<S>>(&self, bound: &B) -> Relation {
         [
             self.left,
             self.right,
@@ -128,14 +128,14 @@ pub trait Projection<S: BaseFloat>: Into<Matrix4<S>> {
     fn to_frustum(&self) -> Frustum<S>;
 }
 
-impl<S: BaseFloat + 'static> Projection<S> for PerspectiveFov<S> {
+impl<S: BaseFloat> Projection<S> for PerspectiveFov<S> {
     fn to_frustum(&self) -> Frustum<S> {
         // TODO: Could this be faster?
         Frustum::from_matrix4(self.clone().into()).unwrap()
     }
 }
 
-impl<S: BaseFloat + 'static> Projection<S> for Perspective<S> {
+impl<S: BaseFloat> Projection<S> for Perspective<S> {
     fn to_frustum(&self) -> Frustum<S> {
         // TODO: Could this be faster?
         Frustum::from_matrix4(self.clone().into()).unwrap()

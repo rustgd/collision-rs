@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate collision;
 extern crate cgmath;
+extern crate collision;
 
 use cgmath::{Point3, PerspectiveFov, Rad};
 use collision::{Projection, Relation, Sphere};
@@ -28,21 +28,21 @@ fn test_contains() {
         far: 10f32,
     }.to_frustum();
     assert_eq!(
-        frustum.contains(Sphere {
+        frustum.contains(&Sphere {
             center: Point3::new(0f32, 0f32, -5f32),
             radius: 1f32,
         }),
         Relation::In
     );
     assert_eq!(
-        frustum.contains(Sphere {
+        frustum.contains(&Sphere {
             center: Point3::new(0f32, 3f32, -5f32),
             radius: 1f32,
         }),
         Relation::Cross
     );
     assert_eq!(
-        frustum.contains(Sphere {
+        frustum.contains(&Sphere {
             center: Point3::new(0f32, 0f32, 5f32),
             radius: 1f32,
         }),

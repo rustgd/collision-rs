@@ -74,8 +74,8 @@ impl<S: BaseFloat> Discrete for (Sphere<S>, Sphere<S>) {
     }
 }
 
-impl<S: BaseFloat + 'static> Bound<S> for Sphere<S> {
-    fn relate_plane(self, plane: Plane<S>) -> Relation {
+impl<S: BaseFloat> Bound<S> for Sphere<S> {
+    fn relate_plane(&self, plane: Plane<S>) -> Relation {
         let dist = self.center.dot(plane.n) - plane.d;
         if dist > self.radius {
             Relation::In

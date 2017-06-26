@@ -47,14 +47,14 @@ extern crate serde_derive;
 pub use aabb::*;
 pub use bound::*;
 pub use cylinder::Cylinder;
-pub use frustum::{Frustum, FrustumPoints, Projection};
+pub use frustum::*;
 pub use intersect::Continuous;
 pub use intersect::Discrete;
 pub use obb::*;
 pub use sphere::Sphere;
 pub use plane::Plane;
-pub use ray::{Ray, Ray2, Ray3};
-pub use line::{Line2, Line3};
+pub use ray::*;
+pub use line::*;
 
 // Modules
 

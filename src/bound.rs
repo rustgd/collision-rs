@@ -15,10 +15,13 @@
 
 //! Generic spatial bounds.
 
-use Plane;
+use std::{cmp, fmt};
 use cgmath::Matrix4;
 use cgmath::BaseFloat;
 use cgmath::{EuclideanSpace, Point3};
+
+use frustum::Frustum;
+use plane::Plane;
 
 /// Spatial relation between two objects.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialOrd, PartialEq)]
@@ -33,21 +36,34 @@ pub enum Relation {
 }
 
 /// Generic bound.
-pub trait Bound<S: BaseFloat + 'static>: Sized + Copy {
+pub trait Bound<S: BaseFloat>: fmt::Debug {
     /// Classify the spatial relation with a plane.
-    fn relate_plane(self, Plane<S>) -> Relation;
+    fn relate_plane(&self, Plane<S>) -> Relation;
     /// Classify the relation with a projection matrix.
-    fn relate_clip_space(self, projection: Matrix4<S>) -> Relation {
-        use frustum::Frustum;
-        match Frustum::from_matrix4(projection) {
-            Some(f) => f.contains(self),
-            None => Relation::Cross,
-        }
+    fn relate_clip_space(&self, projection: Matrix4<S>) -> Relation {
+        let frustum = match Frustum::from_matrix4(projection) {
+            Some(f) => f,
+            None => return Relation::Cross,
+        };
+        [
+            frustum.left,
+            frustum.right,
+            frustum.top,
+            frustum.bottom,
+            frustum.near,
+            frustum.far,
+        ].iter().fold(Relation::In, |cur, p| {
+            let r = self.relate_plane(*p);
+            // If any of the planes are `Out`, the bound is outside.
+            // Otherwise, if any are `Cross`, the bound is crossing.
+            // Otherwise, the bound is fully inside.
+            cmp::max(cur, r)
+        })
     }
 }
 
-impl<S: BaseFloat + 'static> Bound<S> for Point3<S> {
-    fn relate_plane(self, plane: Plane<S>) -> Relation {
+impl<S: BaseFloat> Bound<S> for Point3<S> {
+    fn relate_plane(&self, plane: Plane<S>) -> Relation {
         let dist = self.dot(plane.n);
         if dist > plane.d {
             Relation::In
@@ -58,7 +74,7 @@ impl<S: BaseFloat + 'static> Bound<S> for Point3<S> {
         }
     }
 
-    fn relate_clip_space(self, projection: Matrix4<S>) -> Relation {
+    fn relate_clip_space(&self, projection: Matrix4<S>) -> Relation {
         use std::cmp::Ordering::*;
         let p = projection * self.to_homogeneous();
         match (

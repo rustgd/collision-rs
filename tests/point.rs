@@ -21,7 +21,7 @@ extern crate cgmath;
 extern crate collision;
 
 use cgmath::{Point3, Vector3};
-use collision::{Bound, Relation, Plane};
+use collision::{Bound, Continuous, Relation, Plane, Ray3};
 
 #[test]
 fn test_homogeneous() {
@@ -38,4 +38,18 @@ fn test_bound() {
     assert_eq!(point.relate_plane(plane), Relation::Cross);
     assert_eq!((point + normal).relate_plane(plane), Relation::In);
     assert_eq!((point + normal * -1.0).relate_plane(plane), Relation::Out);
+}
+
+#[test]
+fn test_ray_intersect() {
+    let point = Point3::new(1f32, 2.0, 3.0);
+    // ray across the point
+    let ray1 = Ray3::new(Point3::new(1f32, 2.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
+    assert_eq!((point, ray1).intersection(), Some(point));
+    // ray in the opposite direction
+    let ray2 = Ray3::new(Point3::new(1f32, 2.0, 0.0), Vector3::new(0.0, 0.0, -1.0));
+    assert_eq!((point, ray2).intersection(), None);
+    // unrelated ray
+    let ray3 = Ray3::new(Point3::new(1f32, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
+    assert_eq!((point, ray3).intersection(), None);
 }

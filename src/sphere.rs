@@ -29,9 +29,9 @@ pub struct Sphere<S: BaseFloat> {
     pub radius: S,
 }
 
-impl<S: BaseFloat> Continuous<Point3<S>> for (Sphere<S>, Ray3<S>) {
-    fn intersection(&self) -> Option<Point3<S>> {
-        let (ref s, ref r) = *self;
+impl<S: BaseFloat> Continuous<Ray3<S>, Point3<S>> for Sphere<S> {
+    fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
+        let s = self;
 
         let l = s.center - r.origin;
         let tca = l.dot(r.direction);
@@ -47,9 +47,9 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Sphere<S>, Ray3<S>) {
     }
 }
 
-impl<S: BaseFloat> Discrete for (Sphere<S>, Ray3<S>) {
-    fn intersects(&self) -> bool {
-        let (ref s, ref r) = *self;
+impl<S: BaseFloat> Discrete<Ray3<S>> for Sphere<S> {
+    fn intersects(&self, r: &Ray3<S>) -> bool {
+        let s = self;
         let l = s.center - r.origin;
         let tca = l.dot(r.direction);
         if tca < S::zero() {
@@ -63,9 +63,9 @@ impl<S: BaseFloat> Discrete for (Sphere<S>, Ray3<S>) {
     }
 }
 
-impl<S: BaseFloat> Discrete for (Sphere<S>, Sphere<S>) {
-    fn intersects(&self) -> bool {
-        let (ref s1, ref s2) = *self;
+impl<S: BaseFloat> Discrete<Sphere<S>> for Sphere<S> {
+    fn intersects(&self, s2: &Sphere<S>) -> bool {
+        let s1 = self;
 
         let distance = s1.center.distance2(s2.center);
         let radiuses = s1.radius + s2.radius;

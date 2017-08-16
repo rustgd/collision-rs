@@ -18,18 +18,18 @@ use cgmath::{BaseFloat, Zero, EuclideanSpace};
 use cgmath::{Point2, Point3};
 use cgmath::{InnerSpace, Vector2};
 
-pub trait Continuous<Result> {
-    fn intersection(&self) -> Option<Result>;
+pub trait Continuous<RHS, Result> {
+    fn intersection(&self, &RHS) -> Option<Result>;
 }
 
-pub trait Discrete {
-    fn intersects(&self) -> bool;
+pub trait Discrete<RHS> {
+    fn intersects(&self, &RHS) -> bool;
 }
 
 
-impl<S: BaseFloat> Continuous<Point3<S>> for (Plane<S>, Ray3<S>) {
-    fn intersection(&self) -> Option<Point3<S>> {
-        let (ref p, ref r) = *self;
+impl<S: BaseFloat> Continuous<Ray3<S>, Point3<S>> for Plane<S> {
+    fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
+        let p = self;
 
         let t = -(p.d + r.origin.dot(p.n)) / r.direction.dot(p.n);
         if t < Zero::zero() {
@@ -40,18 +40,18 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Plane<S>, Ray3<S>) {
     }
 }
 
-impl<S: BaseFloat> Discrete for (Plane<S>, Ray3<S>) {
-    fn intersects(&self) -> bool {
-        let (ref p, ref r) = *self;
+impl<S: BaseFloat> Discrete<Ray3<S>> for Plane<S> {
+    fn intersects(&self, r: &Ray3<S>) -> bool {
+        let p = self;
         let t = -(p.d + r.origin.dot(p.n)) / r.direction.dot(p.n);
         return t >= Zero::zero();
     }
 }
 
 /// See _Real-Time Collision Detection_, p. 210
-impl<S: BaseFloat> Continuous<Ray3<S>> for (Plane<S>, Plane<S>) {
-    fn intersection(&self) -> Option<Ray3<S>> {
-        let (p1, p2) = *self;
+impl<S: BaseFloat> Continuous<Plane<S>, Ray3<S>> for Plane<S> {
+    fn intersection(&self, p2: &Plane<S>) -> Option<Ray3<S>> {
+        let p1 = self;
         let d = p1.n.cross(p2.n);
         let denom = d.dot(d);
         if ulps_eq!(denom, &S::zero()) {
@@ -63,9 +63,9 @@ impl<S: BaseFloat> Continuous<Ray3<S>> for (Plane<S>, Plane<S>) {
     }
 }
 
-impl<S: BaseFloat> Discrete for (Plane<S>, Plane<S>) {
-    fn intersects(&self) -> bool {
-        let (ref p1, ref p2) = *self;
+impl<S: BaseFloat> Discrete<Plane<S>> for Plane<S> {
+    fn intersects(&self, p2: &Plane<S>) -> bool {
+        let p1 = self;
         let d = p1.n.cross(p2.n);
         let denom = d.dot(d);
         return !ulps_eq!(denom, &S::zero());
@@ -73,9 +73,9 @@ impl<S: BaseFloat> Discrete for (Plane<S>, Plane<S>) {
 }
 
 /// See _Real-Time Collision Detection_, p. 212 - 214
-impl<S: BaseFloat> Continuous<Point3<S>> for (Plane<S>, Plane<S>, Plane<S>) {
-    fn intersection(&self) -> Option<Point3<S>> {
-        let (p1, p2, p3) = *self;
+impl<S: BaseFloat> Continuous<(Plane<S>, Plane<S>), Point3<S>> for Plane<S> {
+    fn intersection(&self, planes: &(Plane<S>, Plane<S>)) -> Option<Point3<S>> {
+        let (p1, p2, p3) = (self, planes.0, planes.1);
         let u = p2.n.cross(p3.n);
         let denom = p1.n.dot(u);
         if ulps_eq!(denom.abs(), &S::zero()) {
@@ -87,9 +87,9 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Plane<S>, Plane<S>, Plane<S>) {
     }
 }
 
-impl<S: BaseFloat> Discrete for (Plane<S>, Plane<S>, Plane<S>) {
-    fn intersects(&self) -> bool {
-        let (ref p1, ref p2, ref p3) = *self;
+impl<S: BaseFloat> Discrete<(Plane<S>, Plane<S>)> for Plane<S> {
+    fn intersects(&self, planes: &(Plane<S>, Plane<S>)) -> bool {
+        let (p1, p2, p3) = (self, planes.0, planes.1);
         let u = p2.n.cross(p3.n);
         let denom = p1.n.dot(u);
         return !ulps_eq!(denom.abs(), &S::zero());
@@ -97,9 +97,9 @@ impl<S: BaseFloat> Discrete for (Plane<S>, Plane<S>, Plane<S>) {
 }
 
 /// Determines if an intersection between a ray and a line segment is found.
-impl<S: BaseFloat> Continuous<Point2<S>> for (Ray2<S>, Line2<S>) {
-    fn intersection(&self) -> Option<Point2<S>> {
-        let (ref ray, ref line) = *self;
+impl<S: BaseFloat> Continuous<Line2<S>, Point2<S>> for Ray2<S> {
+    fn intersection(&self, line: &Line2<S>) -> Option<Point2<S>> {
+        let ray = self;
 
         let p = ray.origin;
         let q = line.origin;

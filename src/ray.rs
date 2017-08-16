@@ -49,29 +49,29 @@ where
 pub type Ray2<S> = Ray<S, Point2<S>, Vector2<S>>;
 pub type Ray3<S> = Ray<S, Point3<S>, Vector3<S>>;
 
-impl<S, P> Continuous<P> for (P, Ray<S, P, P::Diff>)
+impl<S, P> Continuous<Ray<S, P, P::Diff>, P> for P
 where
     S: BaseFloat,
     P: EuclideanSpace<Scalar = S>,
     P::Diff: InnerSpace<Scalar = S>,
 {
-    fn intersection(&self) -> Option<P> {
-        if self.intersects() {
-            Some(self.0)
+    fn intersection(&self, ray: &Ray<S, P, P::Diff>) -> Option<P> {
+        if self.intersects(ray) {
+            Some(self.clone())
         } else {
             None
         }
     }
 }
 
-impl<S, P> Discrete for (P, Ray<S, P, P::Diff>)
+impl<S, P> Discrete<Ray<S, P, P::Diff>> for P
 where
     S: BaseFloat,
     P: EuclideanSpace<Scalar = S>,
     P::Diff: InnerSpace<Scalar = S>,
 {
-    fn intersects(&self) -> bool {
-        let (p, ref ray) = *self;
+    fn intersects(&self, ray: &Ray<S, P, P::Diff>) -> bool {
+        let p = self.clone();
         let l = p - ray.origin;
         let tca = l.dot(ray.direction);
         tca > S::zero() &&

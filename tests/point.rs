@@ -45,11 +45,11 @@ fn test_ray_intersect() {
     let point = Point3::new(1f32, 2.0, 3.0);
     // ray across the point
     let ray1 = Ray3::new(Point3::new(1f32, 2.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
-    assert_eq!((point, ray1).intersection(), Some(point));
+    assert_eq!(point.intersection(&ray1), Some(point));
     // ray in the opposite direction
     let ray2 = Ray3::new(Point3::new(1f32, 2.0, 0.0), Vector3::new(0.0, 0.0, -1.0));
-    assert_eq!((point, ray2).intersection(), None);
+    assert_eq!(point.intersection(&ray2), None);
     // unrelated ray
     let ray3 = Ray3::new(Point3::new(1f32, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
-    assert_eq!((point, ray3).intersection(), None);
+    assert_eq!(point.intersection(&ray3), None);
 }

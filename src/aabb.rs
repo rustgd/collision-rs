@@ -300,9 +300,9 @@ impl<S: BaseNum> fmt::Debug for Aabb3<S> {
     }
 }
 
-impl<S: BaseFloat> Continuous<Point2<S>> for (Ray2<S>, Aabb2<S>) {
-    fn intersection(&self) -> Option<Point2<S>> {
-        let (ref ray, ref aabb) = *self;
+impl<S: BaseFloat> Continuous<Aabb2<S>, Point2<S>> for Ray2<S> {
+    fn intersection(&self, aabb: &Aabb2<S>) -> Option<Point2<S>> {
+        let ray = self;
 
         let mut tmin = S::neg_infinity();
         let mut tmax = S::infinity();
@@ -330,9 +330,9 @@ impl<S: BaseFloat> Continuous<Point2<S>> for (Ray2<S>, Aabb2<S>) {
     }
 }
 
-impl<S: BaseFloat> Continuous<Point3<S>> for (Ray3<S>, Aabb3<S>) {
-    fn intersection(&self) -> Option<Point3<S>> {
-        let (ref ray, ref aabb) = *self;
+impl<S: BaseFloat> Continuous<Aabb3<S>, Point3<S>> for Ray3<S> {
+    fn intersection(&self, aabb: &Aabb3<S>) -> Option<Point3<S>> {
+        let ray = self;
 
         let inv_dir = Vector3::new(S::one(), S::one(), S::one()).div_element_wise(ray.direction);
 
@@ -359,10 +359,10 @@ impl<S: BaseFloat> Continuous<Point3<S>> for (Ray3<S>, Aabb3<S>) {
     }
 }
 
-impl<S: BaseFloat> Discrete for (Aabb2<S>, Aabb2<S>) {
-    fn intersects(&self) -> bool {
-        let (a0, a1) = (self.0.min(), self.0.max());
-        let (b0, b1) = (self.1.min(), self.1.max());
+impl<S: BaseFloat> Discrete<Aabb2<S>> for Aabb2<S> {
+    fn intersects(&self, aabb: &Aabb2<S>) -> bool {
+        let (a0, a1) = (self.min(), self.max());
+        let (b0, b1) = (aabb.min(), aabb.max());
 
         a1.x > b0.x && a0.x < b1.x && a1.y > b0.y && a0.y < b1.y
     }

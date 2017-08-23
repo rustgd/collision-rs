@@ -21,6 +21,7 @@
 //! are useful for very cheap collision detection.
 
 use std::fmt;
+use std::cmp::{PartialOrd, Ordering};
 
 use cgmath::{EuclideanSpace, Point2, Point3};
 use cgmath::{VectorSpace, Array, Vector2, Vector3};
@@ -31,41 +32,54 @@ use {Ray2, Ray3, Plane};
 use bound::{Bound, Relation};
 use intersect::{Continuous, Discrete};
 
+fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
+	match lhs.partial_cmp(&rhs) {
+		Some(Ordering::Less) | Some(Ordering::Equal) | None => lhs,
+		_ => rhs,
+	}
+}
+fn max<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
+	match lhs.partial_cmp(&rhs) {
+		Some(Ordering::Greater) | Some(Ordering::Equal) | None => lhs,
+		_ => rhs,
+	}
+}
+
 pub trait MinMax {
     fn min(a: Self, b: Self) -> Self;
     fn max(a: Self, b: Self) -> Self;
 }
 
-impl<S> MinMax for Point2<S>
+impl<S: PartialOrd> MinMax for Point2<S>
 where
     S: BaseNum,
 {
     fn min(a: Point2<S>, b: Point2<S>) -> Point2<S> {
-        Point2::new(a.x.partial_min(b.x), a.y.partial_min(b.y))
+        Point2::new(min(a.x, b.x), min(a.y, b.y))
     }
 
     fn max(a: Point2<S>, b: Point2<S>) -> Point2<S> {
-        Point2::new(a.x.partial_max(b.x), a.y.partial_max(b.y))
+        Point2::new(max(a.x, b.x), max(a.y, b.y))
     }
 }
 
-impl<S> MinMax for Point3<S>
+impl<S: PartialOrd> MinMax for Point3<S>
 where
     S: BaseNum,
 {
     fn min(a: Point3<S>, b: Point3<S>) -> Point3<S> {
         Point3::new(
-            a.x.partial_min(b.x),
-            a.y.partial_min(b.y),
-            a.z.partial_min(b.z),
+            min(a.x, b.x),
+            min(a.y, b.y),
+            min(a.z, b.z),
         )
     }
 
     fn max(a: Point3<S>, b: Point3<S>) -> Point3<S> {
         Point3::new(
-            a.x.partial_max(b.x),
-            a.y.partial_max(b.y),
-            a.z.partial_max(b.z),
+            max(a.x, b.x),
+            max(a.y, b.y),
+            max(a.z, b.z),
         )
     }
 }
@@ -156,8 +170,8 @@ impl<S: BaseNum> Aabb2<S> {
     #[inline]
     pub fn new(p1: Point2<S>, p2: Point2<S>) -> Aabb2<S> {
         Aabb2 {
-            min: Point2::new(p1.x.partial_min(p2.x), p1.y.partial_min(p2.y)),
-            max: Point2::new(p1.x.partial_max(p2.x), p1.y.partial_max(p2.y)),
+            min: Point2::new(min(p1.x, p2.x), min(p1.y, p2.y)),
+            max: Point2::new(max(p1.x, p2.x), max(p1.y, p2.y)),
         }
     }
 
@@ -229,14 +243,14 @@ impl<S: BaseNum> Aabb3<S> {
     pub fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> {
         Aabb3 {
             min: Point3::new(
-                p1.x.partial_min(p2.x),
-                p1.y.partial_min(p2.y),
-                p1.z.partial_min(p2.z),
+                min(p1.x, p2.x),
+                min(p1.y, p2.y),
+                min(p1.z, p2.z),
             ),
             max: Point3::new(
-                p1.x.partial_max(p2.x),
-                p1.y.partial_max(p2.y),
-                p1.z.partial_max(p2.z),
+                max(p1.x, p2.x),
+                max(p1.y, p2.y),
+                max(p1.z, p2.z),
             ),
         }
     }

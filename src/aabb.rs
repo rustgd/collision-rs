@@ -109,15 +109,13 @@ pub trait Aabb<
     fn contains(&self, p: P) -> bool;
 
     /// Returns a new AABB that is grown to include the given point.
-    fn grow(&self, p: P) -> Self
-    {
+    fn grow(&self, p: P) -> Self {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
     }
 
     /// Returns the union of this AABB with another one.
     #[inline]
-    fn union(&self, other: &Self) -> Self
-    {
+    fn union(&self, other: &Self) -> Self {
         self.grow(other.min()).grow(other.max())
     }
 
@@ -140,23 +138,11 @@ pub trait Aabb<
         Aabb::new(min, max)
     }
 
-    /// Give a list of the corner vertices of this bounding box.
-    fn corners(&self) -> Vec<P>;
-
     /// Apply an arbitrary transform to the corners of this bounding box,
     /// return a new conservative bound.
     fn transform<T>(&self, transform: &T) -> Self
     where
-        T: Transform<P>,
-    {
-        let base = Self::new(
-            transform.transform_point(self.min()),
-            transform.transform_point(self.max()),
-        );
-        self.corners().iter().fold(base, |u, &corner| {
-            u.grow(transform.transform_point(corner))
-        })
-    }
+        T: Transform<P>;
 }
 
 /// A two-dimensional AABB, aka a rectangle.
@@ -187,6 +173,7 @@ impl<S: BaseNum> Aabb2<S> {
             self.max,
         ]
     }
+
 }
 
 impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
@@ -212,8 +199,16 @@ impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
         v_min.x >= S::zero() && v_min.y >= S::zero() && v_max.x > S::zero() && v_max.y > S::zero()
     }
 
-    fn corners(&self) -> Vec<Point2<S>> {
-        self.to_corners().to_vec()
+    #[inline]
+    fn transform<T>(&self, transform: &T) -> Self
+        where
+            T: Transform<Point2<S>>,
+    {
+        let corners = self.to_corners();
+        let base = Self::new(corners[0], corners[0]);
+        corners[1..].iter().fold(base, |u, &corner| {
+            u.grow(transform.transform_point(corner))
+        })
     }
 }
 
@@ -289,8 +284,16 @@ impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
             v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
     }
 
-    fn corners(&self) -> Vec<Point3<S>> {
-        self.to_corners().to_vec()
+    #[inline]
+    fn transform<T>(&self, transform: &T) -> Self
+        where
+            T: Transform<Point3<S>>,
+    {
+        let corners = self.to_corners();
+        let base = Self::new(corners[0], corners[0]);
+        corners[1..].iter().fold(base, |u, &corner| {
+            u.grow(transform.transform_point(corner))
+        })
     }
 }
 

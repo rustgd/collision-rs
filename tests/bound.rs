@@ -21,5 +21,4 @@ use collision::Bound;
 fn _box(_: Box<Bound<f32>>) {}
 
 #[test]
-fn bound_box() {
-}
+fn bound_box() {}

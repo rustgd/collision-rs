@@ -138,14 +138,8 @@ fn test_oblique_ray3_should_intersect() {
     );
     let ray2 = Ray::new(Point3::new(0.0f32, 6.0, 0.0), Vector3::new(1.0, -1.0, 1.0));
 
-    assert_eq!(
-        ray1.intersection(&aabb),
-        Some(Point3::new(1.0, 1.0, 1.0))
-    );
-    assert_eq!(
-        ray2.intersection(&aabb),
-        Some(Point3::new(1.0, 5.0, 1.0))
-    );
+    assert_eq!(ray1.intersection(&aabb), Some(Point3::new(1.0, 1.0, 1.0)));
+    assert_eq!(ray2.intersection(&aabb), Some(Point3::new(1.0, 5.0, 1.0)));
 }
 
 #[test]
@@ -188,31 +182,13 @@ fn test_pointing_to_box_dir_ray3_should_intersect() {
     let ray_y2 = Ray::new(Point3::new(2.0f32, 6.0, 2.0), Vector3::new(0.0, -1.0, 0.0));
     let ray_z2 = Ray::new(Point3::new(2.0f32, 2.0, 6.0), Vector3::new(0.0, 0.0, -1.0));
 
-    assert_eq!(
-        ray_x.intersection(&aabb),
-        Some(Point3::new(1.0, 2.0, 2.0))
-    );
-    assert_eq!(
-        ray_y.intersection(&aabb),
-        Some(Point3::new(2.0, 1.0, 2.0))
-    );
-    assert_eq!(
-        ray_z.intersection(&aabb),
-        Some(Point3::new(2.0, 2.0, 1.0))
-    );
+    assert_eq!(ray_x.intersection(&aabb), Some(Point3::new(1.0, 2.0, 2.0)));
+    assert_eq!(ray_y.intersection(&aabb), Some(Point3::new(2.0, 1.0, 2.0)));
+    assert_eq!(ray_z.intersection(&aabb), Some(Point3::new(2.0, 2.0, 1.0)));
 
-    assert_eq!(
-        ray_x2.intersection(&aabb),
-        Some(Point3::new(5.0, 2.0, 2.0))
-    );
-    assert_eq!(
-        ray_y2.intersection(&aabb),
-        Some(Point3::new(2.0, 5.0, 2.0))
-    );
-    assert_eq!(
-        ray_z2.intersection(&aabb),
-        Some(Point3::new(2.0, 2.0, 5.0))
-    );
+    assert_eq!(ray_x2.intersection(&aabb), Some(Point3::new(5.0, 2.0, 2.0)));
+    assert_eq!(ray_y2.intersection(&aabb), Some(Point3::new(2.0, 5.0, 2.0)));
+    assert_eq!(ray_z2.intersection(&aabb), Some(Point3::new(2.0, 2.0, 5.0)));
 }
 
 #[test]

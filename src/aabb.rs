@@ -23,7 +23,7 @@
 use std::fmt;
 use std::cmp::{PartialOrd, Ordering};
 
-use cgmath::{EuclideanSpace, Point2, Point3};
+use cgmath::{EuclideanSpace, Point2, Point3, One, Zero};
 use cgmath::{VectorSpace, Array, Vector2, Vector3};
 use cgmath::{BaseNum, BaseFloat, ElementWise};
 use cgmath::Transform;
@@ -33,16 +33,20 @@ use bound::{Bound, Relation};
 use intersect::{Continuous, Discrete};
 
 fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
-	match lhs.partial_cmp(&rhs) {
-		Some(Ordering::Less) | Some(Ordering::Equal) | None => lhs,
-		_ => rhs,
-	}
+    match lhs.partial_cmp(&rhs) {
+        Some(Ordering::Less) |
+        Some(Ordering::Equal) |
+        None => lhs,
+        _ => rhs,
+    }
 }
 fn max<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
-	match lhs.partial_cmp(&rhs) {
-		Some(Ordering::Greater) | Some(Ordering::Equal) | None => lhs,
-		_ => rhs,
-	}
+    match lhs.partial_cmp(&rhs) {
+        Some(Ordering::Greater) |
+        Some(Ordering::Equal) |
+        None => lhs,
+        _ => rhs,
+    }
 }
 
 pub trait MinMax {
@@ -68,62 +72,60 @@ where
     S: BaseNum,
 {
     fn min(a: Point3<S>, b: Point3<S>) -> Point3<S> {
-        Point3::new(
-            min(a.x, b.x),
-            min(a.y, b.y),
-            min(a.z, b.z),
-        )
+        Point3::new(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
     }
 
     fn max(a: Point3<S>, b: Point3<S>) -> Point3<S> {
-        Point3::new(
-            max(a.x, b.x),
-            max(a.y, b.y),
-            max(a.z, b.z),
-        )
+        Point3::new(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z))
     }
 }
 
-pub trait Aabb<
-    S: BaseNum,
-    V: VectorSpace<Scalar = S> + ElementWise + Array<Element = S>,
-    P: EuclideanSpace<Scalar = S, Diff = V> + MinMax,
->: Sized {
+pub trait Aabb: Sized {
+    type Scalar: BaseNum;
+    type Diff: VectorSpace<Scalar = Self::Scalar> + ElementWise + Array<Element = Self::Scalar>;
+    type Point: EuclideanSpace<Scalar = Self::Scalar, Diff = Self::Diff> + MinMax;
+
     /// Create a new AABB using two points as opposing corners.
-    fn new(p1: P, p2: P) -> Self;
+    fn new(p1: Self::Point, p2: Self::Point) -> Self;
+
+    /// Create a new empty AABB
+    fn zero() -> Self {
+        let p = Self::Point::from_value(Self::Scalar::zero());
+        Self::new(p, p)
+    }
 
     /// Return a shared reference to the point nearest to (-inf, -inf).
-    fn min(&self) -> P;
+    fn min(&self) -> Self::Point;
 
     /// Return a shared reference to the point nearest to (inf, inf).
-    fn max(&self) -> P;
+    fn max(&self) -> Self::Point;
 
     /// Return the dimensions of this AABB.
     #[inline]
-    fn dim(&self) -> V {
+    fn dim(&self) -> Self::Diff {
         self.max() - self.min()
     }
 
     /// Return the volume this AABB encloses.
     #[inline]
-    fn volume(&self) -> S {
+    fn volume(&self) -> Self::Scalar {
         self.dim().product()
     }
 
     /// Return the center point of this AABB.
     #[inline]
-    fn center(&self) -> P {
-        let two = S::one() + S::one();
+    fn center(&self) -> Self::Point {
+        let two = Self::Scalar::one() + Self::Scalar::one();
         self.min() + self.dim() / two
     }
 
     /// Tests whether a point is contained in the box, inclusive for min corner
     /// and exclusive for the max corner.
     #[inline]
-    fn contains(&self, p: P) -> bool;
+    fn contains(&self, p: Self::Point) -> bool;
 
     /// Returns a new AABB that is grown to include the given point.
-    fn grow(&self, p: P) -> Self {
+    fn grow(&self, p: Self::Point) -> Self {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
     }
 
@@ -135,20 +137,20 @@ pub trait Aabb<
 
     /// Add a vector to every point in the AABB, returning a new AABB.
     #[inline]
-    fn add_v(&self, v: V) -> Self {
+    fn add_v(&self, v: Self::Diff) -> Self {
         Aabb::new(self.min() + v, self.max() + v)
     }
 
     /// Multiply every point in the AABB by a scalar, returning a new AABB.
     #[inline]
-    fn mul_s(&self, s: S) -> Self {
+    fn mul_s(&self, s: Self::Scalar) -> Self {
         Aabb::new(self.min() * s, self.max() * s)
     }
 
     /// Multiply every point in the AABB by a vector, returning a new AABB.
-    fn mul_v(&self, v: V) -> Self {
-        let min = P::from_vec(self.min().to_vec().mul_element_wise(v));
-        let max = P::from_vec(self.max().to_vec().mul_element_wise(v));
+    fn mul_v(&self, v: Self::Diff) -> Self {
+        let min = Self::Point::from_vec(self.min().to_vec().mul_element_wise(v));
+        let max = Self::Point::from_vec(self.max().to_vec().mul_element_wise(v));
         Aabb::new(min, max)
     }
 
@@ -156,7 +158,7 @@ pub trait Aabb<
     /// return a new conservative bound.
     fn transform<T>(&self, transform: &T) -> Self
     where
-        T: Transform<P>;
+        T: Transform<Self::Point>;
 }
 
 /// A two-dimensional AABB, aka a rectangle.
@@ -187,10 +189,13 @@ impl<S: BaseNum> Aabb2<S> {
             self.max,
         ]
     }
-
 }
 
-impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
+impl<S: BaseNum> Aabb for Aabb2<S> {
+    type Scalar = S;
+    type Diff = Vector2<S>;
+    type Point = Point2<S>;
+
     #[inline]
     fn new(p1: Point2<S>, p2: Point2<S>) -> Aabb2<S> {
         Aabb2::new(p1, p2)
@@ -215,8 +220,8 @@ impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
 
     #[inline]
     fn transform<T>(&self, transform: &T) -> Self
-        where
-            T: Transform<Point2<S>>,
+    where
+        T: Transform<Point2<S>>,
     {
         let corners = self.to_corners();
         let base = Self::new(corners[0], corners[0]);
@@ -245,16 +250,8 @@ impl<S: BaseNum> Aabb3<S> {
     #[inline]
     pub fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> {
         Aabb3 {
-            min: Point3::new(
-                min(p1.x, p2.x),
-                min(p1.y, p2.y),
-                min(p1.z, p2.z),
-            ),
-            max: Point3::new(
-                max(p1.x, p2.x),
-                max(p1.y, p2.y),
-                max(p1.z, p2.z),
-            ),
+            min: Point3::new(min(p1.x, p2.x), min(p1.y, p2.y), min(p1.z, p2.z)),
+            max: Point3::new(max(p1.x, p2.x), max(p1.y, p2.y), max(p1.z, p2.z)),
         }
     }
 
@@ -274,7 +271,11 @@ impl<S: BaseNum> Aabb3<S> {
     }
 }
 
-impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
+impl<S: BaseNum> Aabb for Aabb3<S> {
+    type Scalar = S;
+    type Diff = Vector3<S>;
+    type Point = Point3<S>;
+
     #[inline]
     fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> {
         Aabb3::new(p1, p2)
@@ -300,8 +301,8 @@ impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
 
     #[inline]
     fn transform<T>(&self, transform: &T) -> Self
-        where
-            T: Transform<Point3<S>>,
+    where
+        T: Transform<Point3<S>>,
     {
         let corners = self.to_corners();
         let base = Self::new(corners[0], corners[0]);

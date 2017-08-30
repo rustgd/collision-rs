@@ -75,6 +75,10 @@ where
         let l = p - ray.origin;
         let tca = l.dot(ray.direction);
         tca > S::zero() &&
-        (tca * tca).relative_eq(&l.magnitude2(), S::default_epsilon(), S::default_max_relative())
+            (tca * tca).relative_eq(
+                &l.magnitude2(),
+                S::default_epsilon(),
+                S::default_max_relative(),
+            )
     }
 }

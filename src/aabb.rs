@@ -26,7 +26,7 @@ use std::cmp::{PartialOrd, Ordering};
 use cgmath::{EuclideanSpace, Point2, Point3};
 use cgmath::{VectorSpace, Array, Vector2, Vector3};
 use cgmath::{BaseNum, BaseFloat, ElementWise};
-use cgmath::{Transform};
+use cgmath::Transform;
 
 use {Ray2, Ray3, Plane};
 use bound::{Bound, Relation};
@@ -87,7 +87,7 @@ where
 pub trait Aabb<
     S: BaseNum,
     V: VectorSpace<Scalar = S> + ElementWise + Array<Element = S>,
-    P: EuclideanSpace<Scalar = S, Diff = V>,
+    P: EuclideanSpace<Scalar = S, Diff = V> + MinMax,
 >: Sized {
     /// Create a new AABB using two points as opposing corners.
     fn new(p1: P, p2: P) -> Self;
@@ -123,17 +123,13 @@ pub trait Aabb<
     fn contains(&self, p: P) -> bool;
 
     /// Returns a new AABB that is grown to include the given point.
-    fn grow(&self, p: P) -> Self
-    where P: MinMax
-    {
+    fn grow(&self, p: P) -> Self {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
     }
 
     /// Returns the union of this AABB with another one.
     #[inline]
-    fn union(&self, other: &Self) -> Self
-    where P: MinMax
-    {
+    fn union(&self, other: &Self) -> Self {
         self.grow(other.min()).grow(other.max())
     }
 
@@ -155,6 +151,12 @@ pub trait Aabb<
         let max = P::from_vec(self.max().to_vec().mul_element_wise(v));
         Aabb::new(min, max)
     }
+
+    /// Apply an arbitrary transform to the corners of this bounding box,
+    /// return a new conservative bound.
+    fn transform<T>(&self, transform: &T) -> Self
+    where
+        T: Transform<P>;
 }
 
 /// A two-dimensional AABB, aka a rectangle.
@@ -186,17 +188,6 @@ impl<S: BaseNum> Aabb2<S> {
         ]
     }
 
-    /// Apply an arbitrary transform to the corners of this bounding box,
-    /// return a new conservative bound.
-    pub fn transform<T>(&self, transform: &T) -> Self
-    where T: Transform<Point2<S>>,
-    {
-        let base = Self::new(transform.transform_point(self.min),
-                             transform.transform_point(self.max));
-        self.to_corners()[1..3].iter().fold(base, |u, &corner| {
-            u.grow(transform.transform_point(corner))
-        })
-    }
 }
 
 impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
@@ -220,6 +211,18 @@ impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
         let v_min = p - self.min();
         let v_max = self.max() - p;
         v_min.x >= S::zero() && v_min.y >= S::zero() && v_max.x > S::zero() && v_max.y > S::zero()
+    }
+
+    #[inline]
+    fn transform<T>(&self, transform: &T) -> Self
+        where
+            T: Transform<Point2<S>>,
+    {
+        let corners = self.to_corners();
+        let base = Self::new(corners[0], corners[0]);
+        corners[1..].iter().fold(base, |u, &corner| {
+            u.grow(transform.transform_point(corner))
+        })
     }
 }
 
@@ -269,18 +272,6 @@ impl<S: BaseNum> Aabb3<S> {
             self.max,
         ]
     }
-
-    /// Apply an arbitrary transform to the corners of this bounding box,
-    /// return a new conservative bound.
-    pub fn transform<T>(&self, transform: &T) -> Self
-    where T: Transform<Point3<S>>,
-    {
-        let base = Self::new(transform.transform_point(self.min),
-                             transform.transform_point(self.max));
-        self.to_corners()[1..7].iter().fold(base, |u, &corner| {
-            u.grow(transform.transform_point(corner))
-        })
-    }
 }
 
 impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
@@ -305,6 +296,18 @@ impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
         let v_max = self.max() - p;
         v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() &&
             v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
+    }
+
+    #[inline]
+    fn transform<T>(&self, transform: &T) -> Self
+        where
+            T: Transform<Point3<S>>,
+    {
+        let corners = self.to_corners();
+        let base = Self::new(corners[0], corners[0]);
+        corners[1..].iter().fold(base, |u, &corner| {
+            u.grow(transform.transform_point(corner))
+        })
     }
 }
 

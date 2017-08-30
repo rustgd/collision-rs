@@ -110,8 +110,6 @@ pub trait Aabb<
 
     /// Returns a new AABB that is grown to include the given point.
     fn grow(&self, p: P) -> Self
-    where
-        P: MinMax,
     {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
     }
@@ -119,8 +117,6 @@ pub trait Aabb<
     /// Returns the union of this AABB with another one.
     #[inline]
     fn union(&self, other: &Self) -> Self
-    where
-        P: MinMax,
     {
         self.grow(other.min()).grow(other.max())
     }

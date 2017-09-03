@@ -386,6 +386,14 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Aabb2<S> {
     }
 }
 
+impl<S: BaseFloat> Discrete<Aabb3<S>> for Aabb3<S> {
+    fn intersects(&self, aabb: &Aabb3<S>) -> bool {
+        let (a0, a1) = (self.min(), self.max());
+        let (b0, b1) = (aabb.min(), aabb.max());
+
+        a1.x > b0.x && a0.x < b1.x && a1.y > b0.y && a0.y < b1.y && a1.z > b0.z && a0.z < b1.z
+    }
+}
 
 impl<S: BaseFloat> Bound<S> for Aabb3<S> {
     fn relate_plane(&self, plane: Plane<S>) -> Relation {

@@ -219,3 +219,43 @@ fn test_bound() {
     assert_eq!(aabb.relate_plane(plane2), Relation::In);
     assert_eq!(aabb.relate_plane(plane3), Relation::Out);
 }
+
+#[test]
+fn test_aab3_should_not_intersect() {
+    use collision::Discrete;
+    let a = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+    let b = Aabb3::new(Point3::new(15., 15., 15.), Point3::new(25., 25., 25.));
+    assert!(!a.intersects(&b));
+}
+
+#[test]
+fn test_aab3_should_intersect() {
+    use collision::Discrete;
+    let a = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+    let b = Aabb3::new(Point3::new(5., 5., 5.), Point3::new(15., 15., 15.));
+    assert!(a.intersects(&b));
+}
+
+#[test]
+fn test_aabb3_should_not_intersect_overlap_x() {
+    use collision::Discrete;
+    let a = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+    let b = Aabb3::new(Point3::new(5., 11., 11.), Point3::new(15., 13., 13.));
+    assert!(!a.intersects(&b));
+}
+
+#[test]
+fn test_aabb3_should_not_intersect_overlap_y() {
+    use collision::Discrete;
+    let a = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+    let b = Aabb3::new(Point3::new(11., 5., 11.), Point3::new(15., 13., 13.));
+    assert!(!a.intersects(&b));
+}
+
+#[test]
+fn test_aabb3_should_not_intersect_overlap_z() {
+    use collision::Discrete;
+    let a = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+    let b = Aabb3::new(Point3::new(11., 11., 5.), Point3::new(15., 13., 13.));
+    assert!(!a.intersects(&b));
+}

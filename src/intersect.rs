@@ -18,8 +18,10 @@ use cgmath::{BaseFloat, Zero, EuclideanSpace};
 use cgmath::{Point2, Point3};
 use cgmath::{InnerSpace, Vector2};
 
-pub trait Continuous<RHS, Result> {
-    fn intersection(&self, &RHS) -> Option<Result>;
+pub trait Continuous<RHS> {
+    type Result;
+
+    fn intersection(&self, &RHS) -> Option<Self::Result>;
 }
 
 pub trait Discrete<RHS> {
@@ -27,7 +29,8 @@ pub trait Discrete<RHS> {
 }
 
 
-impl<S: BaseFloat> Continuous<Ray3<S>, Point3<S>> for Plane<S> {
+impl<S: BaseFloat> Continuous<Ray3<S>> for Plane<S> {
+    type Result = Point3<S>;
     fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
         let p = self;
 
@@ -49,7 +52,8 @@ impl<S: BaseFloat> Discrete<Ray3<S>> for Plane<S> {
 }
 
 /// See _Real-Time Collision Detection_, p. 210
-impl<S: BaseFloat> Continuous<Plane<S>, Ray3<S>> for Plane<S> {
+impl<S: BaseFloat> Continuous<Plane<S>> for Plane<S> {
+    type Result = Ray3<S>;
     fn intersection(&self, p2: &Plane<S>) -> Option<Ray3<S>> {
         let p1 = self;
         let d = p1.n.cross(p2.n);
@@ -73,7 +77,8 @@ impl<S: BaseFloat> Discrete<Plane<S>> for Plane<S> {
 }
 
 /// See _Real-Time Collision Detection_, p. 212 - 214
-impl<S: BaseFloat> Continuous<(Plane<S>, Plane<S>), Point3<S>> for Plane<S> {
+impl<S: BaseFloat> Continuous<(Plane<S>, Plane<S>)> for Plane<S> {
+    type Result = Point3<S>;
     fn intersection(&self, planes: &(Plane<S>, Plane<S>)) -> Option<Point3<S>> {
         let (p1, p2, p3) = (self, planes.0, planes.1);
         let u = p2.n.cross(p3.n);
@@ -97,7 +102,8 @@ impl<S: BaseFloat> Discrete<(Plane<S>, Plane<S>)> for Plane<S> {
 }
 
 /// Determines if an intersection between a ray and a line segment is found.
-impl<S: BaseFloat> Continuous<Line2<S>, Point2<S>> for Ray2<S> {
+impl<S: BaseFloat> Continuous<Line2<S>> for Ray2<S> {
+    type Result = Point2<S>;
     fn intersection(&self, line: &Line2<S>) -> Option<Point2<S>> {
         let ray = self;
 

@@ -49,12 +49,13 @@ where
 pub type Ray2<S> = Ray<S, Point2<S>, Vector2<S>>;
 pub type Ray3<S> = Ray<S, Point3<S>, Vector3<S>>;
 
-impl<S, P> Continuous<Ray<S, P, P::Diff>, P> for P
+impl<S, P> Continuous<Ray<S, P, P::Diff>> for P
 where
     S: BaseFloat,
     P: EuclideanSpace<Scalar = S>,
     P::Diff: InnerSpace<Scalar = S>,
 {
+    type Result = P;
     fn intersection(&self, ray: &Ray<S, P, P::Diff>) -> Option<P> {
         if self.intersects(ray) {
             Some(self.clone())

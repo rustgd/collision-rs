@@ -355,15 +355,15 @@ impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
         let mut tmax = S::infinity();
 
         if ray.direction.x != S::zero() {
-            let tx1 = (aabb.min.x - ray.origin.x) / ray.direction.x;
-            let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
+            let tx1 = (aabb.min.x - ray.origin.x) * ray.inverse_direction.x;
+            let tx2 = (aabb.max.x - ray.origin.x) * ray.inverse_direction.x;
             tmin = tmin.max(tx1.min(tx2));
             tmax = tmax.min(tx1.max(tx2));
         }
 
         if ray.direction.y != S::zero() {
-            let ty1 = (aabb.min.y - ray.origin.y) / ray.direction.y;
-            let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
+            let ty1 = (aabb.min.y - ray.origin.y) * ray.inverse_direction.y;
+            let ty2 = (aabb.max.y - ray.origin.y) * ray.inverse_direction.y;
             tmin = tmin.max(ty1.min(ty2));
             tmax = tmax.min(ty1.max(ty2));
         }
@@ -385,15 +385,15 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
         let mut tmax = S::infinity();
 
         if ray.direction.x != S::zero() {
-            let tx1 = (aabb.min.x - ray.origin.x) / ray.direction.x;
-            let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
+            let tx1 = (aabb.min.x - ray.origin.x) * ray.inverse_direction.x;
+            let tx2 = (aabb.max.x - ray.origin.x) * ray.inverse_direction.x;
             tmin = tmin.max(tx1.min(tx2));
             tmax = tmax.min(tx1.max(tx2));
         }
 
         if ray.direction.y != S::zero() {
-            let ty1 = (aabb.min.y - ray.origin.y) / ray.direction.y;
-            let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
+            let ty1 = (aabb.min.y - ray.origin.y) * ray.inverse_direction.y;
+            let ty2 = (aabb.max.y - ray.origin.y) * ray.inverse_direction.y;
             tmin = tmin.max(ty1.min(ty2));
             tmax = tmax.min(ty1.max(ty2));
         }
@@ -408,17 +408,15 @@ impl<S: BaseFloat> Continuous<Aabb3<S>> for Ray3<S> {
     fn intersection(&self, aabb: &Aabb3<S>) -> Option<Point3<S>> {
         let ray = self;
 
-        let inv_dir = Vector3::new(S::one(), S::one(), S::one()).div_element_wise(ray.direction);
-
-        let mut t1 = (aabb.min.x - ray.origin.x) * inv_dir.x;
-        let mut t2 = (aabb.max.x - ray.origin.x) * inv_dir.x;
+        let mut t1 = (aabb.min.x - ray.origin.x) * ray.inverse_direction.x;
+        let mut t2 = (aabb.max.x - ray.origin.x) * ray.inverse_direction.x;
 
         let mut tmin = t1.min(t2);
         let mut tmax = t1.max(t2);
 
         for i in 1..3 {
-            t1 = (aabb.min[i] - ray.origin[i]) * inv_dir[i];
-            t2 = (aabb.max[i] - ray.origin[i]) * inv_dir[i];
+            t1 = (aabb.min[i] - ray.origin[i]) * ray.inverse_direction[i];
+            t2 = (aabb.max[i] - ray.origin[i]) * ray.inverse_direction[i];
 
             tmin = tmin.max(t1.min(t2));
             tmax = tmax.min(t1.max(t2));
@@ -437,17 +435,15 @@ impl<S: BaseFloat> Discrete<Aabb3<S>> for Ray3<S> {
     fn intersects(&self, aabb: &Aabb3<S>) -> bool {
         let ray = self;
 
-        let inv_dir = Vector3::new(S::one(), S::one(), S::one()).div_element_wise(ray.direction);
-
-        let mut t1 = (aabb.min.x - ray.origin.x) * inv_dir.x;
-        let mut t2 = (aabb.max.x - ray.origin.x) * inv_dir.x;
+        let mut t1 = (aabb.min.x - ray.origin.x) * ray.inverse_direction.x;
+        let mut t2 = (aabb.max.x - ray.origin.x) * ray.inverse_direction.x;
 
         let mut tmin = t1.min(t2);
         let mut tmax = t1.max(t2);
 
         for i in 1..3 {
-            t1 = (aabb.min[i] - ray.origin[i]) * inv_dir[i];
-            t2 = (aabb.max[i] - ray.origin[i]) * inv_dir[i];
+            t1 = (aabb.min[i] - ray.origin[i]) * ray.inverse_direction[i];
+            t2 = (aabb.max[i] - ray.origin[i]) * ray.inverse_direction[i];
 
             tmin = tmin.max(t1.min(t2));
             tmax = tmax.min(t1.max(t2));

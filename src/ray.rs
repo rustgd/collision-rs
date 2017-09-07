@@ -14,7 +14,7 @@
 // limitations under the License.
 
 use std::marker::PhantomData;
-use cgmath::{BaseFloat, BaseNum, InnerSpace};
+use cgmath::{BaseFloat, BaseNum, InnerSpace, Array, ElementWise};
 use cgmath::{EuclideanSpace, Point2, Point3};
 use cgmath::{VectorSpace, Vector2, Vector3};
 
@@ -28,18 +28,20 @@ use intersect::{Continuous, Discrete};
 pub struct Ray<S, P, V> {
     pub origin: P,
     pub direction: V,
+    pub inverse_direction: V,
     phantom_s: PhantomData<S>,
 }
 
 impl<S, V, P> Ray<S, P, V>
 where
     S: BaseNum,
-    V: VectorSpace<Scalar = S>,
+    V: VectorSpace<Scalar = S> + Array<Element = S> + ElementWise,
     P: EuclideanSpace<Scalar = S, Diff = V>,
 {
     pub fn new(origin: P, direction: V) -> Ray<S, P, V> {
         Ray {
             origin: origin,
+            inverse_direction: V::from_value(S::one()).div_element_wise(direction),
             direction: direction,
             phantom_s: PhantomData,
         }

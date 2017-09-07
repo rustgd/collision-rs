@@ -141,6 +141,10 @@ pub trait Aabb: Sized {
         Aabb::new(self.min() + v, self.max() + v)
     }
 
+    /// Add a margin of the given width around the AABB, returning a new AABB.
+    #[inline]
+    fn add_margin(&self, margin: Self::Diff) -> Self;
+
     /// Multiply every point in the AABB by a scalar, returning a new AABB.
     #[inline]
     fn mul_s(&self, s: Self::Scalar) -> Self {
@@ -216,6 +220,14 @@ impl<S: BaseNum> Aabb for Aabb2<S> {
         let v_min = p - self.min();
         let v_max = self.max() - p;
         v_min.x >= S::zero() && v_min.y >= S::zero() && v_max.x > S::zero() && v_max.y > S::zero()
+    }
+
+    #[inline]
+    fn add_margin(&self, margin: Self::Diff) -> Self {
+        Aabb2::new(
+            Point2::new(self.min.x - margin.x, self.min.y - margin.y),
+            Point2::new(self.max.x + margin.x, self.max.y + margin.y),
+        )
     }
 
     #[inline]
@@ -297,6 +309,22 @@ impl<S: BaseNum> Aabb for Aabb3<S> {
         let v_max = self.max() - p;
         v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() &&
             v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
+    }
+
+    #[inline]
+    fn add_margin(&self, margin: Self::Diff) -> Self {
+        Aabb3::new(
+            Point3::new(
+                self.min.x - margin.x,
+                self.min.y - margin.y,
+                self.min.z - margin.z,
+            ),
+            Point3::new(
+                self.max.x + margin.x,
+                self.max.y + margin.y,
+                self.max.z + margin.z,
+            ),
+        )
     }
 
     #[inline]

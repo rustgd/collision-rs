@@ -55,6 +55,14 @@ fn test_general() {
         )
     );
 
+    assert_eq!(
+        aabb.add_margin(Vector2::new(2isize, 2isize)),
+        Aabb2::new(
+            Point2::new(-22isize, -12isize),
+            Point2::new(12isize, 32isize),
+        )
+    );
+
     let aabb = Aabb3::new(
         Point3::new(-20isize, 30isize, 5isize),
         Point3::new(10isize, -10isize, -5isize),
@@ -96,6 +104,15 @@ fn test_general() {
             Point3::new(10isize, 60isize, 15isize),
         )
     );
+
+    assert_eq!(
+        aabb.add_margin(Vector3::new(2isize, 2isize, 2isize)),
+        Aabb3::new(
+            Point3::new(-22isize, -12isize, -7isize),
+            Point3::new(12isize, 32isize, 7isize),
+        )
+    );
+
 }
 
 #[test]

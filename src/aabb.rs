@@ -318,7 +318,8 @@ impl<S: BaseNum> fmt::Debug for Aabb3<S> {
     }
 }
 
-impl<S: BaseFloat> Continuous<Aabb2<S>, Point2<S>> for Ray2<S> {
+impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
+    type Result = Point2<S>;
     fn intersection(&self, aabb: &Aabb2<S>) -> Option<Point2<S>> {
         let ray = self;
 
@@ -348,7 +349,9 @@ impl<S: BaseFloat> Continuous<Aabb2<S>, Point2<S>> for Ray2<S> {
     }
 }
 
-impl<S: BaseFloat> Continuous<Aabb3<S>, Point3<S>> for Ray3<S> {
+impl<S: BaseFloat> Continuous<Aabb3<S>> for Ray3<S> {
+    type Result = Point3<S>;
+
     fn intersection(&self, aabb: &Aabb3<S>) -> Option<Point3<S>> {
         let ray = self;
 

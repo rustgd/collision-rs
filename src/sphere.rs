@@ -29,7 +29,8 @@ pub struct Sphere<S: BaseFloat> {
     pub radius: S,
 }
 
-impl<S: BaseFloat> Continuous<Ray3<S>, Point3<S>> for Sphere<S> {
+impl<S: BaseFloat> Continuous<Ray3<S>> for Sphere<S> {
+    type Result = Point3<S>;
     fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
         let s = self;
 

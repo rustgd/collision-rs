@@ -18,7 +18,7 @@ extern crate collision;
 
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
-use collision::Continuous;
+use collision::{Continuous, Discrete};
 use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
@@ -124,9 +124,13 @@ fn test_ray2_intersect() {
     let ray4 = Ray::new(Point2::new(3.0f32, 7.0), Vector2::new(1.0, 1.0));
 
     assert_eq!(ray1.intersection(&aabb), Some(Point2::new(0.0, 5.0)));
+    assert!(ray1.intersects(&aabb));
     assert_eq!(ray2.intersection(&aabb), Some(Point2::new(2.5, 5.0)));
+    assert!(ray2.intersects(&aabb));
     assert_eq!(ray3.intersection(&aabb), None);
+    assert!(!ray3.intersects(&aabb));
     assert_eq!(ray4.intersection(&aabb), Some(Point2::new(5.0, 9.0)));
+    assert!(ray4.intersects(&aabb));
 }
 
 #[test]
@@ -141,9 +145,13 @@ fn test_parallel_ray3_should_not_intersect() {
     );
 
     assert_eq!(ray_x.intersection(&aabb), None);
+    assert!(!ray_x.intersects(&aabb));
     assert_eq!(ray_y.intersection(&aabb), None);
+    assert!(!ray_y.intersects(&aabb));
     assert_eq!(ray_z.intersection(&aabb), None);
+    assert!(!ray_z.intersects(&aabb));
     assert_eq!(ray_z_imprecise.intersection(&aabb), None);
+    assert!(!ray_z_imprecise.intersects(&aabb));
 }
 
 #[test]
@@ -156,7 +164,9 @@ fn test_oblique_ray3_should_intersect() {
     let ray2 = Ray::new(Point3::new(0.0f32, 6.0, 0.0), Vector3::new(1.0, -1.0, 1.0));
 
     assert_eq!(ray1.intersection(&aabb), Some(Point3::new(1.0, 1.0, 1.0)));
+    assert!(ray1.intersects(&aabb));
     assert_eq!(ray2.intersection(&aabb), Some(Point3::new(1.0, 5.0, 1.0)));
+    assert!(ray2.intersects(&aabb));
 }
 
 #[test]
@@ -180,12 +190,18 @@ fn test_pointing_to_other_dir_ray3_should_not_intersect() {
     let ray_z2 = Ray::new(Point3::new(2.0f32, 2.0, 6.0), Vector3::new(0.0, 0.0, 1.0));
 
     assert_eq!(ray_x.intersection(&aabb), None);
+    assert!(!ray_x.intersects(&aabb));
     assert_eq!(ray_y.intersection(&aabb), None);
+    assert!(!ray_y.intersects(&aabb));
     assert_eq!(ray_z.intersection(&aabb), None);
+    assert!(!ray_z.intersects(&aabb));
 
     assert_eq!(ray_x2.intersection(&aabb), None);
+    assert!(!ray_x2.intersects(&aabb));
     assert_eq!(ray_y2.intersection(&aabb), None);
+    assert!(!ray_y2.intersects(&aabb));
     assert_eq!(ray_z2.intersection(&aabb), None);
+    assert!(!ray_z2.intersects(&aabb));
 }
 
 #[test]
@@ -200,12 +216,18 @@ fn test_pointing_to_box_dir_ray3_should_intersect() {
     let ray_z2 = Ray::new(Point3::new(2.0f32, 2.0, 6.0), Vector3::new(0.0, 0.0, -1.0));
 
     assert_eq!(ray_x.intersection(&aabb), Some(Point3::new(1.0, 2.0, 2.0)));
+    assert!(ray_x.intersects(&aabb));
     assert_eq!(ray_y.intersection(&aabb), Some(Point3::new(2.0, 1.0, 2.0)));
+    assert!(ray_y.intersects(&aabb));
     assert_eq!(ray_z.intersection(&aabb), Some(Point3::new(2.0, 2.0, 1.0)));
+    assert!(ray_z.intersects(&aabb));
 
     assert_eq!(ray_x2.intersection(&aabb), Some(Point3::new(5.0, 2.0, 2.0)));
+    assert!(ray_x2.intersects(&aabb));
     assert_eq!(ray_y2.intersection(&aabb), Some(Point3::new(2.0, 5.0, 2.0)));
+    assert!(ray_y2.intersects(&aabb));
     assert_eq!(ray_z2.intersection(&aabb), Some(Point3::new(2.0, 2.0, 5.0)));
+    assert!(ray_z2.intersects(&aabb));
 }
 
 #[test]

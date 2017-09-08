@@ -28,6 +28,10 @@ pub trait Discrete<RHS> {
     fn intersects(&self, &RHS) -> bool;
 }
 
+pub trait Contains<RHS> {
+    #[inline]
+    fn contains(&self, &RHS) -> bool;
+}
 
 impl<S: BaseFloat> Continuous<Ray3<S>> for Plane<S> {
     type Result = Point3<S>;

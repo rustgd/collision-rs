@@ -28,9 +28,7 @@ use cgmath::{VectorSpace, Array, Vector2, Vector3};
 use cgmath::{BaseNum, BaseFloat, ElementWise};
 use cgmath::Transform;
 
-use {Ray2, Ray3, Plane};
-use bound::{Bound, Relation};
-use intersect::{Continuous, Discrete};
+use {Ray2, Ray3, Plane, Sphere, Contains, Continuous, Discrete, Bound, Relation, Line2, Line3};
 
 fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     match lhs.partial_cmp(&rhs) {
@@ -118,11 +116,6 @@ pub trait Aabb: Sized {
         let two = Self::Scalar::one() + Self::Scalar::one();
         self.min() + self.dim() / two
     }
-
-    /// Tests whether a point is contained in the box, inclusive for min corner
-    /// and exclusive for the max corner.
-    #[inline]
-    fn contains(&self, p: Self::Point) -> bool;
 
     /// Returns a new AABB that is grown to include the given point.
     fn grow(&self, p: Self::Point) -> Self {
@@ -216,13 +209,6 @@ impl<S: BaseNum> Aabb for Aabb2<S> {
     }
 
     #[inline]
-    fn contains(&self, p: Point2<S>) -> bool {
-        let v_min = p - self.min();
-        let v_max = self.max() - p;
-        v_min.x >= S::zero() && v_min.y >= S::zero() && v_max.x > S::zero() && v_max.y > S::zero()
-    }
-
-    #[inline]
     fn add_margin(&self, margin: Self::Diff) -> Self {
         Aabb2::new(
             Point2::new(self.min.x - margin.x, self.min.y - margin.y),
@@ -240,6 +226,33 @@ impl<S: BaseNum> Aabb for Aabb2<S> {
         corners[1..].iter().fold(base, |u, &corner| {
             u.grow(transform.transform_point(corner))
         })
+    }
+}
+
+impl<S: BaseNum> Contains<Point2<S>> for Aabb2<S> {
+    #[inline]
+    fn contains(&self, p: &Point2<S>) -> bool {
+        let v_min = p - self.min();
+        let v_max = self.max() - p;
+        v_min.x >= S::zero() && v_min.y >= S::zero() && v_max.x > S::zero() && v_max.y > S::zero()
+    }
+}
+
+impl<S: BaseNum> Contains<Aabb2<S>> for Aabb2<S> {
+    #[inline]
+    fn contains(&self, other: &Aabb2<S>) -> bool {
+        let other_min = other.min();
+        let other_max = other.max();
+
+        other_min.x >= self.min.x && other_min.y >= self.min.y && other_max.x <= self.max.x &&
+            other_max.y <= self.max.y
+    }
+}
+
+impl<S: BaseNum> Contains<Line2<S>> for Aabb2<S> {
+    #[inline]
+    fn contains(&self, line: &Line2<S>) -> bool {
+        self.contains(&line.origin) && self.contains(&line.dest)
     }
 }
 
@@ -304,14 +317,6 @@ impl<S: BaseNum> Aabb for Aabb3<S> {
     }
 
     #[inline]
-    fn contains(&self, p: Point3<S>) -> bool {
-        let v_min = p - self.min();
-        let v_max = self.max() - p;
-        v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() &&
-            v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
-    }
-
-    #[inline]
     fn add_margin(&self, margin: Self::Diff) -> Self {
         Aabb3::new(
             Point3::new(
@@ -337,6 +342,48 @@ impl<S: BaseNum> Aabb for Aabb3<S> {
         corners[1..].iter().fold(base, |u, &corner| {
             u.grow(transform.transform_point(corner))
         })
+    }
+}
+
+impl<S: BaseNum> Contains<Point3<S>> for Aabb3<S> {
+    #[inline]
+    fn contains(&self, p: &Point3<S>) -> bool {
+        let v_min = p - self.min();
+        let v_max = self.max() - p;
+        v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() &&
+            v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
+    }
+}
+
+impl<S: BaseNum> Contains<Aabb3<S>> for Aabb3<S> {
+    #[inline]
+    fn contains(&self, other: &Aabb3<S>) -> bool {
+        let other_min = other.min();
+        let other_max = other.max();
+
+        other_min.x >= self.min.x && other_min.y >= self.min.y && other_min.z >= self.min.z &&
+            other_max.x <= self.max.x &&
+            other_max.y <= self.max.y && other_max.z <= self.max.z
+    }
+}
+
+impl<S: BaseFloat> Contains<Sphere<S>> for Aabb3<S> {
+    // will return true for border hits on both min and max extents
+    #[inline]
+    fn contains(&self, sphere: &Sphere<S>) -> bool {
+        (sphere.center.x - sphere.radius) >= self.min.x &&
+            (sphere.center.y - sphere.radius) >= self.min.y &&
+            (sphere.center.z - sphere.radius) >= self.min.z &&
+            (sphere.center.x + sphere.radius) <= self.max.x &&
+            (sphere.center.y + sphere.radius) <= self.max.y &&
+            (sphere.center.z + sphere.radius) <= self.max.z
+    }
+}
+
+impl<S: BaseNum> Contains<Line3<S>> for Aabb3<S> {
+    #[inline]
+    fn contains(&self, line: &Line3<S>) -> bool {
+        self.contains(&line.origin) && self.contains(&line.dest)
     }
 }
 

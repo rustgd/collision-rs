@@ -50,6 +50,7 @@ pub use cylinder::Cylinder;
 pub use frustum::*;
 pub use intersect::Continuous;
 pub use intersect::Discrete;
+pub use intersect::Contains;
 pub use obb::*;
 pub use sphere::Sphere;
 pub use plane::Plane;

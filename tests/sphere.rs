@@ -86,3 +86,76 @@ fn test_bound() {
         Relation::Out
     );
 }
+
+#[test]
+fn test_sphere_contains_point() {
+    let sphere = Sphere {
+        center: Point3::new(1f32, 2., 3.),
+        radius: 1.,
+    };
+
+    let inside_p = Point3::new(1f32, 2.2, 3.);
+    let outside_p = Point3::new(11f32, 2.2, 3.);
+
+    assert!(sphere.contains(&inside_p));
+    assert!(!sphere.contains(&outside_p));
+}
+
+#[test]
+fn test_sphere_contains_line() {
+    let sphere = Sphere {
+        center: Point3::new(1f32, 2., 3.),
+        radius: 1.,
+    };
+
+    let inside = Line3::new(Point3::new(1f32, 2., 3.), Point3::new(1f32, 2.2, 3.));
+    let outside = Line3::new(Point3::new(11f32, 2., 3.), Point3::new(11f32, 2.2, 3.));
+    let inside_out = Line3::new(Point3::new(1f32, 2., 3.), Point3::new(11f32, 2.2, 3.));
+
+    assert!(sphere.contains(&inside));
+    assert!(!sphere.contains(&outside));
+    assert!(!sphere.contains(&inside_out));
+}
+
+#[test]
+fn test_sphere_contains_sphere() {
+    let sphere = Sphere {
+        center: Point3::new(1f32, 2., 3.),
+        radius: 1.,
+    };
+
+    let inside = Sphere {
+        center: Point3::new(1f32, 2., 3.),
+        radius: 0.1,
+    };
+    let outside = Sphere {
+        center: Point3::new(11f32, 2., 3.),
+        radius: 0.1,
+    };
+    let inside_out = Sphere {
+        center: Point3::new(1f32, 2., 3.),
+        radius: 10.,
+    };
+
+    assert!(sphere.contains(&inside));
+    assert!(!sphere.contains(&outside));
+    assert!(!sphere.contains(&inside_out));
+}
+
+#[test]
+fn test_sphere_contains_aabb() {
+    let sphere = Sphere {
+        center: Point3::new(1f32, 2., 3.),
+        radius: 1.,
+    };
+
+    let inside = Aabb3::new(Point3::new(1f32, 2., 3.), Point3::new(1f32, 2.2, 3.));
+    let outside = Aabb3::new(Point3::new(11f32, 2., 3.), Point3::new(11f32, 2.2, 3.));
+    let inside_out = Aabb3::new(Point3::new(1f32, 2., 3.), Point3::new(11f32, 2.2, 3.));
+    let edge_case = Aabb3::new(Point3::new(1f32, 1.01, 3.), Point3::new(1.99f32, 2., 3.99));
+
+    assert!(sphere.contains(&inside));
+    assert!(!sphere.contains(&outside));
+    assert!(!sphere.contains(&inside_out));
+    assert!(!sphere.contains(&edge_case));
+}

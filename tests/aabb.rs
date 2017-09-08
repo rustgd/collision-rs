@@ -18,7 +18,8 @@ extern crate collision;
 
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
-use collision::{Continuous, Discrete};
+use collision::{Continuous, Contains, Discrete};
+use collision::{Line2, Line3, Sphere};
 use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
@@ -35,9 +36,9 @@ fn test_general() {
     assert_eq!(aabb.volume(), 30isize * 40isize);
     assert_eq!(aabb.center(), Point2::new(-5isize, 10isize));
 
-    assert!(aabb.contains(Point2::new(0isize, 0isize)));
-    assert!(!aabb.contains(Point2::new(-50isize, -50isize)));
-    assert!(!aabb.contains(Point2::new(50isize, 50isize)));
+    assert!(aabb.contains(&Point2::new(0isize, 0isize)));
+    assert!(!aabb.contains(&Point2::new(-50isize, -50isize)));
+    assert!(!aabb.contains(&Point2::new(50isize, 50isize)));
 
     assert_eq!(aabb.grow(Point2::new(0isize, 0isize)), aabb);
     assert_eq!(
@@ -73,13 +74,13 @@ fn test_general() {
     assert_eq!(aabb.volume(), 30isize * 40isize * 10isize);
     assert_eq!(aabb.center(), Point3::new(-5isize, 10isize, 0isize));
 
-    assert!(aabb.contains(Point3::new(0isize, 0isize, 0isize)));
-    assert!(!aabb.contains(Point3::new(-100isize, 0isize, 0isize)));
-    assert!(!aabb.contains(Point3::new(100isize, 0isize, 0isize)));
-    assert!(aabb.contains(Point3::new(9isize, 29isize, -1isize)));
-    assert!(!aabb.contains(Point3::new(10isize, 30isize, 5isize)));
-    assert!(aabb.contains(Point3::new(-20isize, -10isize, -5isize)));
-    assert!(!aabb.contains(Point3::new(-21isize, -11isize, -6isize)));
+    assert!(aabb.contains(&Point3::new(0isize, 0isize, 0isize)));
+    assert!(!aabb.contains(&Point3::new(-100isize, 0isize, 0isize)));
+    assert!(!aabb.contains(&Point3::new(100isize, 0isize, 0isize)));
+    assert!(aabb.contains(&Point3::new(9isize, 29isize, -1isize)));
+    assert!(!aabb.contains(&Point3::new(10isize, 30isize, 5isize)));
+    assert!(aabb.contains(&Point3::new(-20isize, -10isize, -5isize)));
+    assert!(!aabb.contains(&Point3::new(-21isize, -11isize, -6isize)));
 
     assert_eq!(
         aabb.add_v(Vector3::new(1isize, 2isize, 3isize)),
@@ -297,4 +298,101 @@ fn test_aabb3_should_not_intersect_overlap_z() {
     let a = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
     let b = Aabb3::new(Point3::new(11., 11., 5.), Point3::new(15., 13., 13.));
     assert!(!a.intersects(&b));
+}
+
+#[test]
+fn test_aabb2_contains_point2() {
+    let aabb = Aabb2::new(Point2::new(0., 0.), Point2::new(10., 10.));
+
+    let inside = Point2::new(2., 2.);
+    let outside = Point2::new(11., 11.);
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+}
+
+#[test]
+fn test_aabb2_contains_line2() {
+    let aabb = Aabb2::new(Point2::new(0., 0.), Point2::new(10., 10.));
+
+    let inside = Line2::new(Point2::new(1., 1.), Point2::new(2., 2.));
+    let inside_out = Line2::new(Point2::new(1., 1.), Point2::new(12., 12.));
+    let outside = Line2::new(Point2::new(11., 11.), Point2::new(12., 12.));
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+    assert!(!aabb.contains(&inside_out));
+}
+
+#[test]
+fn test_aabb2_contains_aabb2() {
+    let aabb = Aabb2::new(Point2::new(0., 0.), Point2::new(10., 10.));
+
+    let inside = Aabb2::new(Point2::new(1., 1.), Point2::new(2., 2.));
+    let inside_out = Aabb2::new(Point2::new(1., 1.), Point2::new(12., 12.));
+    let outside = Aabb2::new(Point2::new(11., 11.), Point2::new(12., 12.));
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+    assert!(!aabb.contains(&inside_out));
+}
+
+#[test]
+fn test_aabb3_contains_point3() {
+    let aabb = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+
+    let inside = Point3::new(3., 3., 3.);
+    let outside = Point3::new(11., 11., 11.);
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+}
+
+#[test]
+fn test_aabb3_contains_line3() {
+    let aabb = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+
+    let inside = Line3::new(Point3::new(1., 1., 1.), Point3::new(2., 2., 2.));
+    let inside_out = Line3::new(Point3::new(1., 1., 1.), Point3::new(12., 12., 12.));
+    let outside = Line3::new(Point3::new(11., 11., 11.), Point3::new(12., 12., 12.));
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+    assert!(!aabb.contains(&inside_out));
+}
+
+#[test]
+fn test_aabb3_contains_aabb3() {
+    let aabb = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+
+    let inside = Aabb3::new(Point3::new(1., 1., 1.), Point3::new(2., 2., 2.));
+    let inside_out = Aabb3::new(Point3::new(1., 1., 1.), Point3::new(12., 12., 12.));
+    let outside = Aabb3::new(Point3::new(11., 11., 11.), Point3::new(12., 12., 12.));
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+    assert!(!aabb.contains(&inside_out));
+}
+
+#[test]
+fn test_aabb3_contains_sphere() {
+    let aabb = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+
+    let inside = Sphere {
+        center: Point3::new(5., 5., 5.),
+        radius: 1.,
+    };
+
+    let inside_out = Sphere {
+        center: Point3::new(5., 5., 5.),
+        radius: 10.,
+    };
+    let outside = Sphere {
+        center: Point3::new(20., 20., 20.),
+        radius: 1.,
+    };
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+    assert!(!aabb.contains(&inside_out));
 }

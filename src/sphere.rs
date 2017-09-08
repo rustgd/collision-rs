@@ -16,9 +16,11 @@
 //! Bounding sphere
 
 use bound::*;
-use intersect::{Continuous, Discrete};
+use intersect::{Continuous, Discrete, Contains};
 use Plane;
 use Ray3;
+use Aabb3;
+use Line3;
 use cgmath::{BaseFloat, EuclideanSpace};
 use cgmath::{InnerSpace, Point3, MetricSpace};
 
@@ -85,5 +87,41 @@ impl<S: BaseFloat> Bound<S> for Sphere<S> {
         } else {
             Relation::Cross
         }
+    }
+}
+
+impl<S: BaseFloat> Contains<Aabb3<S>> for Sphere<S> {
+    // will return true for border hits
+    #[inline]
+    fn contains(&self, aabb: &Aabb3<S>) -> bool {
+        let radius_sq = self.radius * self.radius;
+        for c in aabb.to_corners().iter() {
+            if c.distance2(self.center) > radius_sq {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+impl<S: BaseFloat> Contains<Point3<S>> for Sphere<S> {
+    #[inline]
+    fn contains(&self, p: &Point3<S>) -> bool {
+        self.center.distance2(*p) <= self.radius * self.radius
+    }
+}
+
+impl<S: BaseFloat> Contains<Line3<S>> for Sphere<S> {
+    #[inline]
+    fn contains(&self, line: &Line3<S>) -> bool {
+        self.contains(&line.origin) && self.contains(&line.dest)
+    }
+}
+
+impl<S: BaseFloat> Contains<Sphere<S>> for Sphere<S> {
+    #[inline]
+    fn contains(&self, other: &Sphere<S>) -> bool {
+        let center_dist = self.center.distance(other.center);
+        (center_dist + other.radius) <= self.radius
     }
 }

@@ -18,7 +18,7 @@ extern crate collision;
 
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
-use collision::{Continuous, Contains, Discrete};
+use collision::{Continuous, Contains, Discrete, Union};
 use collision::{Line2, Line3, Sphere, Ray2, Ray3};
 use collision::{Continuous, Contains, Discrete, Union};
 use collision::{Line2, Line3, Sphere, Ray2, Ray3};

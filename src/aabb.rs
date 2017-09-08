@@ -28,7 +28,10 @@ use cgmath::{VectorSpace, Array, Vector2, Vector3};
 use cgmath::{BaseNum, BaseFloat, ElementWise};
 use cgmath::Transform;
 
-use {Ray2, Ray3, Plane, Sphere, Contains, Continuous, Discrete, Bound, Relation, Line2, Line3};
+use {Ray2, Ray3, Plane, Sphere, Line2, Line3};
+use bound::{Bound, Relation};
+use intersect::{Continuous, Discrete, Contains};
+use ops::Union;
 
 fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     match lhs.partial_cmp(&rhs) {
@@ -120,12 +123,6 @@ pub trait Aabb: Sized {
     /// Returns a new AABB that is grown to include the given point.
     fn grow(&self, p: Self::Point) -> Self {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
-    }
-
-    /// Returns the union of this AABB with another one.
-    #[inline]
-    fn union(&self, other: &Self) -> Self {
-        self.grow(other.min()).grow(other.max())
     }
 
     /// Add a vector to every point in the AABB, returning a new AABB.
@@ -253,6 +250,14 @@ impl<S: BaseNum> Contains<Line2<S>> for Aabb2<S> {
     #[inline]
     fn contains(&self, line: &Line2<S>) -> bool {
         self.contains(&line.origin) && self.contains(&line.dest)
+    }
+}
+
+impl<S: BaseNum> Union for Aabb2<S> {
+    type Output = Aabb2<S>;
+
+    fn union(&self, other: &Aabb2<S>) -> Aabb2<S> {
+        self.grow(other.min()).grow(other.max())
     }
 }
 
@@ -384,6 +389,14 @@ impl<S: BaseNum> Contains<Line3<S>> for Aabb3<S> {
     #[inline]
     fn contains(&self, line: &Line3<S>) -> bool {
         self.contains(&line.origin) && self.contains(&line.dest)
+    }
+}
+
+impl<S: BaseNum> Union for Aabb3<S> {
+    type Output = Aabb3<S>;
+
+    fn union(&self, other: &Aabb3<S>) -> Aabb3<S> {
+        self.grow(other.min()).grow(other.max())
     }
 }
 
@@ -568,5 +581,17 @@ impl<S: BaseFloat> Bound<S> for Aabb3<S> {
             }
         }
         first
+    }
+}
+
+impl<S: BaseFloat> Union<Sphere<S>> for Aabb3<S> {
+    type Output = Aabb3<S>;
+
+    fn union(&self, sphere: &Sphere<S>) -> Aabb3<S> {
+        self.grow(Point3::new(
+            sphere.center.x - sphere.radius,
+            sphere.center.y - sphere.radius,
+            sphere.center.z - sphere.radius,
+        )).grow(sphere.center + Vector3::from_value(sphere.radius))
     }
 }

@@ -15,14 +15,17 @@
 
 //! Bounding sphere
 
+use cgmath::{BaseFloat, EuclideanSpace};
+use cgmath::{InnerSpace, Point3, MetricSpace};
+
 use bound::*;
 use intersect::{Continuous, Discrete, Contains};
 use Plane;
 use Ray3;
 use Aabb3;
 use Line3;
-use cgmath::{BaseFloat, EuclideanSpace};
-use cgmath::{InnerSpace, Point3, MetricSpace};
+use Aabb;
+use Union;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
@@ -123,5 +126,51 @@ impl<S: BaseFloat> Contains<Sphere<S>> for Sphere<S> {
     fn contains(&self, other: &Sphere<S>) -> bool {
         let center_dist = self.center.distance(other.center);
         (center_dist + other.radius) <= self.radius
+    }
+}
+
+impl<S: BaseFloat> Union for Sphere<S> {
+    type Output = Sphere<S>;
+
+    fn union(&self, other: &Sphere<S>) -> Sphere<S> {
+        if self.contains(other) {
+            return self.clone();
+        }
+        if other.contains(self) {
+            return other.clone();
+        }
+        let two = S::one() + S::one();
+        let center_diff = other.center - self.center;
+        let center_diff_s = center_diff.magnitude();
+        let radius = (self.radius + other.radius + center_diff_s) / two;
+        Sphere {
+            radius,
+            center: self.center + center_diff * (radius - self.radius) / center_diff_s,
+        }
+    }
+}
+
+impl<S: BaseFloat> Union<Aabb3<S>> for Sphere<S> {
+    type Output = Sphere<S>;
+
+    fn union(&self, aabb: &Aabb3<S>) -> Sphere<S> {
+        if self.contains(aabb) {
+            return self.clone();
+        }
+        let aabb_radius = aabb.max().distance(aabb.center());
+        if aabb.contains(self) {
+            return Sphere {
+                center: aabb.center(),
+                radius: aabb_radius,
+            };
+        }
+        let two = S::one() + S::one();
+        let center_diff = aabb.center() - self.center;
+        let center_diff_s = aabb.center().distance(self.center);
+        let radius = (self.radius + aabb_radius + center_diff_s) / two;
+        Sphere {
+            center: self.center + center_diff * (radius - self.radius) / center_diff_s,
+            radius,
+        }
     }
 }

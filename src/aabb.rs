@@ -457,6 +457,7 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
         let mut tmax = S::infinity();
 
         if ray.direction.x != S::zero() {
+            println!("x");
             let tx1 = (aabb.min.x - ray.origin.x) / ray.direction.x;
             let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
             tmin = tmin.max(tx1.min(tx2));
@@ -466,6 +467,7 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
         }
 
         if ray.direction.y != S::zero() {
+            println!("y");
             let ty1 = (aabb.min.y - ray.origin.y) / ray.direction.y;
             let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
             tmin = tmin.max(ty1.min(ty2));

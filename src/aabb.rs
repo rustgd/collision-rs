@@ -406,6 +406,8 @@ impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
             let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
             tmin = tmin.max(tx1.min(tx2));
             tmax = tmax.min(tx1.max(tx2));
+        } else if ray.origin.x <= aabb.min.x || ray.origin.x >= aabb.max.x {
+            return None;
         }
 
         if ray.direction.y != S::zero() {
@@ -413,6 +415,8 @@ impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
             let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
             tmin = tmin.max(ty1.min(ty2));
             tmax = tmax.min(ty1.max(ty2));
+        } else if ray.origin.y <= aabb.min.y || ray.origin.y >= aabb.max.y {
+            return None;
         }
 
         if (tmin < S::zero() && tmax < S::zero()) || tmax < tmin {
@@ -421,6 +425,14 @@ impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
             let t = if tmin >= S::zero() { tmin } else { tmax };
             Some(ray.origin + ray.direction * t)
         }
+    }
+}
+
+impl<S: BaseFloat> Continuous<Ray2<S>> for Aabb2<S> {
+    type Result = Point2<S>;
+
+    fn intersection(&self, ray: &Ray2<S>) -> Option<Point2<S>> {
+        ray.intersection(self)
     }
 }
 
@@ -436,6 +448,8 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
             let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
             tmin = tmin.max(tx1.min(tx2));
             tmax = tmax.min(tx1.max(tx2));
+        } else if ray.origin.x <= aabb.min.x || ray.origin.x >= aabb.max.x {
+            return false;
         }
 
         if ray.direction.y != S::zero() {
@@ -443,9 +457,17 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
             let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
             tmin = tmin.max(ty1.min(ty2));
             tmax = tmax.min(ty1.max(ty2));
+        } else if ray.origin.y <= aabb.min.y || ray.origin.y >= aabb.max.y {
+            return false;
         }
 
         tmax >= tmin && (tmin >= S::zero() || tmax >= S::zero())
+    }
+}
+
+impl<S: BaseFloat> Discrete<Ray2<S>> for Aabb2<S> {
+    fn intersects(&self, ray: &Ray2<S>) -> bool {
+        ray.intersects(&self)
     }
 }
 
@@ -480,6 +502,14 @@ impl<S: BaseFloat> Continuous<Aabb3<S>> for Ray3<S> {
     }
 }
 
+impl<S: BaseFloat> Continuous<Ray3<S>> for Aabb3<S> {
+    type Result = Point3<S>;
+
+    fn intersection(&self, ray: &Ray3<S>) -> Option<Point3<S>> {
+        ray.intersection(self)
+    }
+}
+
 impl<S: BaseFloat> Discrete<Aabb3<S>> for Ray3<S> {
     fn intersects(&self, aabb: &Aabb3<S>) -> bool {
         let ray = self;
@@ -501,6 +531,12 @@ impl<S: BaseFloat> Discrete<Aabb3<S>> for Ray3<S> {
         }
 
         tmax >= tmin && (tmin >= S::zero() || tmax >= S::zero())
+    }
+}
+
+impl<S: BaseFloat> Discrete<Ray3<S>> for Aabb3<S> {
+    fn intersects(&self, ray: &Ray3<S>) -> bool {
+        ray.intersects(self)
     }
 }
 

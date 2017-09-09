@@ -19,7 +19,7 @@ extern crate collision;
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
 use collision::{Continuous, Contains, Discrete};
-use collision::{Line2, Line3, Sphere};
+use collision::{Line2, Line3, Sphere, Ray2, Ray3};
 use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
@@ -395,4 +395,34 @@ fn test_aabb3_contains_sphere() {
     assert!(aabb.contains(&inside));
     assert!(!aabb.contains(&outside));
     assert!(!aabb.contains(&inside_out));
+}
+
+#[test]
+fn test_ray_aabb2_parallel() {
+    let aabb = Aabb2::new(Point2::new(5., 5.), Point2::new(10., 10.));
+
+    let ray = Ray2::new(Point2::new(2., 0.), Vector2::new(0., 1.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+
+    let ray = Ray2::new(Point2::new(0., 2.), Vector2::new(1., 0.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+}
+
+#[test]
+fn test_ray_aabb3_parallel() {
+    let aabb = Aabb3::new(Point3::new(5., 5., 5.), Point3::new(10., 10., 10.));
+
+    let ray = Ray3::new(Point3::new(2., 0., 2.), Vector3::new(0., 1., 0.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+
+    let ray = Ray3::new(Point3::new(0., 2., 2.), Vector3::new(1., 0., 0.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+
+    let ray = Ray3::new(Point3::new(2., 2., 0.), Vector3::new(0., 0., 1.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
 }

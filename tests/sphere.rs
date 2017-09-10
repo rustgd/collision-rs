@@ -159,3 +159,68 @@ fn test_sphere_contains_aabb() {
     assert!(!sphere.contains(&inside_out));
     assert!(!sphere.contains(&edge_case));
 }
+
+#[test]
+fn test_sphere_union_sphere() {
+    let base = Sphere {
+        center: Point3::new(0., 0., 0.),
+        radius: 5.,
+    };
+
+    let inside = Sphere {
+        center: Point3::new(1., 1., 1.),
+        radius: 1.,
+    };
+    let outside = Sphere {
+        center: Point3::new(8., 8., 8.),
+        radius: 1.,
+    };
+    let inside_out = Sphere {
+        center: Point3::new(4., 4., 4.),
+        radius: 3.,
+    };
+
+    assert_eq!(base, base.union(&inside));
+    assert_eq!(
+        Sphere {
+            center: Point3::new(2.8452994616207485, 2.8452994616207485, 2.8452994616207485),
+            radius: 9.928203230275509,
+        },
+        base.union(&outside)
+    );
+    assert_eq!(
+        Sphere {
+            center: Point3::new(1.4226497308103743, 1.4226497308103743, 1.4226497308103743),
+            radius: 7.464101615137754,
+        },
+        base.union(&inside_out)
+    );
+}
+
+#[test]
+fn test_sphere_union_aabb3() {
+    let base = Sphere {
+        center: Point3::new(0., 0., 0.),
+        radius: 5.,
+    };
+
+    let inside = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(2., 2., 2.));
+    let outside = Aabb3::new(Point3::new(6., 6., 6.), Point3::new(9., 9., 9.));
+    let inside_out = Aabb3::new(Point3::new(4., 4., 4.), Point3::new(7., 7., 7.));
+
+    assert_eq!(base, base.union(&inside));
+    assert_eq!(
+        Sphere {
+            center: Point3::new(3.0566243270259355, 3.0566243270259355, 3.0566243270259355),
+            radius: 10.294228634059948,
+        },
+        base.union(&outside)
+    );
+    assert_eq!(
+        Sphere {
+            center: Point3::new(2.0566243270259355, 2.0566243270259355, 2.0566243270259355),
+            radius: 8.56217782649107,
+        },
+        base.union(&inside_out)
+    );
+}

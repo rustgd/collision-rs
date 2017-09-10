@@ -18,8 +18,8 @@ extern crate collision;
 
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
-use collision::{Continuous, Contains, Discrete};
-use collision::{Line2, Line3, Sphere};
+use collision::{Continuous, Contains, Discrete, Union};
+use collision::{Line2, Line3, Sphere, Ray2, Ray3};
 use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
@@ -395,4 +395,100 @@ fn test_aabb3_contains_sphere() {
     assert!(aabb.contains(&inside));
     assert!(!aabb.contains(&outside));
     assert!(!aabb.contains(&inside_out));
+}
+
+#[test]
+fn test_ray_aabb2_parallel() {
+    let aabb = Aabb2::new(Point2::new(5., 5.), Point2::new(10., 10.));
+
+    let ray = Ray2::new(Point2::new(2., 0.), Vector2::new(0., 1.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+
+    let ray = Ray2::new(Point2::new(0., 2.), Vector2::new(1., 0.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+}
+
+#[test]
+fn test_ray_aabb3_parallel() {
+    let aabb = Aabb3::new(Point3::new(5., 5., 5.), Point3::new(10., 10., 10.));
+
+    let ray = Ray3::new(Point3::new(2., 0., 2.), Vector3::new(0., 1., 0.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+
+    let ray = Ray3::new(Point3::new(0., 2., 2.), Vector3::new(1., 0., 0.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+
+    let ray = Ray3::new(Point3::new(2., 2., 0.), Vector3::new(0., 0., 1.));
+    assert!(!ray.intersects(&aabb));
+    assert!(ray.intersection(&aabb).is_none());
+}
+
+#[test]
+fn test_aabb2_union_aabb2() {
+    let base = Aabb2::new(Point2::new(0., 0.), Point2::new(10., 10.));
+
+    let inside = Aabb2::new(Point2::new(2., 2.), Point2::new(5., 5.));
+    let outside = Aabb2::new(Point2::new(12., 12.), Point2::new(15., 15.));
+    let inside_out = Aabb2::new(Point2::new(2., 2.), Point2::new(12., 12.));
+
+    assert_eq!(base, base.union(&inside));
+    assert_eq!(
+        Aabb2::new(Point2::new(0., 0.), Point2::new(15., 15.)),
+        base.union(&outside)
+    );
+    assert_eq!(
+        Aabb2::new(Point2::new(0., 0.), Point2::new(12., 12.)),
+        base.union(&inside_out)
+    );
+}
+
+#[test]
+fn test_aabb3_union_aabb3() {
+    let base = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+
+    let inside = Aabb3::new(Point3::new(2., 2., 2.), Point3::new(5., 5., 5.));
+    let outside = Aabb3::new(Point3::new(12., 12., 12.), Point3::new(15., 15., 15.));
+    let inside_out = Aabb3::new(Point3::new(2., 2., 2.), Point3::new(12., 12., 12.));
+
+    assert_eq!(base, base.union(&inside));
+    assert_eq!(
+        Aabb3::new(Point3::new(0., 0., 0.), Point3::new(15., 15., 15.)),
+        base.union(&outside)
+    );
+    assert_eq!(
+        Aabb3::new(Point3::new(0., 0., 0.), Point3::new(12., 12., 12.)),
+        base.union(&inside_out)
+    );
+}
+
+#[test]
+fn test_aabb3_union_sphere() {
+    let base = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 10., 10.));
+
+    let inside = Sphere {
+        center: Point3::new(5., 5., 5.),
+        radius: 1.,
+    };
+    let outside = Sphere {
+        center: Point3::new(14., 14., 14.),
+        radius: 1.,
+    };
+    let inside_out = Sphere {
+        center: Point3::new(8., 8., 8.),
+        radius: 4.,
+    };
+
+    assert_eq!(base, base.union(&inside));
+    assert_eq!(
+        Aabb3::new(Point3::new(0., 0., 0.), Point3::new(15., 15., 15.)),
+        base.union(&outside)
+    );
+    assert_eq!(
+        Aabb3::new(Point3::new(0., 0., 0.), Point3::new(12., 12., 12.)),
+        base.union(&inside_out)
+    );
 }

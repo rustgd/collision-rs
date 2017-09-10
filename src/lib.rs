@@ -51,11 +51,14 @@ pub use frustum::*;
 pub use intersect::Continuous;
 pub use intersect::Discrete;
 pub use intersect::Contains;
+pub use ops::Union;
 pub use obb::*;
 pub use sphere::Sphere;
 pub use plane::Plane;
 pub use ray::*;
 pub use line::*;
+
+pub mod prelude;
 
 // Modules
 
@@ -69,3 +72,4 @@ mod sphere;
 mod plane;
 mod ray;
 mod line;
+mod ops;

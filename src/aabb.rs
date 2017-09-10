@@ -28,7 +28,10 @@ use cgmath::{VectorSpace, Array, Vector2, Vector3};
 use cgmath::{BaseNum, BaseFloat, ElementWise};
 use cgmath::Transform;
 
-use {Ray2, Ray3, Plane, Sphere, Contains, Continuous, Discrete, Bound, Relation, Line2, Line3};
+use {Ray2, Ray3, Plane, Sphere, Line2, Line3};
+use bound::{Bound, Relation};
+use intersect::{Continuous, Discrete, Contains};
+use ops::Union;
 
 fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     match lhs.partial_cmp(&rhs) {
@@ -120,12 +123,6 @@ pub trait Aabb: Sized {
     /// Returns a new AABB that is grown to include the given point.
     fn grow(&self, p: Self::Point) -> Self {
         Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
-    }
-
-    /// Returns the union of this AABB with another one.
-    #[inline]
-    fn union(&self, other: &Self) -> Self {
-        self.grow(other.min()).grow(other.max())
     }
 
     /// Add a vector to every point in the AABB, returning a new AABB.
@@ -253,6 +250,14 @@ impl<S: BaseNum> Contains<Line2<S>> for Aabb2<S> {
     #[inline]
     fn contains(&self, line: &Line2<S>) -> bool {
         self.contains(&line.origin) && self.contains(&line.dest)
+    }
+}
+
+impl<S: BaseNum> Union for Aabb2<S> {
+    type Output = Aabb2<S>;
+
+    fn union(&self, other: &Aabb2<S>) -> Aabb2<S> {
+        self.grow(other.min()).grow(other.max())
     }
 }
 
@@ -387,6 +392,14 @@ impl<S: BaseNum> Contains<Line3<S>> for Aabb3<S> {
     }
 }
 
+impl<S: BaseNum> Union for Aabb3<S> {
+    type Output = Aabb3<S>;
+
+    fn union(&self, other: &Aabb3<S>) -> Aabb3<S> {
+        self.grow(other.min()).grow(other.max())
+    }
+}
+
 impl<S: BaseNum> fmt::Debug for Aabb3<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?} - {:?}]", self.min, self.max)
@@ -406,6 +419,8 @@ impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
             let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
             tmin = tmin.max(tx1.min(tx2));
             tmax = tmax.min(tx1.max(tx2));
+        } else if ray.origin.x <= aabb.min.x || ray.origin.x >= aabb.max.x {
+            return None;
         }
 
         if ray.direction.y != S::zero() {
@@ -413,6 +428,8 @@ impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
             let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
             tmin = tmin.max(ty1.min(ty2));
             tmax = tmax.min(ty1.max(ty2));
+        } else if ray.origin.y <= aabb.min.y || ray.origin.y >= aabb.max.y {
+            return None;
         }
 
         if (tmin < S::zero() && tmax < S::zero()) || tmax < tmin {
@@ -421,6 +438,14 @@ impl<S: BaseFloat> Continuous<Aabb2<S>> for Ray2<S> {
             let t = if tmin >= S::zero() { tmin } else { tmax };
             Some(ray.origin + ray.direction * t)
         }
+    }
+}
+
+impl<S: BaseFloat> Continuous<Ray2<S>> for Aabb2<S> {
+    type Result = Point2<S>;
+
+    fn intersection(&self, ray: &Ray2<S>) -> Option<Point2<S>> {
+        ray.intersection(self)
     }
 }
 
@@ -436,6 +461,8 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
             let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
             tmin = tmin.max(tx1.min(tx2));
             tmax = tmax.min(tx1.max(tx2));
+        } else if ray.origin.x <= aabb.min.x || ray.origin.x >= aabb.max.x {
+            return false;
         }
 
         if ray.direction.y != S::zero() {
@@ -443,9 +470,17 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
             let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
             tmin = tmin.max(ty1.min(ty2));
             tmax = tmax.min(ty1.max(ty2));
+        } else if ray.origin.y <= aabb.min.y || ray.origin.y >= aabb.max.y {
+            return false;
         }
 
         tmax >= tmin && (tmin >= S::zero() || tmax >= S::zero())
+    }
+}
+
+impl<S: BaseFloat> Discrete<Ray2<S>> for Aabb2<S> {
+    fn intersects(&self, ray: &Ray2<S>) -> bool {
+        ray.intersects(&self)
     }
 }
 
@@ -480,6 +515,14 @@ impl<S: BaseFloat> Continuous<Aabb3<S>> for Ray3<S> {
     }
 }
 
+impl<S: BaseFloat> Continuous<Ray3<S>> for Aabb3<S> {
+    type Result = Point3<S>;
+
+    fn intersection(&self, ray: &Ray3<S>) -> Option<Point3<S>> {
+        ray.intersection(self)
+    }
+}
+
 impl<S: BaseFloat> Discrete<Aabb3<S>> for Ray3<S> {
     fn intersects(&self, aabb: &Aabb3<S>) -> bool {
         let ray = self;
@@ -501,6 +544,12 @@ impl<S: BaseFloat> Discrete<Aabb3<S>> for Ray3<S> {
         }
 
         tmax >= tmin && (tmin >= S::zero() || tmax >= S::zero())
+    }
+}
+
+impl<S: BaseFloat> Discrete<Ray3<S>> for Aabb3<S> {
+    fn intersects(&self, ray: &Ray3<S>) -> bool {
+        ray.intersects(self)
     }
 }
 
@@ -532,5 +581,17 @@ impl<S: BaseFloat> Bound<S> for Aabb3<S> {
             }
         }
         first
+    }
+}
+
+impl<S: BaseFloat> Union<Sphere<S>> for Aabb3<S> {
+    type Output = Aabb3<S>;
+
+    fn union(&self, sphere: &Sphere<S>) -> Aabb3<S> {
+        self.grow(Point3::new(
+            sphere.center.x - sphere.radius,
+            sphere.center.y - sphere.radius,
+            sphere.center.z - sphere.radius,
+        )).grow(sphere.center + Vector3::from_value(sphere.radius))
     }
 }

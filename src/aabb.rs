@@ -32,6 +32,7 @@ use {Ray2, Ray3, Plane, Sphere, Line2, Line3};
 use bound::{Bound, Relation};
 use intersect::{Continuous, Discrete, Contains};
 use ops::Union;
+use geometry::SurfaceArea;
 
 fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     match lhs.partial_cmp(&rhs) {
@@ -261,6 +262,12 @@ impl<S: BaseNum> Union for Aabb2<S> {
     }
 }
 
+impl<S: BaseNum> SurfaceArea<S> for Aabb2<S> {
+    fn surface_area(&self) -> S {
+        self.dim().x * self.dim().y
+    }
+}
+
 impl<S: BaseNum> fmt::Debug for Aabb2<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?} - {:?}]", self.min, self.max)
@@ -457,6 +464,7 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
         let mut tmax = S::infinity();
 
         if ray.direction.x != S::zero() {
+            println!("x");
             let tx1 = (aabb.min.x - ray.origin.x) / ray.direction.x;
             let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
             tmin = tmin.max(tx1.min(tx2));
@@ -466,6 +474,7 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
         }
 
         if ray.direction.y != S::zero() {
+            println!("y");
             let ty1 = (aabb.min.y - ray.origin.y) / ray.direction.y;
             let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
             tmin = tmin.max(ty1.min(ty2));
@@ -593,5 +602,13 @@ impl<S: BaseFloat> Union<Sphere<S>> for Aabb3<S> {
             sphere.center.y - sphere.radius,
             sphere.center.z - sphere.radius,
         )).grow(sphere.center + Vector3::from_value(sphere.radius))
+    }
+}
+
+impl<S: BaseNum> SurfaceArea<S> for Aabb3<S> {
+    fn surface_area(&self) -> S {
+        let dim = self.dim();
+        let two = S::one() + S::one();
+        two * ((dim.x * dim.y) + (dim.x * dim.z) + (dim.y * dim.z))
     }
 }

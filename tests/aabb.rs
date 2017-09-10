@@ -18,7 +18,7 @@ extern crate collision;
 
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
-use collision::{Continuous, Contains, Discrete, Union};
+use collision::{Continuous, Contains, Discrete, Union, SurfaceArea};
 use collision::{Line2, Line3, Sphere, Ray2, Ray3};
 use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
@@ -491,4 +491,17 @@ fn test_aabb3_union_sphere() {
         Aabb3::new(Point3::new(0., 0., 0.), Point3::new(12., 12., 12.)),
         base.union(&inside_out)
     );
+}
+
+#[test]
+fn test_aabb2_surface_area() {
+    let aabb = Aabb2::new(Point2::new(0., 0.), Point2::new(10., 20.));
+    assert_eq!(200., aabb.surface_area());
+}
+
+#[test]
+fn test_aabb3_surface_area() {
+    let aabb = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 20., 30.));
+    // 2 * (x*y + x*z + y*z)
+    assert_eq!(2200., aabb.surface_area());
 }

@@ -224,3 +224,14 @@ fn test_sphere_union_aabb3() {
         base.union(&inside_out)
     );
 }
+
+#[test]
+fn test_surface_area() {
+    let base = Sphere {
+        center: Point3::new(2., 1., -4.),
+        radius: 2.,
+    };
+
+    // 4 * pi * r^2
+    assert_eq!(4. * std::f64::consts::PI * 2. * 2., base.surface_area());
+}

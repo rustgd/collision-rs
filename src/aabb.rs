@@ -32,6 +32,7 @@ use {Ray2, Ray3, Plane, Sphere, Line2, Line3};
 use bound::{Bound, Relation};
 use intersect::{Continuous, Discrete, Contains};
 use ops::Union;
+use geometry::SurfaceArea;
 
 fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     match lhs.partial_cmp(&rhs) {
@@ -258,6 +259,12 @@ impl<S: BaseNum> Union for Aabb2<S> {
 
     fn union(&self, other: &Aabb2<S>) -> Aabb2<S> {
         self.grow(other.min()).grow(other.max())
+    }
+}
+
+impl<S: BaseNum> SurfaceArea<S> for Aabb2<S> {
+    fn surface_area(&self) -> S {
+        self.dim().x * self.dim().y
     }
 }
 
@@ -595,5 +602,13 @@ impl<S: BaseFloat> Union<Sphere<S>> for Aabb3<S> {
             sphere.center.y - sphere.radius,
             sphere.center.z - sphere.radius,
         )).grow(sphere.center + Vector3::from_value(sphere.radius))
+    }
+}
+
+impl<S: BaseNum> SurfaceArea<S> for Aabb3<S> {
+    fn surface_area(&self) -> S {
+        let dim = self.dim();
+        let two = S::one() + S::one();
+        two * ((dim.x * dim.y) + (dim.x * dim.z) + (dim.y * dim.z))
     }
 }

@@ -20,12 +20,14 @@ use cgmath::{InnerSpace, Point3, MetricSpace};
 
 use bound::*;
 use intersect::{Continuous, Discrete, Contains};
+use ops::Union;
+use geometry::SurfaceArea;
 use Plane;
 use Ray3;
 use Aabb3;
 use Line3;
 use Aabb;
-use Union;
+
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
@@ -172,5 +174,16 @@ impl<S: BaseFloat> Union<Aabb3<S>> for Sphere<S> {
             center: self.center + center_diff * (radius - self.radius) / center_diff_s,
             radius,
         }
+    }
+}
+
+impl<S: BaseFloat> SurfaceArea<S> for Sphere<S> {
+    fn surface_area(&self) -> S {
+        use std::f64::consts::PI;
+
+        let two = S::one() + S::one();
+        let four = two + two;
+        let pi = S::from(PI).unwrap();
+        four * pi * self.radius * self.radius
     }
 }

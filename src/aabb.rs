@@ -220,7 +220,8 @@ impl<S: BaseNum> Aabb for Aabb2<S> {
         T: Transform<Point2<S>>,
     {
         let corners = self.to_corners();
-        let base = Self::new(corners[0], corners[0]);
+        let transformed_first = transform.transform_point(corners[0]);
+        let base = Self::new(transformed_first, transformed_first);
         corners[1..].iter().fold(base, |u, &corner| {
             u.grow(transform.transform_point(corner))
         })
@@ -350,7 +351,8 @@ impl<S: BaseNum> Aabb for Aabb3<S> {
         T: Transform<Point3<S>>,
     {
         let corners = self.to_corners();
-        let base = Self::new(corners[0], corners[0]);
+        let transformed_first = transform.transform_point(corners[0]);
+        let base = Self::new(transformed_first, transformed_first);
         corners[1..].iter().fold(base, |u, &corner| {
             u.grow(transform.transform_point(corner))
         })

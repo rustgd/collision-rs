@@ -505,3 +505,31 @@ fn test_aabb3_surface_area() {
     // 2 * (x*y + x*z + y*z)
     assert_eq!(2200., aabb.surface_area());
 }
+
+#[test]
+fn test_aabb2_transform() {
+    let aabb = Aabb2::new(Point2::new(0., 0.), Point2::new(10., 20.));
+    let transform = cgmath::Decomposed::<Vector2<f32>, cgmath::Basis2<f32>> {
+        disp: Vector2::new(5., 3.),
+        scale: 1.,
+        rot: cgmath::Rotation2::from_angle(cgmath::Rad(0.)),
+    };
+    assert_eq!(
+        Aabb2::new(Point2::new(5., 3.), Point2::new(15., 23.)),
+        aabb.transform(&transform)
+    );
+}
+
+#[test]
+fn test_aabb3_transform() {
+    let aabb = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 20., 30.));
+    let transform = cgmath::Decomposed::<Vector3<f32>, cgmath::Basis3<f32>> {
+        disp: Vector3::new(5., 3., 1.),
+        scale: 1.,
+        rot: cgmath::Rotation3::from_angle_z(cgmath::Rad(0.)),
+    };
+    assert_eq!(
+        Aabb3::new(Point3::new(5., 3., 1.), Point3::new(15., 23., 31.)),
+        aabb.transform(&transform)
+    );
+}

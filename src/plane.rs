@@ -15,11 +15,11 @@
 
 use std::fmt;
 
-use cgmath::{ApproxEq, BaseFloat};
-use cgmath::Point3;
-use cgmath::{Vector3, Vector4};
-use cgmath::{EuclideanSpace, InnerSpace};
-use cgmath::Zero;
+use cgmath::prelude::*;
+use cgmath::{Vector3, Vector4, Point3, BaseFloat, ApproxEq};
+
+use prelude::*;
+use Ray3;
 
 
 /// A 3-dimensional plane formed from the equation: `A*x + B*y + C*z - D = 0`.
@@ -163,5 +163,77 @@ impl<S: BaseFloat> fmt::Debug for Plane<S> {
             self.n.z,
             self.d
         )
+    }
+}
+
+impl<S: BaseFloat> Continuous<Ray3<S>> for Plane<S> {
+    type Result = Point3<S>;
+    fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
+        let p = self;
+
+        let t = -(p.d + r.origin.dot(p.n)) / r.direction.dot(p.n);
+        if t < Zero::zero() {
+            None
+        } else {
+            Some(r.origin + r.direction * t)
+        }
+    }
+}
+
+impl<S: BaseFloat> Discrete<Ray3<S>> for Plane<S> {
+    fn intersects(&self, r: &Ray3<S>) -> bool {
+        let p = self;
+        let t = -(p.d + r.origin.dot(p.n)) / r.direction.dot(p.n);
+        return t >= Zero::zero();
+    }
+}
+
+/// See _Real-Time Collision Detection_, p. 210
+impl<S: BaseFloat> Continuous<Plane<S>> for Plane<S> {
+    type Result = Ray3<S>;
+    fn intersection(&self, p2: &Plane<S>) -> Option<Ray3<S>> {
+        let p1 = self;
+        let d = p1.n.cross(p2.n);
+        let denom = d.dot(d);
+        if ulps_eq!(denom, &S::zero()) {
+            None
+        } else {
+            let p = (p2.n * p1.d - p1.n * p2.d).cross(d) / denom;
+            Some(Ray3::new(Point3::from_vec(p), d))
+        }
+    }
+}
+
+impl<S: BaseFloat> Discrete<Plane<S>> for Plane<S> {
+    fn intersects(&self, p2: &Plane<S>) -> bool {
+        let p1 = self;
+        let d = p1.n.cross(p2.n);
+        let denom = d.dot(d);
+        return !ulps_eq!(denom, &S::zero());
+    }
+}
+
+/// See _Real-Time Collision Detection_, p. 212 - 214
+impl<S: BaseFloat> Continuous<(Plane<S>, Plane<S>)> for Plane<S> {
+    type Result = Point3<S>;
+    fn intersection(&self, planes: &(Plane<S>, Plane<S>)) -> Option<Point3<S>> {
+        let (p1, p2, p3) = (self, planes.0, planes.1);
+        let u = p2.n.cross(p3.n);
+        let denom = p1.n.dot(u);
+        if ulps_eq!(denom.abs(), &S::zero()) {
+            None
+        } else {
+            let p = (u * p1.d + p1.n.cross(p2.n * p3.d - p3.n * p2.d)) / denom;
+            Some(Point3::from_vec(p))
+        }
+    }
+}
+
+impl<S: BaseFloat> Discrete<(Plane<S>, Plane<S>)> for Plane<S> {
+    fn intersects(&self, planes: &(Plane<S>, Plane<S>)) -> bool {
+        let (p1, p2, p3) = (self, planes.0, planes.1);
+        let u = p2.n.cross(p3.n);
+        let denom = p1.n.dot(u);
+        return !ulps_eq!(denom.abs(), &S::zero());
     }
 }

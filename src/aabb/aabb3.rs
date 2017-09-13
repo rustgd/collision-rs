@@ -1,3 +1,6 @@
+//! Axis aligned bounding box for 2D.
+//!
+
 use std::fmt;
 
 use cgmath::{Point3, Vector3, BaseNum, BaseFloat};

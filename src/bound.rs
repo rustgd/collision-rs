@@ -35,7 +35,7 @@ pub enum Relation {
     Out,
 }
 
-/// Generic bound.
+/// Generic 3D bound.
 pub trait Bound<S: BaseFloat>: fmt::Debug {
     /// Classify the spatial relation with a plane.
     fn relate_plane(&self, Plane<S>) -> Relation;

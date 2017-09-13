@@ -40,8 +40,10 @@ pub trait Contains<RHS> {
 
 /// Shape surface area
 ///
-pub trait SurfaceArea<S: BaseNum> {
-    fn surface_area(&self) -> S;
+pub trait SurfaceArea {
+    type Scalar: BaseNum;
+
+    fn surface_area(&self) -> Self::Scalar;
 }
 
 /// Build the union of two shapes.

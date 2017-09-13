@@ -253,7 +253,9 @@ impl<S: BaseFloat> Bound<S> for Aabb3<S> {
     }
 }
 
-impl<S: BaseNum> SurfaceArea<S> for Aabb3<S> {
+impl<S: BaseNum> SurfaceArea for Aabb3<S> {
+    type Scalar = S;
+
     fn surface_area(&self) -> S {
         let dim = self.dim();
         let two = S::one() + S::one();

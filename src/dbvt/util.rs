@@ -145,7 +145,7 @@ where
 impl<T> TreeValue for ValueAabbWrapper<T>
 where
     T: ValueAabbWrapped,
-    <T::Bound as Aabb>::Diff: Clone + Debug,
+    <T::Bound as Aabb>::Diff: Clone + Debug + VectorSpace,
 {
     type Bound = T::Bound;
     type Vector = <T::Bound as Aabb>::Diff;

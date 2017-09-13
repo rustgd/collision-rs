@@ -13,13 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Generic rays
+
 use std::marker::PhantomData;
-use cgmath::{BaseFloat, BaseNum, InnerSpace};
-use cgmath::{EuclideanSpace, Point2, Point3};
-use cgmath::{VectorSpace, Vector2, Vector3};
 
-use intersect::{Continuous, Discrete};
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, BaseNum};
+use cgmath::{Point2, Point3};
+use cgmath::{Vector2, Vector3};
 
+use traits::{Continuous, Discrete};
 
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.

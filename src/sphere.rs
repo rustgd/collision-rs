@@ -15,19 +15,11 @@
 
 //! Bounding sphere
 
-use cgmath::{BaseFloat, EuclideanSpace};
-use cgmath::{InnerSpace, Point3, MetricSpace};
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3};
 
-use bound::*;
-use intersect::{Continuous, Discrete, Contains};
-use ops::Union;
-use geometry::SurfaceArea;
-use Plane;
-use Ray3;
-use Aabb3;
-use Line3;
-use Aabb;
-
+use prelude::*;
+use {Plane, Ray3, Aabb3, Line3};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]

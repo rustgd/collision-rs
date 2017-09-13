@@ -536,7 +536,7 @@ where
     ///
     /// Will in turn call [`update`](struct.DynamicBoundingVolumeTree.html#method.update), followed
     /// by [`do_refit`](struct.DynamicBoundingVolumeTree.html#method.do_refit).
-    /// 
+    ///
     pub fn tick(&mut self) {
         self.update();
         self.do_refit();

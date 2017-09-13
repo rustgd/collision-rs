@@ -1,4 +1,4 @@
-//! Utility functions for use with
+//! Utilities for use with
 //! [`DynamicBoundingVolumeTree`](struct.DynamicBoundingVolumeTree.html).
 //!
 
@@ -13,12 +13,79 @@ use prelude::*;
 use super::{DynamicBoundingVolumeTree, TreeValue};
 use super::visitor::ContinuousVisitor;
 
+/// Trait used to simplify integration with the tree. Instead of keeping track of the node index,
+/// fat factor and fat bounds, we provide a wrapper type, together with this trait.
 pub trait ValueAabbWrapped: Clone + Debug {
+    /// Bounding volume type
     type Bound: Aabb + Clone + Debug;
 
+    /// Borrow the bounding volume
     fn bound(&self) -> &Self::Bound;
 }
 
+/// Provides an easier to use wrapper type for use with the DBVT.
+///
+/// # Examples
+///
+/// ```
+/// # extern crate collision;
+/// # extern crate cgmath;
+///
+/// use cgmath::{Point2, Vector2};
+/// use cgmath::prelude::*;
+/// use collision::{Aabb2, Ray2};
+/// use collision::dbvt::{DynamicBoundingVolumeTree, ValueAabbWrapped,
+///                       ValueAabbWrapper, query_ray_closest};
+///
+/// #[derive(Debug, Clone)]
+/// struct Value {
+///     id: u32,
+///     bound: Aabb2<f32>,
+/// }
+///
+/// impl Value {
+///     fn new(id: u32, bound: Aabb2<f32>) -> Self {
+///         Self { id, bound }
+///     }
+/// }
+///
+/// impl ValueAabbWrapped for Value {
+///     type Bound = Aabb2<f32>;
+///
+///     fn bound(&self) -> &Self::Bound {
+///         &self.bound
+///     }
+/// }
+///
+/// fn main() {
+///     let mut tree = DynamicBoundingVolumeTree::<ValueAabbWrapper<Value>>::new();
+///     tree.insert(Value::new(12, aabb2(0., 0., 10., 10.)).into());
+///     tree.insert(Value::new(33, aabb2(15., 3., 3., 3.)).into());
+///     tree.insert(Value::new(13, aabb2(-145., 34., 2., 2.)).into());
+///     tree.insert(Value::new(66, aabb2(123., -10., 10., 10.)).into());
+///     tree.insert(Value::new(1, aabb2(22., 50., 16., 16.)).into());
+///     tree.insert(Value::new(76, aabb2(7., 3., 1., 1.)).into());
+///     tree.insert(Value::new(99, aabb2(19., -12., 3., 3.)).into());
+///     tree.do_refit();
+///
+///     let result = query_ray_closest(
+///         &tree,
+///         &Ray2::new(Point2::new(12., 12.), Vector2::new(0.5, -0.5).normalize()),
+///     );
+///     assert!(result.is_some());
+///     let (v, p) = result.unwrap();
+///     assert_eq!(33, v.id);
+///     assert_eq!(Point2::new(18., 5.9999995), p);
+/// }
+///
+/// fn aabb2(minx: f32, miny: f32, width: f32, height: f32) -> Aabb2<f32> {
+///     Aabb2::new(
+///         Point2::new(minx, miny),
+///         Point2::new(minx + width, miny + height),
+///     )
+/// }
+/// ```
+///
 #[derive(Clone, Debug)]
 pub struct ValueAabbWrapper<T>
 where
@@ -26,7 +93,12 @@ where
     <T::Bound as Aabb>::Diff: Clone + Debug,
 {
     index: usize,
+
+    /// Fat factor, defaults to zero, can be changed. After changing, it will be used the next time
+    /// the contained value's bounding volumes moves outside the current fat bound in the tree.
     pub fat_factor: <T::Bound as Aabb>::Diff,
+
+    /// The value itself
     pub value: T,
 }
 
@@ -180,10 +252,7 @@ mod tests {
 
         let result = query_ray_closest(
             &tree,
-            &Ray2::new(
-                Point2::new(12., 12.),
-                Vector2::new(0.5, -0.5).normalize(),
-            ),
+            &Ray2::new(Point2::new(12., 12.), Vector2::new(0.5, -0.5).normalize()),
         );
         assert!(result.is_some());
         let (v, p) = result.unwrap();

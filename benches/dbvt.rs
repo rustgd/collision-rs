@@ -15,7 +15,6 @@ use collision::{Ray2, Aabb2};
 
 #[derive(Debug, Clone)]
 struct Value {
-    index: usize,
     pub id: u32,
     pub aabb: Aabb2<f32>,
     fat_aabb: Aabb2<f32>,
@@ -24,7 +23,6 @@ struct Value {
 impl Value {
     pub fn new(id: u32, aabb: Aabb2<f32>) -> Self {
         Self {
-            index: 0,
             id,
             fat_aabb: aabb.add_margin(Vector2::new(0., 0.)),
             aabb,
@@ -33,7 +31,6 @@ impl Value {
 }
 
 impl TreeValue for Value {
-    type Vector = Vector2<f32>;
     type Bound = Aabb2<f32>;
 
     fn bound(&self) -> &Aabb2<f32> {
@@ -42,14 +39,6 @@ impl TreeValue for Value {
 
     fn fat_bound(&self) -> Aabb2<f32> {
         self.fat_aabb.clone()
-    }
-
-    fn set_index(&mut self, index: usize) {
-        self.index = index
-    }
-
-    fn index(&self) -> usize {
-        self.index
     }
 }
 

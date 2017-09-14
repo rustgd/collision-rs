@@ -10,17 +10,15 @@ use collision::{Aabb2, Ray2, Frustum, Projection, Relation, Aabb3};
 use rand::Rng;
 
 #[derive(Debug, Clone)]
-struct Value {
-    index: usize,
+struct Value2 {
     pub id: u32,
     pub aabb: Aabb2<f32>,
     fat_aabb: Aabb2<f32>,
 }
 
-impl Value {
+impl Value2 {
     pub fn new(id: u32, aabb: Aabb2<f32>) -> Self {
         Self {
-            index: 0,
             id,
             fat_aabb: aabb.add_margin(Vector2::new(0., 0.)),
             aabb,
@@ -28,7 +26,7 @@ impl Value {
     }
 }
 
-impl TreeValue for Value {
+impl TreeValue for Value2 {
     type Bound = Aabb2<f32>;
 
     fn bound(&self) -> &Aabb2<f32> {
@@ -38,19 +36,10 @@ impl TreeValue for Value {
     fn fat_bound(&self) -> Aabb2<f32> {
         self.fat_aabb.clone()
     }
-
-    fn set_index(&mut self, index: usize) {
-        self.index = index
-    }
-
-    fn index(&self) -> usize {
-        self.index
-    }
 }
 
 #[derive(Debug, Clone)]
 struct Value3 {
-    index: usize,
     pub id: u32,
     pub aabb: Aabb3<f32>,
     fat_aabb: Aabb3<f32>,
@@ -59,7 +48,6 @@ struct Value3 {
 impl Value3 {
     pub fn new(id: u32, aabb: Aabb3<f32>) -> Self {
         Self {
-            index: 0,
             id,
             fat_aabb: aabb.add_margin(Vector3::new(3., 3., 3.)),
             aabb,
@@ -77,40 +65,12 @@ impl TreeValue for Value3 {
     fn fat_bound(&self) -> Aabb3<f32> {
         self.fat_aabb.clone()
     }
-
-    fn set_index(&mut self, index: usize) {
-        self.index = index
-    }
-
-    fn index(&self) -> usize {
-        self.index
-    }
-}
-
-#[derive(Debug, Clone)]
-struct ValueWrapped {
-    id: u32,
-    bound: Aabb2<f32>,
-}
-
-impl ValueWrapped {
-    fn new(id: u32, bound: Aabb2<f32>) -> Self {
-        Self { id, bound }
-    }
-}
-
-impl ValueAabbWrapped for ValueWrapped {
-    type Bound = Aabb2<f32>;
-
-    fn bound(&self) -> &Self::Bound {
-        &self.bound
-    }
 }
 
 #[test]
 fn test_add_1() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
     assert_eq!(1, tree.values().len());
     assert_eq!(1, tree.size());
     assert_eq!(1, tree.height());
@@ -118,9 +78,9 @@ fn test_add_1() {
 
 #[test]
 fn test_add_2() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
     tree.do_refit();
     assert_eq!(2, tree.values().len());
     assert_eq!(3, tree.size());
@@ -129,10 +89,10 @@ fn test_add_2() {
 
 #[test]
 fn test_add_3() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
     tree.do_refit();
     assert_eq!(3, tree.values().len());
     assert_eq!(5, tree.size());
@@ -141,16 +101,16 @@ fn test_add_3() {
 
 #[test]
 fn test_add_5() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
     tree.do_refit();
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
     tree.do_refit();
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
     tree.do_refit();
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
     tree.do_refit();
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
     assert_eq!(5, tree.values().len());
     assert_eq!(9, tree.size());
@@ -159,11 +119,11 @@ fn test_add_5() {
 
 #[test]
 fn test_add_20() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
     let mut rng = rand::thread_rng();
     for i in 0..20 {
         let offset = rng.gen_range(-10., 10.);
-        tree.insert(Value::new(
+        tree.insert(Value2::new(
             i,
             aabb2(
                 offset + 0.1,
@@ -180,14 +140,14 @@ fn test_add_20() {
 
 #[test]
 fn test_remove_leaf_right_side() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
-    let node_index = tree.values()[4].index();
+    let node_index = tree.values()[4].0;
     tree.remove(node_index);
     tree.do_refit();
     assert_eq!(4, tree.values().len());
@@ -197,14 +157,14 @@ fn test_remove_leaf_right_side() {
 
 #[test]
 fn test_remove_leaf_left_side() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
-    let node_index = tree.values()[3].index();
+    let node_index = tree.values()[3].0;
     tree.remove(node_index);
     tree.do_refit();
     assert_eq!(4, tree.values().len());
@@ -214,16 +174,16 @@ fn test_remove_leaf_left_side() {
 
 #[test]
 fn test_remove_leaf_left_side_2() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
-    let node_index = tree.values()[3].index();
+    let node_index = tree.values()[3].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
     tree.do_refit();
     assert_eq!(3, tree.values().len());
@@ -233,18 +193,18 @@ fn test_remove_leaf_left_side_2() {
 
 #[test]
 fn test_remove_leaf_left_side_3() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
-    let node_index = tree.values()[3].index();
+    let node_index = tree.values()[3].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
-    let node_index = tree.values()[1].index();
+    let node_index = tree.values()[1].0;
     tree.remove(node_index);
     tree.do_refit();
     assert_eq!(2, tree.values().len());
@@ -254,18 +214,18 @@ fn test_remove_leaf_left_side_3() {
 
 #[test]
 fn test_remove_leaf_left_right() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
-    let node_index = tree.values()[3].index();
+    let node_index = tree.values()[3].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
     tree.do_refit();
     assert_eq!(2, tree.values().len());
@@ -275,20 +235,20 @@ fn test_remove_leaf_left_right() {
 
 #[test]
 fn test_remove_second_to_last() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
-    let node_index = tree.values()[3].index();
+    let node_index = tree.values()[3].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
     tree.do_refit();
     assert_eq!(1, tree.values().len());
@@ -298,22 +258,22 @@ fn test_remove_second_to_last() {
 
 #[test]
 fn test_remove_last() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-    tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
-    tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
-    tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 10., 10.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 23., 16.)));
+    tree.insert(Value2::new(12, aabb2(-12., -1., 0., 0.)));
+    tree.insert(Value2::new(13, aabb2(-200., -26., -185., -20.)));
+    tree.insert(Value2::new(14, aabb2(56., 58., 99., 96.)));
     tree.do_refit();
-    let node_index = tree.values()[3].index();
+    let node_index = tree.values()[3].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
-    let node_index = tree.values()[0].index();
+    let node_index = tree.values()[0].0;
     tree.remove(node_index);
     tree.do_refit();
     assert_eq!(0, tree.values().len());
@@ -323,14 +283,14 @@ fn test_remove_last() {
 
 #[test]
 fn test_ray_closest() {
-    let mut tree = DynamicBoundingVolumeTree::<ValueAabbWrapper<ValueWrapped>>::new();
-    tree.insert(ValueWrapped::new(12, aabb2(0., 0., 10., 10.)).into());
-    tree.insert(ValueWrapped::new(33, aabb2(15., 3., 3., 3.)).into());
-    tree.insert(ValueWrapped::new(13, aabb2(-145., 34., 2., 2.)).into());
-    tree.insert(ValueWrapped::new(66, aabb2(123., -10., 10., 10.)).into());
-    tree.insert(ValueWrapped::new(1, aabb2(22., 50., 16., 16.)).into());
-    tree.insert(ValueWrapped::new(76, aabb2(7., 3., 1., 1.)).into());
-    tree.insert(ValueWrapped::new(99, aabb2(19., -12., 3., 3.)).into());
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(12, aabb2(0., 0., 10., 10.)));
+    tree.insert(Value2::new(33, aabb2(15., 3., 3., 3.)));
+    tree.insert(Value2::new(13, aabb2(-145., 34., 2., 2.)));
+    tree.insert(Value2::new(66, aabb2(123., -10., 10., 10.)));
+    tree.insert(Value2::new(1, aabb2(22., 50., 16., 16.)));
+    tree.insert(Value2::new(76, aabb2(7., 3., 1., 1.)));
+    tree.insert(Value2::new(99, aabb2(19., -12., 3., 3.)));
     tree.do_refit();
 
     let result = query_ray_closest(
@@ -345,17 +305,17 @@ fn test_ray_closest() {
 
 #[test]
 fn test_ray_discrete() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 5., 15.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 2., 2.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 5., 15.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 2., 2.)));
     tree.do_refit();
 
     let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
-    let mut visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
+    let mut visitor = DiscreteVisitor::<Ray2<f32>, Value2>::new(&ray);
     assert_eq!(0, tree.query(&mut visitor).len());
 
     let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
-    let mut visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
+    let mut visitor = DiscreteVisitor::<Ray2<f32>, Value2>::new(&ray);
     let results = tree.query(&mut visitor);
     assert_eq!(1, results.len());
     assert_eq!(10, results[0].0.id);
@@ -363,17 +323,17 @@ fn test_ray_discrete() {
 
 #[test]
 fn test_ray_continuous() {
-    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-    tree.insert(Value::new(10, aabb2(5., 5., 5., 15.)));
-    tree.insert(Value::new(11, aabb2(21., 14., 2., 2.)));
+    let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
+    tree.insert(Value2::new(10, aabb2(5., 5., 5., 15.)));
+    tree.insert(Value2::new(11, aabb2(21., 14., 2., 2.)));
     tree.do_refit();
 
     let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
-    let mut visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
+    let mut visitor = ContinuousVisitor::<Ray2<f32>, Value2>::new(&ray);
     assert_eq!(0, tree.query(&mut visitor).len());
 
     let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
-    let mut visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
+    let mut visitor = ContinuousVisitor::<Ray2<f32>, Value2>::new(&ray);
     let results = tree.query(&mut visitor);
     assert_eq!(1, results.len());
     assert_eq!(10, results[0].0.id);

@@ -36,7 +36,6 @@
 //!
 //! #[derive(Debug, Clone)]
 //! struct Value {
-//!     index: usize,
 //!     pub id: u32,
 //!     pub aabb: Aabb2<f32>,
 //!     fat_aabb: Aabb2<f32>,
@@ -45,7 +44,6 @@
 //! impl Value {
 //!     pub fn new(id: u32, aabb: Aabb2<f32>) -> Self {
 //!         Self {
-//!             index: 0,
 //!             id,
 //!             fat_aabb : aabb.add_margin(Vector2::new(3., 3.)),
 //!             aabb,
@@ -54,7 +52,6 @@
 //! }
 //!
 //! impl TreeValue for Value {
-//!     type Vector = Vector2<f32>;
 //!     type Bound = Aabb2<f32>;
 //!
 //!     fn bound(&self) -> &Aabb2<f32> {
@@ -64,14 +61,6 @@
 //!     fn fat_bound(&self) -> Aabb2<f32> {
 //!         self.fat_aabb.clone()
 //!     }
-//!
-//!     fn set_index(&mut self, index: usize) {
-//!         self.index = index
-//!     }
-//!
-//!     fn index(&self) -> usize {
-//!         self.index
-//!    }
 //! }
 //!
 //! fn aabb2(minx: f32, miny: f32, maxx: f32, maxy: f32) -> Aabb2<f32> {
@@ -131,13 +120,6 @@ pub trait TreeValue: Clone + Debug {
     /// base bounding volume. It is recommended for moving shapes to have a larger fat bound, so
     /// tree rotations don't have to be performed every frame.
     fn fat_bound(&self) -> Self::Bound;
-
-    /// Used to feed the node index into the value. It is vitally important that this is kept.
-    fn set_index(&mut self, index: usize);
-
-    /// Return the node index of this value. This must return the value that was last given with
-    /// [`set_index`](trait.TreeValue.html#tymethod.set_index).
-    fn index(&self) -> usize;
 }
 
 /// Visitor trait used for [querying](struct.DynamicBoundingVolumeTree.html#method.query) the tree.
@@ -192,7 +174,6 @@ pub trait Visitor {
 ///
 /// #[derive(Debug, Clone)]
 /// struct Value {
-///     index: usize,
 ///     pub id: u32,
 ///     pub aabb: Aabb2<f32>,
 ///     fat_aabb: Aabb2<f32>,
@@ -201,7 +182,6 @@ pub trait Visitor {
 /// impl Value {
 ///     pub fn new(id: u32, aabb: Aabb2<f32>) -> Self {
 ///         Self {
-///             index: 0,
 ///             id,
 ///             fat_aabb : aabb.add_margin(Vector2::new(3., 3.)),
 ///             aabb,
@@ -219,14 +199,6 @@ pub trait Visitor {
 ///     fn fat_bound(&self) -> Aabb2<f32> {
 ///         self.fat_aabb.clone()
 ///     }
-///
-///     fn set_index(&mut self, index: usize) {
-///         self.index = index
-///     }
-///
-///     fn index(&self) -> usize {
-///         self.index
-///    }
 /// }
 ///
 /// fn aabb2(minx: f32, miny: f32, maxx: f32, maxy: f32) -> Aabb2<f32> {
@@ -252,9 +224,12 @@ pub trait Visitor {
 /// }
 /// ```
 ///
-pub struct DynamicBoundingVolumeTree<T> where T : TreeValue {
+pub struct DynamicBoundingVolumeTree<T>
+where
+    T: TreeValue,
+{
     nodes: Vec<Node<T::Bound>>,
-    values: Vec<T>,
+    values: Vec<(usize, T)>,
     free_list: Vec<usize>,
     updated_list: Vec<usize>,
     root_index: usize,
@@ -371,7 +346,7 @@ where
 
     /// Get a mutable list of all values in the tree.
     ///
-    /// Do NOT insert or remove values directly in this list, instead use
+    /// Do not insert or remove values directly in this list, instead use
     /// [`insert`](struct.DynamicBoundingVolumeTree.html#method.insert) and
     /// [`remove`](struct.DynamicBoundingVolumeTree.html#method.remove)
     /// on the tree. It is allowed to change the order of the values, but when doing so it is
@@ -380,12 +355,15 @@ where
     /// after changing the order, and before any other operation
     /// is performed on the tree. Otherwise the internal consistency of the tree will be broken.
     ///
+    /// Do not change the first value in the tuple, this is the node index of the value, and without
+    /// that the tree will not function.
+    ///
     /// ### Returns
     ///
     /// A mutable reference to the [`Vec`](https://doc.rust-lang.org/std/vec/struct.Vec.html)
     /// of values in the tree.
     ///
-    pub fn values(&mut self) -> &mut Vec<T> {
+    pub fn values(&mut self) -> &mut Vec<(usize, T)> {
         &mut self.values
     }
 
@@ -396,7 +374,7 @@ where
     ///
     pub fn reindex_values(&mut self) {
         for i in 0..self.values.len() {
-            match self.nodes[self.values[i].index()] {
+            match self.nodes[self.values[i].0] {
                 Node::Leaf(ref mut leaf) => leaf.value = i,
                 _ => (),
             };
@@ -454,8 +432,8 @@ where
                 Node::Leaf(ref leaf) => {
                     // if we encounter a leaf, do a real bound intersection test, and add to return
                     // values if there's an intersection
-                    match visitor.accept(&self.values[leaf.value].bound(), true) {
-                        Some(result) => values.push((&self.values[leaf.value], result)),
+                    match visitor.accept(&self.values[leaf.value].1.bound(), true) {
+                        Some(result) => values.push((&self.values[leaf.value].1, result)),
                         _ => (),
                     }
                 }
@@ -495,8 +473,7 @@ where
     pub fn update_node(&mut self, node_index: usize, new_value: T) {
         match self.nodes[node_index] {
             Node::Leaf(ref mut leaf) => {
-                self.values[leaf.value] = new_value;
-                self.values[leaf.value].set_index(node_index);
+                self.values[leaf.value].1 = new_value;
             }
             _ => (),
         };
@@ -530,8 +507,12 @@ where
         let nodes = self.updated_list
             .iter()
             .filter_map(|index| if let Node::Leaf(ref l) = self.nodes[*index] {
-                if !l.bound.contains(self.values[l.value].bound()) {
-                    Some((index.clone(), l.parent, self.values[l.value].fat_bound()))
+                if !l.bound.contains(self.values[l.value].1.bound()) {
+                    Some((
+                        index.clone(),
+                        l.parent,
+                        self.values[l.value].1.fat_bound(),
+                    ))
                 } else {
                     None
                 }
@@ -587,7 +568,7 @@ where
     pub fn insert(&mut self, value: T) -> usize {
         let fat_bound = value.fat_bound();
         let value_index = self.values.len();
-        self.values.push(value);
+        self.values.push((0, value));
 
         // Create a new leaf node for the given value
         let mut new_leaf = Leaf {
@@ -601,7 +582,7 @@ where
         if self.root_index == 0 {
             self.root_index = self.nodes.len();
             self.nodes.push(Node::Leaf(new_leaf));
-            self.values[value_index].set_index(self.root_index);
+            self.values[value_index].0 = self.root_index;
             self.root_index
         } else {
             // Start searching from the root node
@@ -611,7 +592,7 @@ where
             // into the node list
             let (new_branch_index, new_leaf_index) = self.next_free();
             // We need to tell the value what it's node index is
-            self.values[value_index].set_index(new_leaf_index);
+            self.values[value_index].0 = new_leaf_index;
             // The new leaf will always be a child of the new branch node.
             new_leaf.parent = new_branch_index;
 
@@ -729,11 +710,11 @@ where
             return None;
         };
         // remove from values list and update node list with new value indices
-        let value = self.values.swap_remove(value_index);
+        let (_, value) = self.values.swap_remove(value_index);
         // we only need to update the node for the value that we swapped into the old values place
         if value_index < self.values.len() {
             // should only fail if we just removed the last value
-            match self.nodes[self.values[value_index].index()] {
+            match self.nodes[self.values[value_index].0] {
                 Node::Leaf(ref mut leaf) => leaf.value = value_index,
                 _ => (),
             }

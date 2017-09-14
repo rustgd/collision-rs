@@ -1,0 +1,173 @@
+#![feature(test)]
+
+extern crate rand;
+extern crate cgmath;
+extern crate collision;
+extern crate test;
+
+use test::Bencher;
+use rand::Rng;
+use cgmath::{Point2, Vector2};
+use cgmath::prelude::*;
+use collision::dbvt::*;
+use collision::prelude::*;
+use collision::{Ray2, Aabb2};
+
+#[derive(Debug, Clone)]
+struct Value {
+    index: usize,
+    pub id: u32,
+    pub aabb: Aabb2<f32>,
+    fat_aabb: Aabb2<f32>,
+}
+
+impl Value {
+    pub fn new(id: u32, aabb: Aabb2<f32>) -> Self {
+        Self {
+            index: 0,
+            id,
+            fat_aabb: aabb.add_margin(Vector2::new(0., 0.)),
+            aabb,
+        }
+    }
+}
+
+impl TreeValue for Value {
+    type Vector = Vector2<f32>;
+    type Bound = Aabb2<f32>;
+
+    fn bound(&self) -> &Aabb2<f32> {
+        &self.aabb
+    }
+
+    fn fat_bound(&self) -> Aabb2<f32> {
+        self.fat_aabb.clone()
+    }
+
+    fn set_index(&mut self, index: usize) {
+        self.index = index
+    }
+
+    fn index(&self) -> usize {
+        self.index
+    }
+}
+
+#[bench]
+fn benchmark_insert(b: &mut Bencher) {
+    let mut rng = rand::thread_rng();
+    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+    let mut i = 0;
+    b.iter(|| {
+        let offset = rng.gen_range(0., 100.);
+        tree.insert(Value::new(
+            i,
+            aabb2(offset + 2., offset + 2., offset + 4., offset + 4.),
+        ));
+        i += 1;
+    });
+}
+
+#[bench]
+fn benchmark_do_refit(b: &mut Bencher) {
+    let mut rng = rand::thread_rng();
+    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+    let mut i = 0;
+    b.iter(|| {
+        let offset = rng.gen_range(0., 100.);
+        tree.insert(Value::new(
+            i,
+            aabb2(offset + 2., offset + 2., offset + 4., offset + 4.),
+        ));
+        tree.do_refit();
+        i += 1;
+    });
+}
+
+#[bench]
+fn benchmark_query(b: &mut Bencher) {
+    let mut rng = rand::thread_rng();
+    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+    for i in 0..100000 {
+        let neg_y = if rng.gen::<bool>() { -1. } else { 1. };
+        let neg_x = if rng.gen::<bool>() { -1. } else { 1. };
+        let offset_x = neg_x * rng.gen_range(9000., 10000.);
+        let offset_y = neg_y * rng.gen_range(9000., 10000.);
+        tree.insert(Value::new(
+            i,
+            aabb2(
+                offset_x + 2.,
+                offset_y + 2.,
+                offset_x + 4.,
+                offset_y + 4.,
+            ),
+        ));
+        tree.tick();
+    }
+
+    let rays: Vec<Ray2<f32>> = (0..1000)
+        .map(|_| {
+            let p = Point2::new(
+                rng.gen_range(-10000., 10000.),
+                rng.gen_range(-10000., 10000.),
+            );
+            let d = Vector2::new(rng.gen_range(-1., 1.), rng.gen_range(-1., 1.)).normalize();
+            Ray2::new(p, d)
+        })
+        .collect();
+
+    let mut visitors: Vec<DiscreteVisitor<Ray2<f32>, Value>> = rays.iter()
+        .map(|ray| DiscreteVisitor::<Ray2<f32>, Value>::new(ray))
+        .collect();
+
+    let mut i = 0;
+
+    b.iter(|| {
+        tree.query(&mut visitors[i % 1000]).len();
+        i += 1;
+    });
+}
+
+#[bench]
+fn benchmark_ray_closest_query(b: &mut Bencher) {
+    let mut rng = rand::thread_rng();
+    let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+    for i in 0..100000 {
+        let neg_y = if rng.gen::<bool>() { -1. } else { 1. };
+        let neg_x = if rng.gen::<bool>() { -1. } else { 1. };
+        let offset_x = neg_x * rng.gen_range(9000., 10000.);
+        let offset_y = neg_y * rng.gen_range(9000., 10000.);
+        tree.insert(Value::new(
+            i,
+            aabb2(
+                offset_x + 2.,
+                offset_y + 2.,
+                offset_x + 4.,
+                offset_y + 4.,
+            ),
+        ));
+        tree.tick();
+    }
+
+    let rays: Vec<Ray2<f32>> = (0..1000)
+        .map(|_| {
+            let p = Point2::new(
+                rng.gen_range(-10000., 10000.),
+                rng.gen_range(-10000., 10000.),
+            );
+            let d = Vector2::new(rng.gen_range(-1., 1.), rng.gen_range(-1., 1.)).normalize();
+            Ray2::new(p, d)
+        })
+        .collect();
+
+    let mut i = 0;
+
+    b.iter(|| {
+        query_ray_closest(&tree, rays[i % 1000].clone());
+        i += 1;
+    });
+}
+
+fn aabb2(minx: f32, miny: f32, maxx: f32, maxy: f32) -> Aabb2<f32> {
+    Aabb2::new(Point2::new(minx, miny), Point2::new(maxx, maxy))
+}

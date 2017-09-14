@@ -70,7 +70,7 @@ pub trait ValueAabbWrapped: Clone + Debug {
 ///
 ///     let result = query_ray_closest(
 ///         &tree,
-///         &Ray2::new(Point2::new(12., 12.), Vector2::new(0.5, -0.5).normalize()),
+///         Ray2::new(Point2::new(12., 12.), Vector2::new(0.5, -0.5).normalize()),
 ///     );
 ///     assert!(result.is_some());
 ///     let (v, p) = result.unwrap();
@@ -148,7 +148,6 @@ where
     <T::Bound as Aabb>::Diff: Clone + Debug + VectorSpace,
 {
     type Bound = T::Bound;
-    type Vector = <T::Bound as Aabb>::Diff;
 
     fn bound(&self) -> &Self::Bound {
         self.value.bound()
@@ -269,63 +268,4 @@ where
         }
     }
     saved
-}
-
-#[cfg(test)]
-mod tests {
-
-    use cgmath::{Point2, Vector2};
-
-    use super::*;
-    use super::super::*;
-    use {Aabb2, Ray2};
-
-    #[derive(Debug, Clone)]
-    struct Value {
-        id: u32,
-        bound: Aabb2<f32>,
-    }
-
-    impl Value {
-        fn new(id: u32, bound: Aabb2<f32>) -> Self {
-            Self { id, bound }
-        }
-    }
-
-    impl ValueAabbWrapped for Value {
-        type Bound = Aabb2<f32>;
-
-        fn bound(&self) -> &Self::Bound {
-            &self.bound
-        }
-    }
-
-    #[test]
-    fn test() {
-        let mut tree = DynamicBoundingVolumeTree::<ValueAabbWrapper<Value>>::new();
-        tree.insert(Value::new(12, aabb2(0., 0., 10., 10.)).into());
-        tree.insert(Value::new(33, aabb2(15., 3., 3., 3.)).into());
-        tree.insert(Value::new(13, aabb2(-145., 34., 2., 2.)).into());
-        tree.insert(Value::new(66, aabb2(123., -10., 10., 10.)).into());
-        tree.insert(Value::new(1, aabb2(22., 50., 16., 16.)).into());
-        tree.insert(Value::new(76, aabb2(7., 3., 1., 1.)).into());
-        tree.insert(Value::new(99, aabb2(19., -12., 3., 3.)).into());
-        tree.do_refit();
-
-        let result = query_ray_closest(
-            &tree,
-            Ray2::new(Point2::new(12., 12.), Vector2::new(0.5, -0.5).normalize()),
-        );
-        assert!(result.is_some());
-        let (v, p) = result.unwrap();
-        assert_eq!(33, v.id);
-        assert_eq!(Point2::new(18., 5.9999995), p);
-    }
-
-    fn aabb2(minx: f32, miny: f32, width: f32, height: f32) -> Aabb2<f32> {
-        Aabb2::new(
-            Point2::new(minx, miny),
-            Point2::new(minx + width, miny + height),
-        )
-    }
 }

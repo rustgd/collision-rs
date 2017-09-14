@@ -137,3 +137,164 @@ where
         if r == Relation::Out { None } else { Some(r) }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use cgmath::{Point2, Vector2, InnerSpace, PerspectiveFov, Deg, Point3, Vector3};
+
+    use {Aabb, Aabb2, Ray2, Frustum, Projection, Aabb3, Relation};
+    use super::*;
+    use super::super::*;
+
+    #[derive(Debug, Clone)]
+    struct Value {
+        index: usize,
+        pub id: u32,
+        pub aabb: Aabb2<f32>,
+        fat_aabb: Aabb2<f32>,
+    }
+
+    impl Value {
+        pub fn new(id: u32, aabb: Aabb2<f32>) -> Self {
+            Self {
+                index: 0,
+                id,
+                fat_aabb: aabb.add_margin(Vector2::new(3., 3.)),
+                aabb,
+            }
+        }
+    }
+
+    impl TreeValue for Value {
+        type Vector = Vector2<f32>;
+        type Bound = Aabb2<f32>;
+
+        fn bound(&self) -> &Aabb2<f32> {
+            &self.aabb
+        }
+
+        fn fat_bound(&self) -> Aabb2<f32> {
+            self.fat_aabb.clone()
+        }
+
+        fn set_index(&mut self, index: usize) {
+            self.index = index
+        }
+
+        fn index(&self) -> usize {
+            self.index
+        }
+    }
+
+    #[derive(Debug, Clone)]
+    struct Value3 {
+        index: usize,
+        pub id: u32,
+        pub aabb: Aabb3<f32>,
+        fat_aabb: Aabb3<f32>,
+    }
+
+    impl Value3 {
+        pub fn new(id: u32, aabb: Aabb3<f32>) -> Self {
+            Self {
+                index: 0,
+                id,
+                fat_aabb: aabb.add_margin(Vector3::new(3., 3., 3.)),
+                aabb,
+            }
+        }
+    }
+
+    impl TreeValue for Value3 {
+        type Vector = Vector3<f32>;
+        type Bound = Aabb3<f32>;
+
+        fn bound(&self) -> &Aabb3<f32> {
+            &self.aabb
+        }
+
+        fn fat_bound(&self) -> Aabb3<f32> {
+            self.fat_aabb.clone()
+        }
+
+        fn set_index(&mut self, index: usize) {
+            self.index = index
+        }
+
+        fn index(&self) -> usize {
+            self.index
+        }
+    }
+
+    #[test]
+    fn test_ray_discrete() {
+        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+        tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
+        tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
+        tree.do_refit();
+
+        let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
+        let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
+        assert_eq!(0, tree.query(&visitor).len());
+
+        let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
+        let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
+        let results = tree.query(&visitor);
+        assert_eq!(1, results.len());
+        assert_eq!(10, results[0].0.id);
+    }
+
+    #[test]
+    fn test_ray_continuous() {
+        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+        tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
+        tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
+        tree.do_refit();
+
+        let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
+        let visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
+        assert_eq!(0, tree.query(&visitor).len());
+
+        let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
+        let visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
+        let results = tree.query(&visitor);
+        assert_eq!(1, results.len());
+        assert_eq!(10, results[0].0.id);
+        assert_eq!(Point2::new(6., 5.), results[0].1);
+    }
+
+    #[test]
+    fn test_frustum() {
+        let mut tree = DynamicBoundingVolumeTree::<Value3>::new();
+        tree.insert(Value3::new(10, aabb3(0.2, 0.2, 0.2, 10., 10., 10.)));
+        tree.insert(Value3::new(11, aabb3(0.2, 0.2, -0.2, 10., 10., -10.)));
+        tree.do_refit();
+
+        let frustum = frustum();
+        let visitor = FrustumVisitor::<f32, Value3>::new(&frustum);
+        let result = tree.query(&visitor);
+        assert_eq!(1, result.len());
+        let (v, r) = result[0];
+        assert_eq!(Relation::Cross, r);
+        assert_eq!(11, v.id);
+    }
+
+    fn aabb2(minx: f32, miny: f32, maxx: f32, maxy: f32) -> Aabb2<f32> {
+        Aabb2::new(Point2::new(minx, miny), Point2::new(maxx, maxy))
+    }
+
+    fn aabb3(minx: f32, miny: f32, minz: f32, maxx: f32, maxy: f32, maxz: f32) -> Aabb3<f32> {
+        Aabb3::new(Point3::new(minx, miny, minz), Point3::new(maxx, maxy, maxz))
+    }
+
+    // Default perspective projection is looking down the negative z axis
+    fn frustum() -> Frustum<f32> {
+        let projection = PerspectiveFov {
+            fovy : Deg(60.).into(),
+            aspect : 16. / 9.,
+            near : 0.1,
+            far : 4.0,
+        };
+        projection.to_frustum()
+    }
+}

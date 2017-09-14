@@ -1248,11 +1248,10 @@ fn get_bound<B>(node: &Node<B>) -> &B {
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Point2, Vector2, InnerSpace};
+    use cgmath::{Point2, Vector2};
 
-    use {Aabb, Aabb2, Ray2};
+    use {Aabb, Aabb2};
     use super::{DynamicBoundingVolumeTree, TreeValue};
-    use super::visitor::{DiscreteVisitor, ContinuousVisitor};
 
     #[derive(Debug, Clone)]
     struct Value {
@@ -1481,43 +1480,6 @@ mod tests {
         assert_eq!(0, tree.values().len());
         assert_eq!(0, tree.size());
         assert_eq!(0, tree.height());
-    }
-
-    #[test]
-    fn test_ray_discrete() {
-        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-        tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-        tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-        tree.do_refit();
-
-        let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
-        let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
-        assert_eq!(0, tree.query(&visitor).len());
-
-        let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
-        let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
-        let results = tree.query(&visitor);
-        assert_eq!(1, results.len());
-        assert_eq!(10, results[0].0.id);
-    }
-
-    #[test]
-    fn test_ray_continuous() {
-        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-        tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
-        tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
-        tree.do_refit();
-
-        let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
-        let visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
-        assert_eq!(0, tree.query(&visitor).len());
-
-        let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
-        let visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
-        let results = tree.query(&visitor);
-        assert_eq!(1, results.len());
-        assert_eq!(10, results[0].0.id);
-        assert_eq!(Point2::new(6., 5.), results[0].1);
     }
 
     fn aabb2(minx: f32, miny: f32, maxx: f32, maxy: f32) -> Aabb2<f32> {

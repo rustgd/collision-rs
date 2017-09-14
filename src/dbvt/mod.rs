@@ -103,6 +103,7 @@ pub use self::util::*;
 
 use std::cmp::max;
 use std::fmt::Debug;
+use std::fmt;
 
 use cgmath::prelude::*;
 use num::NumCast;
@@ -114,8 +115,8 @@ use prelude::*;
 mod visitor;
 mod util;
 
-const SURFACE_AREA_IMPROVEMENT_FOR_ROTATION: f32 = 0.25;
-const PERFORM_ROTATION_PERCENTAGE: u32 = 2;
+const SURFACE_AREA_IMPROVEMENT_FOR_ROTATION: f32 = 0.3;
+const PERFORM_ROTATION_PERCENTAGE: u32 = 10;
 
 /// Trait that needs to be implemented for any value that is to be used in the
 /// [`DynamicBoundingVolumeTree`](struct.DynamicBoundingVolumeTree.html).
@@ -152,7 +153,7 @@ pub trait Visitor {
     type Result;
 
     /// Acceptance test function
-    fn accept(&self, bound: &Self::Bound) -> Option<Self::Result>;
+    fn accept(&mut self, bound: &Self::Bound, is_leaf: bool) -> Option<Self::Result>;
 }
 
 /// A dynamic bounding volume tree, index based (not pointer based).
@@ -256,7 +257,6 @@ pub trait Visitor {
 /// }
 /// ```
 ///
-#[derive(Debug)]
 pub struct DynamicBoundingVolumeTree<T: TreeValue> {
     nodes: Vec<Node<T::Bound>>,
     values: Vec<T>,
@@ -264,6 +264,31 @@ pub struct DynamicBoundingVolumeTree<T: TreeValue> {
     updated_list: Vec<usize>,
     root_index: usize,
     refit_nodes: Vec<(u32, usize)>,
+}
+
+impl<T: TreeValue> Debug for DynamicBoundingVolumeTree<T>
+where
+    T::Bound: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "graph tree {{")?;
+        for n_index in 1..self.nodes.len() {
+            match self.nodes[n_index] {
+                Node::Branch(ref b) => {
+                    write!(f, "  n_{} [label=\"{:?}\"];", n_index, b.bound)?;
+                    write!(f, "  n_{} -- n_{};", n_index, b.left)?;
+                    write!(f, "  n_{} -- n_{};", n_index, b.right)?;
+                }
+
+                Node::Leaf(ref l) => {
+                    write!(f, "  n_{} [label=\"{:?}\"];", n_index, l.bound)?;
+                }
+
+                Node::Nil => (),
+            }
+        }
+        write!(f, "}}")
+    }
 }
 
 /// Branch node
@@ -414,7 +439,7 @@ where
     /// Will return a list of tuples of values accepted and the result returned by the visitor for
     /// the acceptance test.
     ///
-    pub fn query<V>(&self, visitor: &V) -> Vec<(&T, V::Result)>
+    pub fn query<V>(&self, visitor: &mut V) -> Vec<(&T, V::Result)>
     where
         V: Visitor<Bound = T::Bound>,
     {
@@ -433,7 +458,7 @@ where
                 Node::Leaf(ref leaf) => {
                     // if we encounter a leaf, do a real bound intersection test, and add to return
                     // values if there's an intersection
-                    match visitor.accept(&self.values[leaf.value].bound()) {
+                    match visitor.accept(&self.values[leaf.value].bound(), true) {
                         Some(result) => values.push((&self.values[leaf.value], result)),
                         _ => (),
                     }
@@ -442,7 +467,7 @@ where
                 // if we encounter a branch, do intersection test, and push the children if the
                 // branch intersected
                 Node::Branch(ref branch) => {
-                    match visitor.accept(&branch.bound) {
+                    match visitor.accept(&branch.bound, false) {
                         Some(_) => {
                             stack[stack_pointer] = branch.left;
                             stack[stack_pointer + 1] = branch.right;
@@ -1252,7 +1277,7 @@ mod tests {
     use test::Bencher;
 
     use {Aabb, Aabb2, Ray2};
-    use super::{DynamicBoundingVolumeTree, TreeValue};
+    use super::{DynamicBoundingVolumeTree, TreeValue, query_ray_closest};
 
     #[derive(Debug, Clone)]
     struct Value {
@@ -1267,7 +1292,7 @@ mod tests {
             Self {
                 index: 0,
                 id,
-                fat_aabb: aabb.add_margin(Vector2::new(3., 3.)),
+                fat_aabb: aabb.add_margin(Vector2::new(0., 0.)),
                 aabb,
             }
         }
@@ -1330,14 +1355,41 @@ mod tests {
     fn test_add_5() {
         let mut tree = DynamicBoundingVolumeTree::<Value>::new();
         tree.insert(Value::new(10, aabb2(5., 5., 10., 10.)));
+        tree.do_refit();
         tree.insert(Value::new(11, aabb2(21., 14., 23., 16.)));
+        tree.do_refit();
         tree.insert(Value::new(12, aabb2(-12., -1., 0., 0.)));
+        tree.do_refit();
         tree.insert(Value::new(13, aabb2(-200., -26., -185., -20.)));
+        tree.do_refit();
         tree.insert(Value::new(14, aabb2(56., 58., 99., 96.)));
         tree.do_refit();
         assert_eq!(5, tree.values().len());
         assert_eq!(9, tree.size());
         assert_eq!(4, tree.height());
+    }
+
+    #[test]
+    fn test_add_20() {
+        use rand;
+        use rand::Rng;
+        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+        let mut rng = rand::thread_rng();
+        for i in 0..20 {
+            let offset = rng.gen_range(-10., 10.);
+            tree.insert(Value::new(
+                i,
+                aabb2(
+                    offset + 0.1,
+                    offset + 0.1,
+                    offset + 0.3,
+                    offset + 0.3,
+                ),
+            ));
+            tree.do_refit();
+        }
+        assert_eq!(20, tree.values().len());
+        assert_eq!(39, tree.size());
     }
 
     #[test]
@@ -1492,8 +1544,11 @@ mod tests {
         let mut i = 0;
         b.iter(|| {
             let offset = rng.gen_range(0., 100.);
-            tree.insert(Value::new(i, aabb2(offset + 2., offset + 2., offset + 4., offset + 4.)));
-            i+=1;
+            tree.insert(Value::new(
+                i,
+                aabb2(offset + 2., offset + 2., offset + 4., offset + 4.),
+            ));
+            i += 1;
         });
     }
 
@@ -1506,7 +1561,10 @@ mod tests {
         let mut i = 0;
         b.iter(|| {
             let offset = rng.gen_range(0., 100.);
-            tree.insert(Value::new(i, aabb2(offset + 2., offset + 2., offset + 4., offset + 4.)));
+            tree.insert(Value::new(
+                i,
+                aabb2(offset + 2., offset + 2., offset + 4., offset + 4.),
+            ));
             tree.do_refit();
             i += 1;
         });
@@ -1520,16 +1578,86 @@ mod tests {
 
         let mut rng = rand::thread_rng();
         let mut tree = DynamicBoundingVolumeTree::<Value>::new();
-        for i in 0..1000 {
-            let offset = rng.gen_range(0., 100.);
-            tree.insert(Value::new(i, aabb2(offset + 2., offset + 2., offset + 4., offset + 4.)));
+        for i in 0..100000 {
+            let neg_y = if rng.gen::<bool>() { -1. } else { 1. };
+            let neg_x = if rng.gen::<bool>() { -1. } else { 1. };
+            let offset_x = neg_x * rng.gen_range(9000., 10000.);
+            let offset_y = neg_y * rng.gen_range(9000., 10000.);
+            tree.insert(Value::new(
+                i,
+                aabb2(
+                    offset_x + 2.,
+                    offset_y + 2.,
+                    offset_x + 4.,
+                    offset_y + 4.,
+                ),
+            ));
+            tree.tick();
         }
-        tree.do_refit();
+
+        let rays: Vec<Ray2<f32>> = (0..1000)
+            .map(|_| {
+                let p = Point2::new(
+                    rng.gen_range(-10000., 10000.),
+                    rng.gen_range(-10000., 10000.),
+                );
+                let d = Vector2::new(rng.gen_range(-1., 1.), rng.gen_range(-1., 1.)).normalize();
+                Ray2::new(p, d)
+            })
+            .collect();
+
+        let mut visitors: Vec<DiscreteVisitor<Ray2<f32>, Value>> = rays.iter()
+            .map(|ray| DiscreteVisitor::<Ray2<f32>, Value>::new(ray))
+            .collect();
+
+        let mut i = 0;
+
         b.iter(|| {
-            let r = rng.gen_range(0., 1.);
-            let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(r, r).normalize());
-            let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
-            tree.query(&visitor);
+            tree.query(&mut visitors[i % 1000]).len();
+            i += 1;
+        });
+    }
+
+    #[bench]
+    fn benchmark_ray_closest_query(b: &mut Bencher) {
+        use rand;
+        use rand::Rng;
+
+        let mut rng = rand::thread_rng();
+        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+        for i in 0..100000 {
+            let neg_y = if rng.gen::<bool>() { -1. } else { 1. };
+            let neg_x = if rng.gen::<bool>() { -1. } else { 1. };
+            let offset_x = neg_x * rng.gen_range(9000., 10000.);
+            let offset_y = neg_y * rng.gen_range(9000., 10000.);
+            tree.insert(Value::new(
+                i,
+                aabb2(
+                    offset_x + 2.,
+                    offset_y + 2.,
+                    offset_x + 4.,
+                    offset_y + 4.,
+                ),
+            ));
+            tree.tick();
+        }
+
+        let rays: Vec<Ray2<f32>> = (0..1000)
+            .map(|_| {
+                let p = Point2::new(
+                    rng.gen_range(-10000., 10000.),
+                    rng.gen_range(-10000., 10000.),
+                );
+                let d = Vector2::new(rng.gen_range(-1., 1.), rng.gen_range(-1., 1.)).normalize();
+                Ray2::new(p, d)
+            })
+            .collect();
+
+        let mut i = 0;
+
+        b.iter(|| {
+            query_ray_closest(&tree, rays[i % 1000].clone());
+            i += 1;
         });
     }
 

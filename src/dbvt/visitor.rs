@@ -45,7 +45,7 @@ where
     type Bound = T::Bound;
     type Result = <T::Bound as Continuous<B>>::Result;
 
-    fn accept(&self, bound: &Self::Bound) -> Option<Self::Result> {
+    fn accept(&mut self, bound: &Self::Bound, _: bool) -> Option<Self::Result> {
         bound.intersection(self.bound)
     }
 }
@@ -84,7 +84,7 @@ where
     type Bound = T::Bound;
     type Result = ();
 
-    fn accept(&self, bound: &Self::Bound) -> Option<()> {
+    fn accept(&mut self, bound: &Self::Bound, _: bool) -> Option<()> {
         if bound.intersects(self.bound) {
             Some(())
         } else {
@@ -132,7 +132,7 @@ where
     type Bound = T::Bound;
     type Result = Relation;
 
-    fn accept(&self, bound: &Self::Bound) -> Option<Relation> {
+    fn accept(&mut self, bound: &Self::Bound, _: bool) -> Option<Relation> {
         let r = self.frustum.contains(bound);
         if r == Relation::Out { None } else { Some(r) }
     }
@@ -234,12 +234,12 @@ mod tests {
         tree.do_refit();
 
         let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
-        let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
-        assert_eq!(0, tree.query(&visitor).len());
+        let mut visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
+        assert_eq!(0, tree.query(&mut visitor).len());
 
         let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
-        let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
-        let results = tree.query(&visitor);
+        let mut visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
+        let results = tree.query(&mut visitor);
         assert_eq!(1, results.len());
         assert_eq!(10, results[0].0.id);
     }
@@ -252,12 +252,12 @@ mod tests {
         tree.do_refit();
 
         let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(-1., -1.).normalize());
-        let visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
-        assert_eq!(0, tree.query(&visitor).len());
+        let mut visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
+        assert_eq!(0, tree.query(&mut visitor).len());
 
         let ray = Ray2::new(Point2::new(6., 0.), Vector2::new(0., 1.).normalize());
-        let visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
-        let results = tree.query(&visitor);
+        let mut visitor = ContinuousVisitor::<Ray2<f32>, Value>::new(&ray);
+        let results = tree.query(&mut visitor);
         assert_eq!(1, results.len());
         assert_eq!(10, results[0].0.id);
         assert_eq!(Point2::new(6., 5.), results[0].1);
@@ -271,8 +271,8 @@ mod tests {
         tree.do_refit();
 
         let frustum = frustum();
-        let visitor = FrustumVisitor::<f32, Value3>::new(&frustum);
-        let result = tree.query(&visitor);
+        let mut visitor = FrustumVisitor::<f32, Value3>::new(&frustum);
+        let result = tree.query(&mut visitor);
         assert_eq!(1, result.len());
         let (v, r) = result[0];
         assert_eq!(Relation::Cross, r);

@@ -1248,9 +1248,10 @@ fn get_bound<B>(node: &Node<B>) -> &B {
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Point2, Vector2};
+    use cgmath::{Point2, Vector2, InnerSpace};
+    use test::Bencher;
 
-    use {Aabb, Aabb2};
+    use {Aabb, Aabb2, Ray2};
     use super::{DynamicBoundingVolumeTree, TreeValue};
 
     #[derive(Debug, Clone)]
@@ -1480,6 +1481,56 @@ mod tests {
         assert_eq!(0, tree.values().len());
         assert_eq!(0, tree.size());
         assert_eq!(0, tree.height());
+    }
+
+    #[bench]
+    fn benchmark_insert(b: &mut Bencher) {
+        use rand;
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+        let mut i = 0;
+        b.iter(|| {
+            let offset = rng.gen_range(0., 100.);
+            tree.insert(Value::new(i, aabb2(offset + 2., offset + 2., offset + 4., offset + 4.)));
+            i+=1;
+        });
+    }
+
+    #[bench]
+    fn benchmark_do_refit(b: &mut Bencher) {
+        use rand;
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+        let mut i = 0;
+        b.iter(|| {
+            let offset = rng.gen_range(0., 100.);
+            tree.insert(Value::new(i, aabb2(offset + 2., offset + 2., offset + 4., offset + 4.)));
+            tree.do_refit();
+            i += 1;
+        });
+    }
+
+    #[bench]
+    fn benchmark_query(b: &mut Bencher) {
+        use rand;
+        use rand::Rng;
+        use super::visitor::DiscreteVisitor;
+
+        let mut rng = rand::thread_rng();
+        let mut tree = DynamicBoundingVolumeTree::<Value>::new();
+        for i in 0..1000 {
+            let offset = rng.gen_range(0., 100.);
+            tree.insert(Value::new(i, aabb2(offset + 2., offset + 2., offset + 4., offset + 4.)));
+        }
+        tree.do_refit();
+        b.iter(|| {
+            let r = rng.gen_range(0., 1.);
+            let ray = Ray2::new(Point2::new(0., 0.), Vector2::new(r, r).normalize());
+            let visitor = DiscreteVisitor::<Ray2<f32>, Value>::new(&ray);
+            tree.query(&visitor);
+        });
     }
 
     fn aabb2(minx: f32, miny: f32, maxx: f32, maxy: f32) -> Aabb2<f32> {

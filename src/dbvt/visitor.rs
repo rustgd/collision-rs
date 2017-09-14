@@ -290,10 +290,10 @@ mod tests {
     // Default perspective projection is looking down the negative z axis
     fn frustum() -> Frustum<f32> {
         let projection = PerspectiveFov {
-            fovy : Deg(60.).into(),
-            aspect : 16. / 9.,
-            near : 0.1,
-            far : 4.0,
+            fovy: Deg(60.).into(),
+            aspect: 16. / 9.,
+            near: 0.1,
+            far: 4.0,
         };
         projection.to_frustum()
     }

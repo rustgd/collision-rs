@@ -12,7 +12,7 @@ use Ray;
 use prelude::*;
 use super::{DynamicBoundingVolumeTree, TreeValue, Visitor};
 
-pub struct RayClosestVisitor<S, P, T>
+struct RayClosestVisitor<S, P, T>
 where
     S: BaseFloat,
     T: TreeValue,
@@ -75,6 +75,17 @@ where
 }
 
 /// Query the given tree for the closest value that intersects the given ray.
+///
+/// ### Parameters:
+///
+/// - `tree`: DBVT to query.
+/// - `ray`: Ray to find the closest intersection for.
+///
+/// ### Returns
+///
+/// Optionally returns the value that had the closest intersection with the ray, along with the
+/// actual intersection point.
+/// 
 pub fn query_ray_closest<'a, S, T: 'a, P>(
     tree: &'a DynamicBoundingVolumeTree<T>,
     ray: Ray<S, P, P::Diff>,

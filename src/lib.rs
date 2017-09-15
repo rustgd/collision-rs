@@ -36,6 +36,7 @@ extern crate approx;
 
 extern crate cgmath;
 extern crate num;
+extern crate rand;
 
 #[cfg(feature = "eders")]
 extern crate serde;
@@ -56,6 +57,7 @@ pub use ray::*;
 pub use line::*;
 
 pub mod prelude;
+pub mod dbvt;
 
 // Modules
 

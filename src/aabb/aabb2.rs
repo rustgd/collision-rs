@@ -123,7 +123,9 @@ impl<S: BaseNum> Union for Aabb2<S> {
     }
 }
 
-impl<S: BaseNum> SurfaceArea<S> for Aabb2<S> {
+impl<S: BaseNum> SurfaceArea for Aabb2<S> {
+    type Scalar = S;
+
     fn surface_area(&self) -> S {
         self.dim().x * self.dim().y
     }

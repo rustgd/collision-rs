@@ -169,7 +169,9 @@ impl<S: BaseFloat> Union<Aabb3<S>> for Sphere<S> {
     }
 }
 
-impl<S: BaseFloat> SurfaceArea<S> for Sphere<S> {
+impl<S: BaseFloat> SurfaceArea for Sphere<S> {
+    type Scalar = S;
+
     fn surface_area(&self) -> S {
         use std::f64::consts::PI;
 

@@ -15,16 +15,20 @@
 
 //! Bounding sphere
 
-use cgmath::prelude::*;
 use cgmath::{BaseFloat, Point3};
+use cgmath::prelude::*;
 
-use prelude::*;
 use {Plane, Ray3, Aabb3, Line3};
+use prelude::*;
 
+/// Bounding sphere.
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Sphere<S: BaseFloat> {
+    /// Center point of the sphere in world space
     pub center: Point3<S>,
+
+    /// Sphere radius
     pub radius: S,
 }
 

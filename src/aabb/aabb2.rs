@@ -6,15 +6,18 @@ use std::fmt;
 use cgmath::{Point2, Vector2, BaseNum, BaseFloat};
 use cgmath::prelude::*;
 
-use prelude::*;
 use super::{min, max};
 use {Ray2, Line2};
+use prelude::*;
 
 /// A two-dimensional AABB, aka a rectangle.
 #[derive(Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Aabb2<S> {
+    /// Minimum point of the AABB
     pub min: Point2<S>,
+
+    /// Maximum point of the AABB
     pub max: Point2<S>,
 }
 

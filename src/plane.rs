@@ -15,11 +15,11 @@
 
 use std::fmt;
 
-use cgmath::prelude::*;
 use cgmath::{Vector3, Vector4, Point3, BaseFloat, ApproxEq};
+use cgmath::prelude::*;
 
-use prelude::*;
 use Ray3;
+use prelude::*;
 
 
 /// A 3-dimensional plane formed from the equation: `A*x + B*y + C*z - D = 0`.
@@ -40,7 +40,10 @@ use Ray3;
 #[derive(Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Plane<S> {
+    /// Plane normal
     pub n: Vector3<S>,
+
+    /// Plane distance value
     pub d: S,
 }
 

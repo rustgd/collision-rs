@@ -17,19 +17,22 @@
 
 use std::marker::PhantomData;
 
-use cgmath::prelude::*;
 use cgmath::{BaseFloat, BaseNum};
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
+use cgmath::prelude::*;
 
 use traits::{Continuous, Discrete};
 
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Ray<S, P, V> {
+    /// Ray origin
     pub origin: P,
+
+    /// Normalized ray direction
     pub direction: V,
     phantom_s: PhantomData<S>,
 }
@@ -40,6 +43,8 @@ where
     V: VectorSpace<Scalar = S>,
     P: EuclideanSpace<Scalar = S, Diff = V>,
 {
+    /// Create a generic ray starting at `origin` and extending infinitely in
+    /// `direction`.
     pub fn new(origin: P, direction: V) -> Ray<S, P, V> {
         Ray {
             origin: origin,
@@ -49,7 +54,10 @@ where
     }
 }
 
+/// 2D ray
 pub type Ray2<S> = Ray<S, Point2<S>, Vector2<S>>;
+
+/// 3D ray
 pub type Ray3<S> = Ray<S, Point3<S>, Vector3<S>>;
 
 impl<S, P> Continuous<Ray<S, P, P::Diff>> for P

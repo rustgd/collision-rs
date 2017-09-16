@@ -25,8 +25,8 @@ pub use self::aabb3::Aabb3;
 
 use std::cmp::{PartialOrd, Ordering};
 
-use cgmath::prelude::*;
 use cgmath::{Point2, Point3, BaseNum};
+use cgmath::prelude::*;
 
 mod aabb2;
 mod aabb3;
@@ -49,8 +49,12 @@ pub(crate) fn max<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     }
 }
 
+/// Compute the minimum/maximum of the given values
 pub trait MinMax {
+    /// Compute the minimum
     fn min(a: Self, b: Self) -> Self;
+
+    /// Compute the maximum
     fn max(a: Self, b: Self) -> Self;
 }
 
@@ -80,9 +84,15 @@ where
     }
 }
 
+/// Base trait describing an axis aligned bounding box.
 pub trait Aabb: Sized {
+    /// Scalar type
     type Scalar: BaseNum;
+
+    /// Vector type
     type Diff: VectorSpace<Scalar = Self::Scalar> + ElementWise + Array<Element = Self::Scalar>;
+
+    /// Point type
     type Point: EuclideanSpace<Scalar = Self::Scalar, Diff = Self::Diff> + MinMax;
 
     /// Create a new AABB using two points as opposing corners.

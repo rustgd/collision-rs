@@ -5,12 +5,12 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-use cgmath::prelude::*;
 use cgmath::BaseFloat;
+use cgmath::prelude::*;
 
+use super::{DynamicBoundingVolumeTree, TreeValue, Visitor};
 use Ray;
 use prelude::*;
-use super::{DynamicBoundingVolumeTree, TreeValue, Visitor};
 
 struct RayClosestVisitor<S, P, T>
 where
@@ -85,7 +85,7 @@ where
 ///
 /// Optionally returns the value that had the closest intersection with the ray, along with the
 /// actual intersection point.
-/// 
+///
 pub fn query_ray_closest<'a, S, T: 'a, P>(
     tree: &'a DynamicBoundingVolumeTree<T>,
     ray: Ray<S, P, P::Diff>,

@@ -16,13 +16,13 @@
 extern crate cgmath;
 extern crate collision;
 
+use cgmath::{Point2, Point3};
+use cgmath::{Vector2, Vector3};
+use cgmath::InnerSpace;
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
 use collision::{Continuous, Contains, Discrete, Union, SurfaceArea};
 use collision::{Line2, Line3, Sphere, Ray2, Ray3};
-use cgmath::InnerSpace;
-use cgmath::{Point2, Point3};
-use cgmath::{Vector2, Vector3};
 
 #[test]
 fn test_general() {

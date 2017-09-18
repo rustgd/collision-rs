@@ -24,10 +24,8 @@ use cgmath::Vector3;
 pub struct Cylinder<S> {
     /// Center point
     pub center: Point3<S>,
-
     /// Axis the cylinder is aligned with
     pub axis: Vector3<S>,
-
     /// Radius of the cylinder
     pub radius: S,
 }

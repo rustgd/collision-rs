@@ -27,10 +27,8 @@ use cgmath::{Vector2, Vector3};
 pub struct Obb<S, V, P> {
     /// OBB center point in world space
     pub center: P,
-
     /// Axis OBB is aligned with
     pub axis: V,
-
     /// Size of the OBB
     pub extents: V,
     marker: PhantomData<S>,

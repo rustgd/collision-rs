@@ -42,7 +42,6 @@ use prelude::*;
 pub struct Plane<S> {
     /// Plane normal
     pub n: Vector3<S>,
-
     /// Plane distance value
     pub d: S,
 }

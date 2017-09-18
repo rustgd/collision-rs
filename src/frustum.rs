@@ -28,19 +28,14 @@ use cgmath::Point3;
 pub struct Frustum<S: BaseFloat> {
     /// Left plane
     pub left: Plane<S>,
-
     /// Right plane
     pub right: Plane<S>,
-
     /// Bottom plane
     pub bottom: Plane<S>,
-
     /// Top plane
     pub top: Plane<S>,
-
     /// Near plane
     pub near: Plane<S>,
-
     /// Far plane
     pub far: Plane<S>,
 }
@@ -128,25 +123,18 @@ impl<S: BaseFloat> Frustum<S> {
 pub struct FrustumPoints<S> {
     /// Near top left point
     pub near_top_left: Point3<S>,
-
     /// Near top right point
     pub near_top_right: Point3<S>,
-
     /// Near bottom left point
     pub near_bottom_left: Point3<S>,
-
     /// Near bottom right point
     pub near_bottom_right: Point3<S>,
-
     /// Far top left point
     pub far_top_left: Point3<S>,
-
     /// Far top right point
     pub far_top_right: Point3<S>,
-
     /// Far bottom left point
     pub far_bottom_left: Point3<S>,
-
     /// Far bottom right point
     pub far_bottom_right: Point3<S>,
 }

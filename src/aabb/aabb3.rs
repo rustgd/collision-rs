@@ -16,7 +16,6 @@ use prelude::*;
 pub struct Aabb3<S> {
     /// Minimum point of the AABB
     pub min: Point3<S>,
-
     /// Maximum point of the AABB
     pub max: Point3<S>,
 }

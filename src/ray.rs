@@ -31,7 +31,6 @@ use traits::{Continuous, Discrete};
 pub struct Ray<S, P, V> {
     /// Ray origin
     pub origin: P,
-
     /// Normalized ray direction
     pub direction: V,
     phantom_s: PhantomData<S>,

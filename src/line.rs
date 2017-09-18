@@ -31,10 +31,8 @@ use prelude::*;
 pub struct Line<S, V, P> {
     /// Origin of the line
     pub origin: P,
-
     /// Endpoint of the line
     pub dest: P,
-
     phantom_s: PhantomData<S>,
     phantom_v: PhantomData<V>,
 }

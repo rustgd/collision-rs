@@ -27,7 +27,6 @@ use prelude::*;
 pub struct Sphere<S: BaseFloat> {
     /// Center point of the sphere in world space
     pub center: Point3<S>,
-
     /// Sphere radius
     pub radius: S,
 }

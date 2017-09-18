@@ -5,13 +5,13 @@ extern crate cgmath;
 extern crate collision;
 extern crate test;
 
-use test::Bencher;
-use rand::Rng;
 use cgmath::{Point2, Vector2};
 use cgmath::prelude::*;
+use collision::{Ray2, Aabb2};
 use collision::dbvt::*;
 use collision::prelude::*;
-use collision::{Ray2, Aabb2};
+use rand::Rng;
+use test::Bencher;
 
 #[derive(Debug, Clone)]
 struct Value {

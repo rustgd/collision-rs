@@ -15,10 +15,10 @@
 
 //! Generic spatial bounds.
 
-use std::{cmp, fmt};
-use cgmath::Matrix4;
-use cgmath::BaseFloat;
 use cgmath::{EuclideanSpace, Point3};
+use cgmath::BaseFloat;
+use cgmath::Matrix4;
+use std::{cmp, fmt};
 
 use frustum::Frustum;
 use plane::Plane;

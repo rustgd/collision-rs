@@ -18,18 +18,25 @@
 use Plane;
 use bound::*;
 use cgmath::{Matrix, Matrix4};
+use cgmath::{PerspectiveFov, Ortho, Perspective};
 use cgmath::BaseFloat;
 use cgmath::Point3;
-use cgmath::{PerspectiveFov, Ortho, Perspective};
 
+/// View frustum, used for frustum culling
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Frustum<S: BaseFloat> {
+    /// Left plane
     pub left: Plane<S>,
+    /// Right plane
     pub right: Plane<S>,
+    /// Bottom plane
     pub bottom: Plane<S>,
+    /// Top plane
     pub top: Plane<S>,
+    /// Near plane
     pub near: Plane<S>,
+    /// Far plane
     pub far: Plane<S>,
 }
 
@@ -110,21 +117,31 @@ impl<S: BaseFloat> Frustum<S> {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
+/// View frustum corner points
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct FrustumPoints<S> {
+    /// Near top left point
     pub near_top_left: Point3<S>,
+    /// Near top right point
     pub near_top_right: Point3<S>,
+    /// Near bottom left point
     pub near_bottom_left: Point3<S>,
+    /// Near bottom right point
     pub near_bottom_right: Point3<S>,
+    /// Far top left point
     pub far_top_left: Point3<S>,
+    /// Far top right point
     pub far_top_right: Point3<S>,
+    /// Far bottom left point
     pub far_bottom_left: Point3<S>,
+    /// Far bottom right point
     pub far_bottom_right: Point3<S>,
 }
 
-
+/// Conversion trait for converting cgmath projection types into a view frustum
 pub trait Projection<S: BaseFloat>: Into<Matrix4<S>> {
+    /// Create a view frustum
     fn to_frustum(&self) -> Frustum<S>;
 }
 

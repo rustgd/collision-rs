@@ -15,7 +15,8 @@
 
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
-//#![warn(missing_docs)] //TODO
+#![deny(missing_docs, missing_debug_implementations, trivial_casts,
+unsafe_code, unstable_features, unused_import_braces, unused_qualifications)]
 
 //! Computer graphics-centric math.
 //!
@@ -45,16 +46,17 @@ extern crate serde;
 extern crate serde_derive;
 
 // Re-exports
+
 pub use aabb::*;
 pub use bound::*;
 pub use cylinder::Cylinder;
 pub use frustum::*;
-pub use traits::*;
+pub use line::*;
 pub use obb::*;
-pub use sphere::Sphere;
 pub use plane::Plane;
 pub use ray::*;
-pub use line::*;
+pub use sphere::Sphere;
+pub use traits::*;
 
 pub mod prelude;
 pub mod dbvt;

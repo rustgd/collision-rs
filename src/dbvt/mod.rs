@@ -87,12 +87,12 @@
 //! ```
 //!
 
-pub use self::visitor::*;
 pub use self::util::*;
+pub use self::visitor::*;
 
 use std::cmp::max;
-use std::fmt::Debug;
 use std::fmt;
+use std::fmt::Debug;
 
 use num::NumCast;
 use rand;

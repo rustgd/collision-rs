@@ -18,10 +18,14 @@
 use cgmath::Point3;
 use cgmath::Vector3;
 
-#[derive(Copy, Clone, PartialEq)]
+/// Bounding cylinder
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Cylinder<S> {
+    /// Center point
     pub center: Point3<S>,
+    /// Axis the cylinder is aligned with
     pub axis: Vector3<S>,
+    /// Radius of the cylinder
     pub radius: S,
 }

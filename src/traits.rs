@@ -20,20 +20,24 @@ use cgmath::BaseNum;
 /// An example would be a Ray vs AABB intersection test that returns a Point in space.
 ///
 pub trait Continuous<RHS> {
+    /// Result returned by the intersection test
     type Result;
 
+    /// Intersection test
     fn intersection(&self, &RHS) -> Option<Self::Result>;
 }
 
 /// A boolean intersection test.
 ///
 pub trait Discrete<RHS> {
+    /// Intersection test
     fn intersects(&self, &RHS) -> bool;
 }
 
 /// Boolean containment test.
 ///
 pub trait Contains<RHS> {
+    /// Containment test
     #[inline]
     fn contains(&self, &RHS) -> bool;
 }
@@ -41,15 +45,19 @@ pub trait Contains<RHS> {
 /// Shape surface area
 ///
 pub trait SurfaceArea {
+    /// Result type returned from surface area computation
     type Scalar: BaseNum;
 
+    /// Compute surface area
     fn surface_area(&self) -> Self::Scalar;
 }
 
 /// Build the union of two shapes.
 ///
 pub trait Union<RHS = Self> {
+    /// Union shape created
     type Output;
 
+    /// Build the union shape of self and the given shape.
     fn union(&self, &RHS) -> Self::Output;
 }

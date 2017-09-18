@@ -17,19 +17,21 @@
 
 use std::marker::PhantomData;
 
-use cgmath::prelude::*;
 use cgmath::{BaseNum, BaseFloat};
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
+use cgmath::prelude::*;
 
 use Ray2;
 use prelude::*;
 
 /// A generic directed line segment from `origin` to `dest`.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Line<S, V, P> {
+    /// Origin of the line
     pub origin: P,
+    /// Endpoint of the line
     pub dest: P,
     phantom_s: PhantomData<S>,
     phantom_v: PhantomData<V>,
@@ -37,6 +39,7 @@ pub struct Line<S, V, P> {
 
 impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff = V>>
     Line<S, V, P> {
+    /// Create a new directed line segment from `origin` to `dest`.
     pub fn new(origin: P, dest: P) -> Line<S, V, P> {
         Line {
             origin: origin,
@@ -47,7 +50,10 @@ impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff 
     }
 }
 
+/// 2D directed line segment
 pub type Line2<S> = Line<S, Vector2<S>, Point2<S>>;
+
+/// 3D directed line segment
 pub type Line3<S> = Line<S, Vector3<S>, Point3<S>>;
 
 /// Determines if an intersection between a ray and a line segment is found.

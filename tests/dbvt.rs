@@ -2,11 +2,11 @@ extern crate collision;
 extern crate cgmath;
 extern crate rand;
 
-use cgmath::prelude::*;
 use cgmath::{Point2, Vector2, PerspectiveFov, Deg, Point3, Vector3};
+use cgmath::prelude::*;
+use collision::{Aabb2, Ray2, Frustum, Projection, Relation, Aabb3};
 use collision::dbvt::*;
 use collision::prelude::*;
-use collision::{Aabb2, Ray2, Frustum, Projection, Relation, Aabb3};
 use rand::Rng;
 
 #[derive(Debug, Clone)]

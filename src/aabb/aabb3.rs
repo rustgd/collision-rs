@@ -6,15 +6,17 @@ use std::fmt;
 use cgmath::{Point3, Vector3, BaseNum, BaseFloat};
 use cgmath::prelude::*;
 
-use prelude::*;
 use super::{min, max};
 use {Ray3, Line3, Sphere, Plane};
+use prelude::*;
 
 /// A three-dimensional AABB, aka a rectangular prism.
 #[derive(Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Aabb3<S> {
+    /// Minimum point of the AABB
     pub min: Point3<S>,
+    /// Maximum point of the AABB
     pub max: Point3<S>,
 }
 

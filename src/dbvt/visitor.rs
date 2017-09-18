@@ -6,9 +6,9 @@ use std::marker::PhantomData;
 
 use cgmath::BaseFloat;
 
+use super::{Visitor, TreeValue};
 use {Bound, Frustum, Relation};
 use prelude::*;
-use super::{Visitor, TreeValue};
 
 /// Visitor for doing continuous intersection testing on the DBVT.
 ///

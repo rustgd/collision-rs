@@ -51,6 +51,15 @@ where
             phantom_s: PhantomData,
         }
     }
+
+    /// Create a new ray by applying a transform.
+    pub fn transform<T>(&self, transform: T) -> Self
+    where
+        T: Transform<P>
+    {
+        Self::new(transform.transform_point(self.origin),
+                  transform.transform_vector(self.direction))
+    }
 }
 
 /// 2D ray

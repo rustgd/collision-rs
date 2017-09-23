@@ -47,29 +47,23 @@ extern crate serde_derive;
 
 // Re-exports
 
-pub use aabb::*;
 pub use bound::*;
-pub use cylinder::Cylinder;
 pub use frustum::*;
 pub use line::*;
-pub use obb::*;
 pub use plane::Plane;
 pub use ray::*;
-pub use sphere::Sphere;
 pub use traits::*;
+pub use volume::*;
 
 pub mod prelude;
 pub mod dbvt;
 
 // Modules
 
-mod aabb;
 mod bound;
-mod cylinder;
 mod frustum;
 mod traits;
-mod obb;
-mod sphere;
 mod plane;
 mod ray;
 mod line;
+mod volume;

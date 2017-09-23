@@ -57,6 +57,7 @@ pub use volume::*;
 
 pub mod prelude;
 pub mod dbvt;
+pub mod primitive;
 
 // Modules
 

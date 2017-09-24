@@ -1,16 +1,16 @@
 //! Rectangle primitive
 
-use cgmath::{Point2, Vector2, BaseFloat};
+use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
 use {Aabb2, Ray2};
 use prelude::*;
-use traits::{ContinuousTransformed, DiscreteTransformed, HasAABB, SupportFunction};
 
 /// Rectangle primitive.
 ///
 /// Have a cached set of corner points to speed up computation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Rectangle<S> {
     /// Dimensions of the rectangle
     pub dim: Vector2<S>,
@@ -61,7 +61,7 @@ where
     }
 }
 
-impl<S> HasAABB for Rectangle<S>
+impl<S> HasAabb for Rectangle<S>
 where
     S: BaseFloat,
 {
@@ -72,36 +72,6 @@ where
             Point2::from_vec(-self.half_dim),
             Point2::from_vec(self.half_dim),
         )
-    }
-}
-
-impl<S> DiscreteTransformed<Ray2<S>> for Rectangle<S>
-where
-    S: BaseFloat,
-{
-    type Point = Point2<S>;
-
-    fn intersects_transformed<T>(&self, ray: &Ray2<S>, transform: &T) -> bool
-    where
-        T: Transform<Point2<S>>,
-    {
-        self.intersects(&ray.transform(transform.inverse_transform().unwrap()))
-    }
-}
-
-impl<S> ContinuousTransformed<Ray2<S>> for Rectangle<S>
-where
-    S: BaseFloat,
-{
-    type Point = Point2<S>;
-    type Result = Point2<S>;
-
-    fn intersection_transformed<T>(&self, ray: &Ray2<S>, transform: &T) -> Option<Point2<S>>
-    where
-        T: Transform<Point2<S>>,
-    {
-        self.intersection(&ray.transform(transform.inverse_transform().unwrap()))
-            .map(|p| transform.transform_point(p))
     }
 }
 
@@ -181,7 +151,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Point2, Vector2, Rad, Basis2, Decomposed};
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
 
     use super::*;
 

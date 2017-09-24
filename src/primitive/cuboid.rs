@@ -1,14 +1,14 @@
-use cgmath::{Point3, Vector3, BaseFloat};
+use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
 use {Aabb3, Ray3};
 use prelude::*;
-use traits::{HasAABB, SupportFunction, ContinuousTransformed, DiscreteTransformed};
 
 /// Cuboid primitive.
 ///
 /// Have a cached set of corner points to speed up computation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Cuboid<S> {
     /// Dimensions of the box
     pub dim: Vector3<S>,
@@ -63,7 +63,7 @@ where
     }
 }
 
-impl<S> HasAABB for Cuboid<S>
+impl<S> HasAabb for Cuboid<S>
 where
     S: BaseFloat,
 {
@@ -74,20 +74,6 @@ where
             Point3::from_vec(-self.half_dim),
             Point3::from_vec(self.half_dim),
         )
-    }
-}
-
-impl<S> DiscreteTransformed<Ray3<S>> for Cuboid<S>
-where
-    S: BaseFloat,
-{
-    type Point = Point3<S>;
-
-    fn intersects_transformed<T>(&self, ray: &Ray3<S>, transform: &T) -> bool
-    where
-        T: Transform<Point3<S>>,
-    {
-        self.intersects(&ray.transform(transform.inverse_transform().unwrap()))
     }
 }
 
@@ -116,22 +102,6 @@ where
         }
 
         tmax >= tmin && (tmin >= S::zero() || tmax >= S::zero())
-    }
-}
-
-impl<S> ContinuousTransformed<Ray3<S>> for Cuboid<S>
-where
-    S: BaseFloat,
-{
-    type Point = Point3<S>;
-    type Result = Point3<S>;
-
-    fn intersection_transformed<T>(&self, ray: &Ray3<S>, transform: &T) -> Option<Point3<S>>
-    where
-        T: Transform<Point3<S>>,
-    {
-        self.intersection(&ray.transform(transform.inverse_transform().unwrap()))
-            .map(|p| transform.transform_point(p))
     }
 }
 
@@ -173,7 +143,7 @@ where
 #[cfg(test)]
 mod tests {
 
-    use cgmath::{Point3, Vector3, Quaternion, Rad, Decomposed};
+    use cgmath::{Decomposed, Point3, Quaternion, Rad, Vector3};
 
     use super::*;
     use Ray3;

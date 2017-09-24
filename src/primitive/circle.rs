@@ -1,14 +1,14 @@
 //! Circle primitive
 
-use cgmath::{Point2, Vector2, BaseFloat};
+use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
 use {Aabb2, Ray2};
 use prelude::*;
-use traits::{ContinuousTransformed, DiscreteTransformed, HasAABB, SupportFunction};
 
 /// Circle primitive
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Circle<S> {
     /// Radius of the circle
     pub radius: S,
@@ -31,14 +31,15 @@ where
     where
         T: Transform<Point2<S>>,
     {
-        let direction = transform.inverse_transform().unwrap().transform_vector(
-            *direction,
-        );
+        let direction = transform
+            .inverse_transform()
+            .unwrap()
+            .transform_vector(*direction);
         transform.transform_point(Point2::from_vec(direction.normalize_to(self.radius)))
     }
 }
 
-impl<S> HasAABB for Circle<S>
+impl<S> HasAabb for Circle<S>
 where
     S: BaseFloat,
 {
@@ -52,30 +53,13 @@ where
     }
 }
 
-impl<S> DiscreteTransformed<Ray2<S>> for Circle<S>
+impl<S> Discrete<Ray2<S>> for Circle<S>
 where
     S: BaseFloat,
 {
-    type Point = Point2<S>;
-
-    fn intersects_transformed<T>(&self, ray: &Ray2<S>, transform: &T) -> bool
-    where
-        T: Transform<Point2<S>>,
-    {
-        self.intersects(&(
-            *ray,
-            transform.transform_point(Point2::from_value(S::zero())),
-        ))
-    }
-}
-
-impl<S> Discrete<(Ray2<S>, Point2<S>)> for Circle<S>
-where
-    S: BaseFloat,
-{
-    fn intersects(&self, &(ref r, ref center): &(Ray2<S>, Point2<S>)) -> bool {
+    fn intersects(&self, r: &Ray2<S>) -> bool {
         let s = self;
-        let l = center - r.origin;
+        let l = Vector2::new(-r.origin.x, -r.origin.y);
         let tca = l.dot(r.direction);
         if tca < S::zero() {
             return false;
@@ -88,35 +72,16 @@ where
     }
 }
 
-impl<S> ContinuousTransformed<Ray2<S>> for Circle<S>
-where
-    S: BaseFloat,
-{
-    type Point = Point2<S>;
-    type Result = Point2<S>;
-
-    #[inline]
-    fn intersection_transformed<T>(&self, ray: &Ray2<S>, transform: &T) -> Option<Point2<S>>
-    where
-        T: Transform<Point2<S>>,
-    {
-        self.intersection(&(
-            *ray,
-            transform.transform_point(Point2::from_value(S::zero())),
-        ))
-    }
-}
-
-impl<S> Continuous<(Ray2<S>, Point2<S>)> for Circle<S>
+impl<S> Continuous<Ray2<S>> for Circle<S>
 where
     S: BaseFloat,
 {
     type Result = Point2<S>;
 
-    fn intersection(&self, &(ref r, ref center): &(Ray2<S>, Point2<S>)) -> Option<Point2<S>> {
+    fn intersection(&self, r: &Ray2<S>) -> Option<Point2<S>> {
         let s = self;
 
-        let l = center - r.origin;
+        let l = Vector2::new(-r.origin.x, -r.origin.y);
         let tca = l.dot(r.direction);
         if tca < S::zero() {
             return None;
@@ -135,7 +100,7 @@ mod tests {
     use std;
 
     use Ray2;
-    use cgmath::{Basis2, Point2, Rad, Rotation2, Vector2, Decomposed};
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
     use prelude::*;
 
     use super::*;
@@ -175,10 +140,9 @@ mod tests {
     fn test_circle_ray_discrete() {
         let circle = Circle::new(10.);
         let ray = Ray2::new(Point2::new(25., 0.), Vector2::new(-1., 0.));
-        let center = Point2::new(0., 0.);
-        assert!(circle.intersects(&(ray, center)));
-        let center = Point2::new(0., 11.);
-        assert!(!circle.intersects(&(ray, center)));
+        assert!(circle.intersects(&ray));
+        let ray = Ray2::new(Point2::new(25., -11.), Vector2::new(-1., 0.));
+        assert!(!circle.intersects(&ray));
     }
 
     #[test]
@@ -195,13 +159,9 @@ mod tests {
     fn test_circle_ray_continuous() {
         let circle = Circle::new(10.);
         let ray = Ray2::new(Point2::new(25., 0.), Vector2::new(-1., 0.));
-        let center = Point2::new(0., 0.);
-        assert_eq!(
-            Some(Point2::new(10., 0.)),
-            circle.intersection(&(ray, center))
-        );
-        let center = Point2::new(0., 11.);
-        assert_eq!(None, circle.intersection(&(ray, center)));
+        assert_eq!(Some(Point2::new(10., 0.)), circle.intersection(&ray));
+        let ray = Ray2::new(Point2::new(25., -11.), Vector2::new(-1., 0.));
+        assert_eq!(None, circle.intersection(&ray));
     }
 
     #[test]

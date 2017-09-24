@@ -2,7 +2,7 @@
 //!
 
 use Aabb;
-use cgmath::{BaseNum, Vector2, BaseFloat};
+use cgmath::{BaseFloat, BaseNum, Vector2};
 use cgmath::prelude::*;
 use num::Float;
 
@@ -12,9 +12,10 @@ where
     P::Scalar: BaseFloat,
     T: Transform<P>,
 {
-    let direction = transform.inverse_transform().unwrap().transform_vector(
-        *direction,
-    );
+    let direction = transform
+        .inverse_transform()
+        .unwrap()
+        .transform_vector(*direction);
     let (p, _) = vertices.iter().map(|v| (v, v.dot(direction))).fold(
         (P::from_value(P::Scalar::zero()), P::Scalar::neg_infinity()),
         |(max_p, max_dot), (v, dot)| if dot > max_dot {
@@ -44,6 +45,7 @@ where
     Vector2::new(b.x * ac - a.x * bc, b.y * ac - a.y * bc)
 }
 
+/// Compute barycentric coordinates of p in relation to the triangle defined by (a, b, c).
 #[allow(dead_code)]
 pub(crate) fn barycentric_vector<V>(p: V, a: V, b: V, c: V) -> (V::Scalar, V::Scalar, V::Scalar)
 where
@@ -66,7 +68,7 @@ where
     (u, v, w)
 }
 
-#[allow(dead_code)]
+/// Compute barycentric coordinates of p in relation to the triangle defined by (a, b, c).
 pub(crate) fn barycentric_point<P>(p: P, a: P, b: P, c: P) -> (P::Scalar, P::Scalar, P::Scalar)
 where
     P: EuclideanSpace,
@@ -93,7 +95,7 @@ where
 mod tests {
     use std;
 
-    use cgmath::{Basis2, Point2, Rad, Rotation2, Vector2, Decomposed};
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;
     use Aabb2;

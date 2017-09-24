@@ -1,12 +1,12 @@
-use cgmath::{Point3, Vector3, BaseFloat};
+use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
 use {Aabb3, Ray3};
 use prelude::*;
-use traits::{HasAABB, SupportFunction, ContinuousTransformed, DiscreteTransformed};
 
 /// Sphere primitive
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Sphere<S> {
     /// Radius of the sphere
     pub radius: S,
@@ -29,14 +29,15 @@ where
     where
         T: Transform<Point3<S>>,
     {
-        let direction = transform.inverse_transform().unwrap().transform_vector(
-            *direction,
-        );
+        let direction = transform
+            .inverse_transform()
+            .unwrap()
+            .transform_vector(*direction);
         transform.transform_point(Point3::from_vec(direction.normalize_to(self.radius)))
     }
 }
 
-impl<S> HasAABB for Sphere<S>
+impl<S> HasAabb for Sphere<S>
 where
     S: BaseFloat,
 {
@@ -50,30 +51,13 @@ where
     }
 }
 
-impl<S> DiscreteTransformed<Ray3<S>> for Sphere<S>
+impl<S> Discrete<Ray3<S>> for Sphere<S>
 where
     S: BaseFloat,
 {
-    type Point = Point3<S>;
-
-    fn intersects_transformed<T>(&self, ray: &Ray3<S>, transform: &T) -> bool
-    where
-        T: Transform<Point3<S>>,
-    {
-        self.intersects(&(
-            *ray,
-            transform.transform_point(Point3::from_value(S::zero())),
-        ))
-    }
-}
-
-impl<S> Discrete<(Ray3<S>, Point3<S>)> for Sphere<S>
-where
-    S: BaseFloat,
-{
-    fn intersects(&self, &(ref r, ref center): &(Ray3<S>, Point3<S>)) -> bool {
+    fn intersects(&self, r: &Ray3<S>) -> bool {
         let s = self;
-        let l = center - r.origin;
+        let l = Vector3::new(-r.origin.x, -r.origin.y, -r.origin.z);
         let tca = l.dot(r.direction);
         if tca < S::zero() {
             return false;
@@ -86,34 +70,16 @@ where
     }
 }
 
-impl<S> ContinuousTransformed<Ray3<S>> for Sphere<S>
-where
-    S: BaseFloat,
-{
-    type Result = Point3<S>;
-    type Point = Point3<S>;
-
-    fn intersection_transformed<T>(&self, ray: &Ray3<S>, transform: &T) -> Option<Point3<S>>
-    where
-        T: Transform<Point3<S>>,
-    {
-        self.intersection(&(
-            *ray,
-            transform.transform_point(Point3::from_value(S::zero())),
-        ))
-    }
-}
-
-impl<S> Continuous<(Ray3<S>, Point3<S>)> for Sphere<S>
+impl<S> Continuous<Ray3<S>> for Sphere<S>
 where
     S: BaseFloat,
 {
     type Result = Point3<S>;
 
-    fn intersection(&self, &(ref r, ref center): &(Ray3<S>, Point3<S>)) -> Option<Point3<S>> {
+    fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
         let s = self;
 
-        let l = center - r.origin;
+        let l = Vector3::new(-r.origin.x, -r.origin.y, -r.origin.z);
         let tca = l.dot(r.direction);
         if tca < S::zero() {
             return None;
@@ -131,7 +97,7 @@ where
 mod tests {
     use std;
 
-    use cgmath::{Point3, Quaternion, Rad, Rotation3, Vector3, Decomposed};
+    use cgmath::{Decomposed, Point3, Quaternion, Rad, Rotation3, Vector3};
 
     use super::*;
 
@@ -185,14 +151,12 @@ mod tests {
     #[test]
     fn test_ray_discrete() {
         let sphere = Sphere::new(10.);
-        let center = Point3::from_value(0.);
         let ray = Ray3::new(Point3::new(20., 0., 0.), Vector3::new(-1., 0., 0.));
-        assert!(sphere.intersects(&(ray, center)));
+        assert!(sphere.intersects(&ray));
         let ray = Ray3::new(Point3::new(20., 0., 0.), Vector3::new(1., 0., 0.));
-        assert!(!sphere.intersects(&(ray, center)));
-        let center = Point3::new(0., 15., 0.);
-        let ray = Ray3::new(Point3::new(20., 0., 0.), Vector3::new(-1., 0., 0.));
-        assert!(!sphere.intersects(&(ray, center)));
+        assert!(!sphere.intersects(&ray));
+        let ray = Ray3::new(Point3::new(20., -15., 0.), Vector3::new(-1., 0., 0.));
+        assert!(!sphere.intersects(&ray));
     }
 
     #[test]
@@ -211,17 +175,12 @@ mod tests {
     #[test]
     fn test_ray_continuous() {
         let sphere = Sphere::new(10.);
-        let center = Point3::from_value(0.);
         let ray = Ray3::new(Point3::new(20., 0., 0.), Vector3::new(-1., 0., 0.));
-        assert_eq!(
-            Some(Point3::new(10., 0., 0.)),
-            sphere.intersection(&(ray, center))
-        );
+        assert_eq!(Some(Point3::new(10., 0., 0.)), sphere.intersection(&ray));
         let ray = Ray3::new(Point3::new(20., 0., 0.), Vector3::new(1., 0., 0.));
-        assert_eq!(None, sphere.intersection(&(ray, center)));
-        let center = Point3::new(0., 15., 0.);
-        let ray = Ray3::new(Point3::new(20., 0., 0.), Vector3::new(-1., 0., 0.));
-        assert_eq!(None, sphere.intersection(&(ray, center)));
+        assert_eq!(None, sphere.intersection(&ray));
+        let ray = Ray3::new(Point3::new(20., -15., 0.), Vector3::new(-1., 0., 0.));
+        assert_eq!(None, sphere.intersection(&ray));
     }
 
     #[test]

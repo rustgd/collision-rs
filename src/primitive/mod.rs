@@ -2,14 +2,21 @@
 
 pub use self::circle::Circle;
 pub use self::cuboid::Cuboid;
+pub use self::particle::*;
 pub use self::polygon::ConvexPolygon;
+pub use self::polyhedron::ConvexPolyhedron;
 pub use self::rectangle::Rectangle;
 pub use self::sphere::Sphere;
+pub use self::primitive2::Primitive2;
 
 mod circle;
 mod rectangle;
 mod polygon;
 mod sphere;
 mod cuboid;
+mod polyhedron;
+mod particle;
+mod primitive2;
+mod primitive3;
 
 pub(crate) mod util;

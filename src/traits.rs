@@ -67,8 +67,8 @@ pub trait Union<RHS = Self> {
     fn union(&self, &RHS) -> Self::Output;
 }
 
-/// Primitive with bounding box
-pub trait HasAABB {
+/// Primitive with axis aligned bounding box
+pub trait HasAabb {
     /// Bounding box type
     type Aabb: Aabb + Clone + Union<Self::Aabb, Output = Self::Aabb> + Debug;
 
@@ -83,16 +83,18 @@ pub trait SupportFunction {
 
     /// Get the support point on the shape in a given direction.
     ///
-    /// # Parameters
+    /// ## Parameters
     ///
     /// - `direction`: The search direction in world space.
-    /// - `transform`: The current local to world transform for this shape.
+    /// - `transform`: The current local to world transform for this primitive.
     ///
-    /// # Returns
+    /// ## Returns
     ///
-    /// Returns the point that is furthest away from the origin.
+    /// Return the point that is furthest away from the origin, in the given search direction.
+    /// For discrete shapes, the furthest vertex is enough, there is no need to do exact
+    /// intersection point computation.
     ///
-    /// # Type parameters
+    /// ## Type parameters
     ///
     /// - `P`: Transform type
     fn support_point<T>(
@@ -105,7 +107,7 @@ pub trait SupportFunction {
 }
 
 /// Discrete intersection test on transformed primitive
-pub trait DiscreteTransformed<RHS = Self> {
+pub trait DiscreteTransformed<RHS> {
     /// Point type for transformation of self
     type Point: EuclideanSpace;
 
@@ -116,7 +118,7 @@ pub trait DiscreteTransformed<RHS = Self> {
 }
 
 /// Continuous intersection test on transformed primitive
-pub trait ContinuousTransformed<RHS = Self> {
+pub trait ContinuousTransformed<RHS> {
     /// Point type for transformation of self
     type Point: EuclideanSpace;
 
@@ -129,17 +131,15 @@ pub trait ContinuousTransformed<RHS = Self> {
         T: Transform<Self::Point>;
 }
 
-/// Trait detailing a collision primitive. These are the building blocks for all collision shapes.
-///
-/// See [primitive2d](primitive2d/index.html) and [primitive3d](primitive3d/index.html)
-/// for more information about supported primitives.
-///
+/// Marker trait for a collision primitive.
 pub trait Primitive
-    : Debug + Clone + HasAABB + SupportFunction<Point = <<Self as HasAABB>::Aabb as Aabb>::Point>
+    : Debug + Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>
     {
 }
 
-impl <T> Primitive for T
-    where
-        T: Debug + Clone + HasAABB +
-        SupportFunction<Point = <<Self as HasAABB>::Aabb as Aabb>::Point> {}
+/// Implementation of marker trait for all types where the bounds are fulfilled
+impl<T> Primitive for T
+where
+    T: Debug + Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>,
+{
+}

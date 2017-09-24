@@ -1,17 +1,17 @@
 //! Convex polygon primitive
 
-use cgmath::{Point2, Vector2, BaseFloat};
+use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
-use {Aabb2, Ray2, Line2};
+use {Aabb2, Line2, Ray2};
 use prelude::*;
-use traits::{HasAABB, SupportFunction, DiscreteTransformed, ContinuousTransformed};
 
 /// Convex polygon primitive.
 ///
 /// Can contain any number of vertices, but a high number of vertices will
 /// affect performance of course. Vertices need to be in CCW order.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct ConvexPolygon<S> {
     /// Vertices of the convex polygon.
     pub vertices: Vec<Point2<S>>,
@@ -42,7 +42,7 @@ where
     }
 }
 
-impl<S> HasAABB for ConvexPolygon<S>
+impl<S> HasAabb for ConvexPolygon<S>
 where
     S: BaseFloat,
 {
@@ -50,20 +50,6 @@ where
 
     fn get_bound(&self) -> Aabb2<S> {
         ::primitive::util::get_bound(&self.vertices)
-    }
-}
-
-impl<S> DiscreteTransformed<Ray2<S>> for ConvexPolygon<S>
-where
-    S: BaseFloat,
-{
-    type Point = Point2<S>;
-
-    fn intersects_transformed<T>(&self, ray: &Ray2<S>, transform: &T) -> bool
-    where
-        T: Transform<Point2<S>>,
-    {
-        self.intersects(&ray.transform(transform.inverse_transform().unwrap()))
     }
 }
 
@@ -94,22 +80,6 @@ where
         }
 
         false
-    }
-}
-
-impl<S> ContinuousTransformed<Ray2<S>> for ConvexPolygon<S>
-where
-    S: BaseFloat,
-{
-    type Point = Point2<S>;
-    type Result = Point2<S>;
-
-    fn intersection_transformed<T>(&self, ray: &Ray2<S>, transform: &T) -> Option<Point2<S>>
-    where
-        T: Transform<Point2<S>>,
-    {
-        self.intersection(&ray.transform(transform.inverse_transform().unwrap()))
-            .map(|p| transform.transform_point(p))
     }
 }
 
@@ -151,9 +121,10 @@ where
     P::Scalar: BaseFloat,
     T: Transform<P>,
 {
-    let direction = transform.inverse_transform().unwrap().transform_vector(
-        *direction,
-    );
+    let direction = transform
+        .inverse_transform()
+        .unwrap()
+        .transform_vector(*direction);
 
     // figure out where to start, if the direction is negative for the first vertex,
     // go halfway around the polygon
@@ -227,7 +198,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Point2, Vector2, Basis2, Rad, Decomposed};
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
 
     use super::*;
     use {Aabb2, Ray2};

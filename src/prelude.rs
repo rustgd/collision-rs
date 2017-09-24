@@ -2,4 +2,4 @@
 
 pub use bound::{Bound, Relation};
 pub use traits::*;
-pub use volume::{MinMax, Aabb};
+pub use volume::{Aabb, MinMax};

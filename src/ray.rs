@@ -22,7 +22,7 @@ use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 use cgmath::prelude::*;
 
-use traits::{Continuous, Discrete};
+use traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransformed};
 
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
@@ -102,5 +102,43 @@ where
                 S::default_epsilon(),
                 S::default_max_relative(),
             )
+    }
+}
+
+impl<P, C> DiscreteTransformed<Ray<P::Scalar, P, P::Diff>> for C
+where
+    C: Discrete<Ray<P::Scalar, P, P::Diff>>,
+    P: EuclideanSpace,
+    P::Scalar: BaseFloat,
+{
+    type Point = P;
+
+    fn intersects_transformed<T>(&self, ray: &Ray<P::Scalar, P, P::Diff>, transform: &T) -> bool
+    where
+        T: Transform<P>,
+    {
+        self.intersects(&ray.transform(transform.inverse_transform().unwrap()))
+    }
+}
+
+impl<P, C> ContinuousTransformed<Ray<P::Scalar, P, P::Diff>> for C
+where
+    C: Continuous<Ray<P::Scalar, P, P::Diff>, Result = P>,
+    P: EuclideanSpace,
+    P::Scalar: BaseFloat,
+{
+    type Point = P;
+    type Result = P;
+
+    fn intersection_transformed<T>(
+        &self,
+        ray: &Ray<P::Scalar, P, P::Diff>,
+        transform: &T,
+    ) -> Option<P>
+    where
+        T: Transform<P>,
+    {
+        self.intersection(&ray.transform(transform.inverse_transform().unwrap()))
+            .map(|p| transform.transform_point(p))
     }
 }

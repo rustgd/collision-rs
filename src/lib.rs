@@ -35,6 +35,7 @@
 #[macro_use]
 extern crate approx;
 
+extern crate bit_set;
 extern crate cgmath;
 extern crate num;
 extern crate rand;

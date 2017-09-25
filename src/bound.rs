@@ -84,9 +84,7 @@ impl<S: BaseFloat> Bound<S> for Point3<S> {
             p.z.abs().partial_cmp(&p.w),
         ) {
             (Some(Less), Some(Less), Some(Less)) => Relation::In,
-            (Some(Greater), _, _) |
-            (_, Some(Greater), _) |
-            (_, _, Some(Greater)) => Relation::Out,
+            (Some(Greater), _, _) | (_, Some(Greater), _) | (_, _, Some(Greater)) => Relation::Out,
             _ => Relation::Cross,
         }
     }

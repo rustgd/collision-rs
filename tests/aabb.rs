@@ -20,9 +20,9 @@ use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 use cgmath::InnerSpace;
 use collision::{Aabb, Aabb2, Aabb3};
-use collision::{Bound, Relation, Plane, Ray};
-use collision::{Continuous, Contains, Discrete, Union, SurfaceArea};
-use collision::{Line2, Line3, Sphere, Ray2, Ray3};
+use collision::{Bound, Plane, Ray, Relation};
+use collision::{Contains, Continuous, Discrete, SurfaceArea, Union};
+use collision::{Line2, Line3, Ray2, Ray3, Sphere};
 
 #[test]
 fn test_general() {
@@ -113,7 +113,6 @@ fn test_general() {
             Point3::new(12isize, 32isize, 7isize),
         )
     );
-
 }
 
 #[test]

@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 
 use cgmath::BaseFloat;
 
-use super::{Visitor, TreeValue};
+use super::{TreeValue, Visitor};
 use {Bound, Frustum, Relation};
 use prelude::*;
 
@@ -134,6 +134,10 @@ where
 
     fn accept(&mut self, bound: &Self::Bound, _: bool) -> Option<Relation> {
         let r = self.frustum.contains(bound);
-        if r == Relation::Out { None } else { Some(r) }
+        if r == Relation::Out {
+            None
+        } else {
+            Some(r)
+        }
     }
 }

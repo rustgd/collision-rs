@@ -1,13 +1,13 @@
 #![feature(test)]
 
-extern crate rand;
 extern crate cgmath;
 extern crate collision;
+extern crate rand;
 extern crate test;
 
 use cgmath::{Point2, Vector2};
 use cgmath::prelude::*;
-use collision::{Ray2, Aabb2};
+use collision::{Aabb2, Ray2};
 use collision::dbvt::*;
 use collision::prelude::*;
 use rand::Rng;
@@ -84,12 +84,7 @@ fn benchmark_query(b: &mut Bencher) {
         let offset_y = neg_y * rng.gen_range(9000., 10000.);
         tree.insert(Value::new(
             i,
-            aabb2(
-                offset_x + 2.,
-                offset_y + 2.,
-                offset_x + 4.,
-                offset_y + 4.,
-            ),
+            aabb2(offset_x + 2., offset_y + 2., offset_x + 4., offset_y + 4.),
         ));
         tree.tick();
     }
@@ -128,12 +123,7 @@ fn benchmark_ray_closest_query(b: &mut Bencher) {
         let offset_y = neg_y * rng.gen_range(9000., 10000.);
         tree.insert(Value::new(
             i,
-            aabb2(
-                offset_x + 2.,
-                offset_y + 2.,
-                offset_x + 4.,
-                offset_y + 4.,
-            ),
+            aabb2(offset_x + 2., offset_y + 2., offset_x + 4., offset_y + 4.),
         ));
         tree.tick();
     }

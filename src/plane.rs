@@ -15,7 +15,7 @@
 
 use std::fmt;
 
-use cgmath::{Vector3, Vector4, Point3, BaseFloat, ApproxEq};
+use cgmath::{ApproxEq, BaseFloat, Point3, Vector3, Vector4};
 use cgmath::prelude::*;
 
 use Ray3;
@@ -144,14 +144,14 @@ where
 
     #[inline]
     fn relative_eq(&self, other: &Self, epsilon: S::Epsilon, max_relative: S::Epsilon) -> bool {
-        Vector3::relative_eq(&self.n, &other.n, epsilon, max_relative) &&
-            S::relative_eq(&self.d, &other.d, epsilon, max_relative)
+        Vector3::relative_eq(&self.n, &other.n, epsilon, max_relative)
+            && S::relative_eq(&self.d, &other.d, epsilon, max_relative)
     }
 
     #[inline]
     fn ulps_eq(&self, other: &Self, epsilon: S::Epsilon, max_ulps: u32) -> bool {
-        Vector3::ulps_eq(&self.n, &other.n, epsilon, max_ulps) &&
-            S::ulps_eq(&self.d, &other.d, epsilon, max_ulps)
+        Vector3::ulps_eq(&self.n, &other.n, epsilon, max_ulps)
+            && S::ulps_eq(&self.d, &other.d, epsilon, max_ulps)
     }
 }
 

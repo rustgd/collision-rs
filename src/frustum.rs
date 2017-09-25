@@ -18,7 +18,7 @@
 use Plane;
 use bound::*;
 use cgmath::{Matrix, Matrix4};
-use cgmath::{PerspectiveFov, Ortho, Perspective};
+use cgmath::{Ortho, Perspective, PerspectiveFov};
 use cgmath::BaseFloat;
 use cgmath::Point3;
 
@@ -63,33 +63,27 @@ impl<S: BaseFloat> Frustum<S> {
     /// Extract frustum planes from a projection matrix.
     pub fn from_matrix4(mat: Matrix4<S>) -> Option<Frustum<S>> {
         Some(Frustum::new(
-            match Plane::from_vector4_alt(mat.row(3) + mat.row(0))
-                .normalize() {
+            match Plane::from_vector4_alt(mat.row(3) + mat.row(0)).normalize() {
                 Some(p) => p,
                 None => return None,
             },
-            match Plane::from_vector4_alt(mat.row(3) - mat.row(0))
-                .normalize() {
+            match Plane::from_vector4_alt(mat.row(3) - mat.row(0)).normalize() {
                 Some(p) => p,
                 None => return None,
             },
-            match Plane::from_vector4_alt(mat.row(3) + mat.row(1))
-                .normalize() {
+            match Plane::from_vector4_alt(mat.row(3) + mat.row(1)).normalize() {
                 Some(p) => p,
                 None => return None,
             },
-            match Plane::from_vector4_alt(mat.row(3) - mat.row(1))
-                .normalize() {
+            match Plane::from_vector4_alt(mat.row(3) - mat.row(1)).normalize() {
                 Some(p) => p,
                 None => return None,
             },
-            match Plane::from_vector4_alt(mat.row(3) + mat.row(2))
-                .normalize() {
+            match Plane::from_vector4_alt(mat.row(3) + mat.row(2)).normalize() {
                 Some(p) => p,
                 None => return None,
             },
-            match Plane::from_vector4_alt(mat.row(3) - mat.row(2))
-                .normalize() {
+            match Plane::from_vector4_alt(mat.row(3) - mat.row(2)).normalize() {
                 Some(p) => p,
                 None => return None,
             },

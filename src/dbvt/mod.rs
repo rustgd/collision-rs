@@ -435,14 +435,16 @@ where
 
                 // if we encounter a branch, do intersection test, and push the children if the
                 // branch intersected
-                Node::Branch(ref branch) => match visitor.accept(&branch.bound, false) {
-                    Some(_) => {
-                        stack[stack_pointer] = branch.left;
-                        stack[stack_pointer + 1] = branch.right;
-                        stack_pointer += 2;
+                Node::Branch(ref branch) => {
+                    match visitor.accept(&branch.bound, false) {
+                        Some(_) => {
+                            stack[stack_pointer] = branch.left;
+                            stack[stack_pointer + 1] = branch.right;
+                            stack_pointer += 2;
+                        }
+                        _ => (),
                     }
-                    _ => (),
-                },
+                }
                 Node::Nil => (),
             }
         }
@@ -749,11 +751,13 @@ where
                 // else we have a remaining branch, and need to update either left or right to point
                 // to the sibling, based on where the old branch node was
                 match self.nodes[parent_parent_index] {
-                    Node::Branch(ref mut b) => if b.left == parent_index {
-                        b.left = sibling_index;
-                    } else {
-                        b.right = sibling_index;
-                    },
+                    Node::Branch(ref mut b) => {
+                        if b.left == parent_index {
+                            b.left = sibling_index;
+                        } else {
+                            b.right = sibling_index;
+                        }
+                    }
                     _ => (),
                 }
 
@@ -832,9 +836,11 @@ where
     ///
     fn refit_node(&mut self, node_index: usize) {
         match self.recalculate_node(node_index) {
-            Some((parent_index, height)) => if parent_index != 0 {
-                self.mark_for_refit(parent_index, height + 1);
-            },
+            Some((parent_index, height)) => {
+                if parent_index != 0 {
+                    self.mark_for_refit(parent_index, height + 1);
+                }
+            }
             _ => (),
         }
 
@@ -1101,10 +1107,12 @@ where
     // either the left child or the left left grandchild
     if !right_is_leaf {
         let (rl_bound, rr_bound) = match nodes[right_index] {
-            Node::Branch(ref right) => (
-                get_bound(&nodes[right.left]),
-                get_bound(&nodes[right.right]),
-            ),
+            Node::Branch(ref right) => {
+                (
+                    get_bound(&nodes[right.left]),
+                    get_bound(&nodes[right.right]),
+                )
+            }
             _ => panic!(),
         };
 

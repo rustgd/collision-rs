@@ -6,6 +6,7 @@ use cgmath::prelude::*;
 
 use {Aabb3, Plane, Ray3};
 use prelude::*;
+use primitive::util::barycentric_point;
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
@@ -53,6 +54,8 @@ where
 /// resulting in better performance. The breakpoint is around 250 vertices, but the face version is
 /// only marginally slower on lower vertex counts (about 1-2%), while for higher vertex counts it's
 /// about 2-5 times faster.
+///
+///
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct ConvexPolyhedron<S>
@@ -122,7 +125,7 @@ where
             .iter()
             .map(|v| (v.position, v.position.dot(direction)))
             .fold(
-                (Point3::from_value(S::zero()), S::neg_infinity()),
+                (Point3::origin(), S::neg_infinity()),
                 |(max_p, max_dot), (v, dot)| if dot > max_dot {
                     (v.clone(), dot)
                 } else {
@@ -195,18 +198,9 @@ fn dedup_faces(
         .iter()
         .map(|&(a, b, c)| {
             (
-                match duplicates.get(&a) {
-                    Some(i) => *i,
-                    None => a,
-                },
-                match duplicates.get(&b) {
-                    Some(i) => *i,
-                    None => b,
-                },
-                match duplicates.get(&c) {
-                    Some(i) => *i,
-                    None => c,
-                },
+                *duplicates.get(&a).unwrap_or(&a),
+                *duplicates.get(&b).unwrap_or(&b),
+                *duplicates.get(&c).unwrap_or(&c),
             )
         })
         .collect::<Vec<_>>()
@@ -235,8 +229,6 @@ where
     let mut edge_map: HashMap<(usize, usize), usize> = HashMap::default();
     for &(a, b, c) in in_faces {
         let face_vertices = [a, b, c];
-        println!("{}, {}, {}", a, b, c);
-        println!("{:?}, {:?}, {:?}", vertices[a], vertices[b], vertices[c]);
         let mut face = Face {
             edge: 0,
             vertices: (a, b, c),
@@ -247,7 +239,6 @@ where
             ).unwrap(),
             ready: false,
         };
-        println!("{:?}", face);
         let face_index = faces.len();
         let mut face_edge_indices = [0, 0, 0];
         for j in 0..3 {
@@ -368,30 +359,10 @@ where
 {
     /// Ray must be in object space
     fn intersects(&self, ray: &Ray3<S>) -> bool {
-        let mut face_index = 0;
-        let mut checked = BitSet::with_capacity(self.faces.len());
-        while face_index < self.faces.len() {
-            checked.insert(face_index);
-            let f = &self.faces[face_index];
-            match intersect_ray_face(ray, &self, &f) {
-                Some((u, v, w)) => {
-                    if in_range(u) && in_range(v) && in_range(w) {
-                        return true;
-                    } else {
-                        face_index =
-                            next_face_classify(self, face_index, Some((u, v, w)), &mut checked);
-                    }
-                }
-                _ => {
-                    face_index = next_face_classify(self, face_index, None, &mut checked);
-                }
-            }
-        }
-        false
+        find_intersecting_face(self, ray).is_some()
     }
 }
 
-// TODO: better algorithm for finding faces to intersect with?
 impl<S> Continuous<Ray3<S>> for ConvexPolyhedron<S>
 where
     S: BaseFloat,
@@ -400,33 +371,47 @@ where
 
     /// Ray must be in object space
     fn intersection(&self, ray: &Ray3<S>) -> Option<Point3<S>> {
-        let mut face_index = 0;
-        let mut checked = BitSet::with_capacity(self.faces.len());
-        while face_index < self.faces.len() {
-            checked.insert(face_index);
+        find_intersecting_face(self, ray).and_then(|(face_index, (u, v, w))| {
             let f = &self.faces[face_index];
-            match intersect_ray_face(ray, &self, &f) {
-                Some((u, v, w)) => {
-                    println!("face v: {:?}, {:?}, {:?}", u, v, w);
-                    if in_range(u) && in_range(v) && in_range(w) {
-                        let v0 = f.vertices.0;
-                        let v1 = f.vertices.1;
-                        let v2 = f.vertices.2;
-                        let p = (self.vertices[v0].position * u)
-                            + (self.vertices[v1].position.to_vec() * v)
-                            + (self.vertices[v2].position.to_vec() * w);
-                        return Some(p);
-                    }
-                    face_index =
-                        next_face_classify(self, face_index, Some((u, v, w)), &mut checked);
-                }
-                _ => {
-                    face_index = next_face_classify(self, face_index, None, &mut checked);
-                }
-            }
-        }
-        None
+            let v0 = f.vertices.0;
+            let v1 = f.vertices.1;
+            let v2 = f.vertices.2;
+            let p = (self.vertices[v0].position * u) + (self.vertices[v1].position.to_vec() * v)
+                + (self.vertices[v2].position.to_vec() * w);
+            Some(p)
+        })
     }
+}
+
+// TODO: better algorithm for finding faces to intersect with?
+// Current algorithm walks in the direction of the plane/ray intersection point for the current
+// tested face, assuming the intersection point isn't on the actual face.
+// It uses barycentric coordinates to find out where to walk next.
+#[inline]
+fn find_intersecting_face<S>(
+    polytope: &ConvexPolyhedron<S>,
+    ray: &Ray3<S>,
+) -> Option<(usize, (S, S, S))>
+where
+    S: BaseFloat,
+{
+    let mut face = Some(0);
+    let mut checked = BitSet::with_capacity(polytope.faces.len());
+    while face.is_some() {
+        let face_index = face.unwrap();
+        checked.insert(face_index);
+        let uvw = match intersect_ray_face(ray, polytope, &polytope.faces[face_index]) {
+            Some((u, v, w)) => {
+                if in_range(u) && in_range(v) && in_range(w) {
+                    return Some((face_index, (u, v, w)));
+                }
+                Some((u, v, w))
+            }
+            _ => None,
+        };
+        face = next_face_classify(polytope, face_index, uvw, &mut checked);
+    }
+    None
 }
 
 #[inline]
@@ -443,12 +428,16 @@ fn next_face_classify<S>(
     face_index: usize,
     bary_coords: Option<(S, S, S)>,
     checked: &mut BitSet,
-) -> usize
+) -> Option<usize>
 where
     S: BaseFloat,
 {
     if polytope.faces.len() < 10 {
-        face_index + 1
+        if face_index == polytope.faces.len() - 1 {
+            None
+        } else {
+            Some(face_index + 1)
+        }
     } else {
         match bary_coords {
             None => {
@@ -456,7 +445,11 @@ where
                 while next < polytope.faces.len() && checked.contains(next) {
                     next = next + 1;
                 }
-                next
+                if next == polytope.faces.len() {
+                    None
+                } else {
+                    Some(next)
+                }
             }
 
             Some((u, v, _)) => {
@@ -484,20 +477,17 @@ where
                 for edge_index in edges.iter() {
                     let twin_edge = polytope.edges[*edge_index].twin_edge;
                     if !checked.contains(polytope.edges[twin_edge].left_face) {
-                        return polytope.edges[twin_edge].left_face;
+                        return Some(polytope.edges[twin_edge].left_face);
                     }
                 }
-
-                // TODO: if none of the closest faces are intersecting, and we got here,
-                // that means this face is probably the closest to an intersection?
 
                 for i in 0..polytope.faces.len() {
                     if !checked.contains(i) {
-                        return i;
+                        return Some(i);
                     }
                 }
 
-                polytope.faces.len()
+                None
             }
         }
     }
@@ -513,16 +503,13 @@ fn intersect_ray_face<S>(
 where
     S: BaseFloat,
 {
-    println!("{:?} {:?}", ray, face);
-
     let n_dir = face.plane.n.dot(ray.direction);
-    println!("normal * ray_dir: {:?}", n_dir);
     if n_dir < S::zero() {
         let v0 = face.vertices.0;
         let v1 = face.vertices.1;
         let v2 = face.vertices.2;
         face.plane.intersection(ray).map(|p| {
-            ::primitive::util::barycentric_point(
+            barycentric_point(
                 p,
                 polytope.vertices[v0].position,
                 polytope.vertices[v1].position,

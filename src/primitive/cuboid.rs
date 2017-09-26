@@ -3,6 +3,7 @@ use cgmath::prelude::*;
 
 use {Aabb3, Ray3};
 use prelude::*;
+use primitive::util::get_max_point;
 
 /// Cuboid primitive.
 ///
@@ -11,7 +12,7 @@ use prelude::*;
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Cuboid<S> {
     /// Dimensions of the box
-    pub dim: Vector3<S>,
+    dim: Vector3<S>,
     half_dim: Vector3<S>,
     corners: Vec<Point3<S>>,
 }
@@ -27,24 +28,24 @@ where
 
     /// Create a new rectangle primitive from a vector of component dimensions
     pub fn new_impl(dim: Vector3<S>) -> Self {
+        let half_dim = dim / (S::one() + S::one());
         Self {
             dim,
-            half_dim: dim / (S::one() + S::one()),
-            corners: Self::generate_corners(&dim),
+            half_dim,
+            corners: Self::generate_corners(&half_dim),
         }
     }
 
-    fn generate_corners(dimensions: &Vector3<S>) -> Vec<Point3<S>> {
-        let two = S::one() + S::one();
+    fn generate_corners(half_dim: &Vector3<S>) -> Vec<Point3<S>> {
         vec![
-            Point3::new(dimensions.x, dimensions.y, dimensions.z) / two,
-            Point3::new(-dimensions.x, dimensions.y, dimensions.z) / two,
-            Point3::new(-dimensions.x, -dimensions.y, dimensions.z) / two,
-            Point3::new(dimensions.x, -dimensions.y, dimensions.z) / two,
-            Point3::new(dimensions.x, dimensions.y, -dimensions.z) / two,
-            Point3::new(-dimensions.x, dimensions.y, -dimensions.z) / two,
-            Point3::new(-dimensions.x, -dimensions.y, -dimensions.z) / two,
-            Point3::new(dimensions.x, -dimensions.y, -dimensions.z) / two,
+            Point3::new(half_dim.x, half_dim.y, half_dim.z),
+            Point3::new(-half_dim.x, half_dim.y, half_dim.z),
+            Point3::new(-half_dim.x, -half_dim.y, half_dim.z),
+            Point3::new(half_dim.x, -half_dim.y, half_dim.z),
+            Point3::new(half_dim.x, half_dim.y, -half_dim.z),
+            Point3::new(-half_dim.x, half_dim.y, -half_dim.z),
+            Point3::new(-half_dim.x, -half_dim.y, -half_dim.z),
+            Point3::new(half_dim.x, -half_dim.y, -half_dim.z),
         ]
     }
 }
@@ -59,7 +60,7 @@ where
     where
         T: Transform<Point3<S>>,
     {
-        ::primitive::util::get_max_point(&self.corners, direction, transform)
+        get_max_point(self.corners.iter(), direction, transform)
     }
 }
 
@@ -82,26 +83,7 @@ where
     S: BaseFloat,
 {
     fn intersects(&self, ray: &Ray3<S>) -> bool {
-        let min = Point3::new(-self.half_dim.x, -self.half_dim.y, -self.half_dim.z);
-        let max = Point3::new(self.half_dim.x, self.half_dim.y, self.half_dim.z);
-
-        let inv_dir = Vector3::from_value(S::one()).div_element_wise(ray.direction);
-
-        let mut t1 = (min.x - ray.origin.x) * inv_dir.x;
-        let mut t2 = (max.x - ray.origin.x) * inv_dir.x;
-
-        let mut tmin = t1.min(t2);
-        let mut tmax = t1.max(t2);
-
-        for i in 1..3 {
-            t1 = (min[i] - ray.origin[i]) * inv_dir[i];
-            t2 = (max[i] - ray.origin[i]) * inv_dir[i];
-
-            tmin = tmin.max(t1.min(t2));
-            tmax = tmax.min(t1.max(t2));
-        }
-
-        tmax >= tmin && (tmin >= S::zero() || tmax >= S::zero())
+        self.get_bound().intersects(ray)
     }
 }
 
@@ -112,31 +94,7 @@ where
     type Result = Point3<S>;
 
     fn intersection(&self, ray: &Ray3<S>) -> Option<Point3<S>> {
-        let min = Point3::new(-self.half_dim.x, -self.half_dim.y, -self.half_dim.z);
-        let max = Point3::new(self.half_dim.x, self.half_dim.y, self.half_dim.z);
-
-        let inv_dir = Vector3::from_value(S::one()).div_element_wise(ray.direction);
-
-        let mut t1 = (min.x - ray.origin.x) * inv_dir.x;
-        let mut t2 = (max.x - ray.origin.x) * inv_dir.x;
-
-        let mut tmin = t1.min(t2);
-        let mut tmax = t1.max(t2);
-
-        for i in 1..3 {
-            t1 = (min[i] - ray.origin[i]) * inv_dir[i];
-            t2 = (max[i] - ray.origin[i]) * inv_dir[i];
-
-            tmin = tmin.max(t1.min(t2));
-            tmax = tmax.min(t1.max(t2));
-        }
-
-        if (tmin < S::zero() && tmax < S::zero()) || tmax < tmin {
-            None
-        } else {
-            let t = if tmin >= S::zero() { tmin } else { tmax };
-            Some(ray.origin + ray.direction * t)
-        }
+        self.get_bound().intersection(ray)
     }
 }
 

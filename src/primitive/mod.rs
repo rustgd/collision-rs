@@ -5,9 +5,10 @@ pub use self::cuboid::Cuboid;
 pub use self::particle::*;
 pub use self::polygon::ConvexPolygon;
 pub use self::polyhedron::ConvexPolyhedron;
+pub use self::primitive2::Primitive2;
+pub use self::primitive3::Primitive3;
 pub use self::rectangle::Rectangle;
 pub use self::sphere::Sphere;
-pub use self::primitive2::Primitive2;
 
 mod circle;
 mod rectangle;

@@ -18,7 +18,7 @@ use std::fmt::Debug;
 use cgmath::BaseNum;
 use cgmath::prelude::*;
 
-use {Aabb, MinMax};
+use Aabb;
 
 /// An intersection test with a result.
 ///
@@ -79,7 +79,7 @@ pub trait HasAabb {
 /// Minkowski support function for primitive
 pub trait SupportFunction {
     /// Point type
-    type Point: EuclideanSpace + MinMax;
+    type Point: EuclideanSpace;
 
     /// Get the support point on the shape in a given direction.
     ///
@@ -112,7 +112,7 @@ pub trait DiscreteTransformed<RHS> {
     type Point: EuclideanSpace;
 
     /// Intersection test for transformed self
-    fn intersects_transformed<T>(&self, _: &RHS, _: &T) -> bool
+    fn intersects_transformed<T>(&self, &RHS, &T) -> bool
     where
         T: Transform<Self::Point>;
 }
@@ -126,7 +126,7 @@ pub trait ContinuousTransformed<RHS> {
     type Result: EuclideanSpace;
 
     /// Intersection test for transformed self
-    fn intersection_transformed<T>(&self, _: &RHS, _: &T) -> Option<Self::Result>
+    fn intersection_transformed<T>(&self, &RHS, &T) -> Option<Self::Result>
     where
         T: Transform<Self::Point>;
 }

@@ -6,18 +6,19 @@ use cgmath::{BaseFloat, BaseNum, Vector2};
 use cgmath::prelude::*;
 use num::Float;
 
-pub(crate) fn get_max_point<P, T>(vertices: &Vec<P>, direction: &P::Diff, transform: &T) -> P
+pub(crate) fn get_max_point<'a, P: 'a, T, I>(vertices: I, direction: &P::Diff, transform: &T) -> P
 where
     P: EuclideanSpace,
     P::Scalar: BaseFloat,
     T: Transform<P>,
+    I: Iterator<Item = &'a P>,
 {
     let direction = transform
         .inverse_transform()
         .unwrap()
         .transform_vector(*direction);
-    let (p, _) = vertices.iter().map(|v| (v, v.dot(direction))).fold(
-        (P::from_value(P::Scalar::zero()), P::Scalar::neg_infinity()),
+    let (p, _) = vertices.map(|v| (v, v.dot(direction))).fold(
+        (P::origin(), P::Scalar::neg_infinity()),
         |(max_p, max_dot), (v, dot)| if dot > max_dot {
             (v.clone(), dot)
         } else {
@@ -27,11 +28,12 @@ where
     transform.transform_point(p)
 }
 
-pub(crate) fn get_bound<A>(vertices: &Vec<A::Point>) -> A
+pub(crate) fn get_bound<'a, I, A: 'a>(vertices: I) -> A
 where
     A: Aabb,
+    I: Iterator<Item = &'a A::Point>,
 {
-    vertices.iter().fold(A::zero(), |bound, p| bound.grow(*p))
+    vertices.fold(A::zero(), |bound, p| bound.grow(*p))
 }
 
 #[allow(dead_code)]
@@ -109,7 +111,7 @@ mod tests {
         ];
         assert_eq!(
             Aabb2::new(Point2::new(-1., -1.), Point2::new(1., 1.)),
-            get_bound(&triangle)
+            get_bound(triangle.iter())
         );
     }
 
@@ -122,7 +124,7 @@ mod tests {
             Point2::new(1., 0.),
         ];
         let t = transform(0., 0., rot_angle);
-        let max_point = get_max_point(&triangle, &direction, &t);
+        let max_point = get_max_point(triangle.iter(), &direction, &t);
         assert_ulps_eq!(point.x, max_point.x);
         assert_ulps_eq!(point.y, max_point.y);
     }
@@ -178,7 +180,7 @@ mod tests {
             Point2::new(1., 0.),
         ];
         let t = transform(0., 8., 0.);
-        assert_eq!(point, get_max_point(&triangle, &direction, &t));
+        assert_eq!(point, get_max_point(triangle.iter(), &direction, &t));
     }
 
     fn transform(dx: f32, dy: f32, rot: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {

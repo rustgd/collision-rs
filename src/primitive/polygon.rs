@@ -5,6 +5,7 @@ use cgmath::prelude::*;
 
 use {Aabb2, Line2, Ray2};
 use prelude::*;
+use primitive::util::{get_bound, get_max_point};
 
 /// Convex polygon primitive.
 ///
@@ -35,7 +36,7 @@ where
         T: Transform<Point2<S>>,
     {
         if self.vertices.len() < 10 {
-            ::primitive::util::get_max_point(&self.vertices, direction, transform)
+            get_max_point(self.vertices.iter(), direction, transform)
         } else {
             support_point(&self.vertices, direction, transform)
         }
@@ -49,7 +50,7 @@ where
     type Aabb = Aabb2<S>;
 
     fn get_bound(&self) -> Aabb2<S> {
-        ::primitive::util::get_bound(&self.vertices)
+        get_bound(self.vertices.iter())
     }
 }
 
@@ -188,12 +189,12 @@ where
 {
     let index_u = index as usize;
     if index_u == vertices.len() {
-        vertices[0].dot(*direction)
+        vertices[0]
     } else if index == -1 {
-        vertices[vertices.len() - 1].dot(*direction)
+        vertices[vertices.len() - 1]
     } else {
-        vertices[index_u].dot(*direction)
-    }
+        vertices[index_u]
+    }.dot(*direction)
 }
 
 #[cfg(test)]

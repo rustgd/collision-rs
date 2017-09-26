@@ -5,6 +5,7 @@ use cgmath::prelude::*;
 
 use {Aabb2, Ray2};
 use prelude::*;
+use primitive::util::get_max_point;
 
 /// Rectangle primitive.
 ///
@@ -13,7 +14,7 @@ use prelude::*;
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
 pub struct Rectangle<S> {
     /// Dimensions of the rectangle
-    pub dim: Vector2<S>,
+    dim: Vector2<S>,
     half_dim: Vector2<S>,
     corners: Vec<Point2<S>>,
 }
@@ -29,20 +30,20 @@ where
 
     /// Create a new rectangle primitive from a vector of component dimensions
     pub fn new_impl(dim: Vector2<S>) -> Self {
+        let half_dim = dim / (S::one() + S::one());
         Rectangle {
             dim,
-            half_dim: dim / (S::one() + S::one()),
-            corners: Self::generate_corners(&dim),
+            half_dim,
+            corners: Self::generate_corners(&half_dim),
         }
     }
 
-    fn generate_corners(dimensions: &Vector2<S>) -> Vec<Point2<S>> {
-        let two = S::one() + S::one();
+    fn generate_corners(half_dim: &Vector2<S>) -> Vec<Point2<S>> {
         vec![
-            Point2::new(dimensions.x / two, dimensions.y / two),
-            Point2::new(-dimensions.x / two, dimensions.y / two),
-            Point2::new(-dimensions.x / two, -dimensions.y / two),
-            Point2::new(dimensions.x / two, -dimensions.y / two),
+            Point2::new(half_dim.x, half_dim.y),
+            Point2::new(-half_dim.x, half_dim.y),
+            Point2::new(-half_dim.x, -half_dim.y),
+            Point2::new(half_dim.x, -half_dim.y),
         ]
     }
 }
@@ -57,7 +58,7 @@ where
     where
         T: Transform<Point2<S>>,
     {
-        ::primitive::util::get_max_point(&self.corners, direction, transform)
+        get_max_point(self.corners.iter(), direction, transform)
     }
 }
 
@@ -81,31 +82,7 @@ where
 {
     /// Ray must be in object space of the rectangle
     fn intersects(&self, ray: &Ray2<S>) -> bool {
-        let min = Point2::new(-self.half_dim.x, -self.half_dim.y);
-        let max = Point2::new(self.half_dim.x, self.half_dim.y);
-
-        let mut tmin = S::neg_infinity();
-        let mut tmax = S::infinity();
-
-        if ray.direction.x != S::zero() {
-            let tx1 = (min.x - ray.origin.x) / ray.direction.x;
-            let tx2 = (max.x - ray.origin.x) / ray.direction.x;
-            tmin = tmin.max(tx1.min(tx2));
-            tmax = tmax.min(tx1.max(tx2));
-        } else if ray.origin.x <= min.x || ray.origin.x >= max.x {
-            return false;
-        }
-
-        if ray.direction.y != S::zero() {
-            let ty1 = (min.y - ray.origin.y) / ray.direction.y;
-            let ty2 = (max.y - ray.origin.y) / ray.direction.y;
-            tmin = tmin.max(ty1.min(ty2));
-            tmax = tmax.min(ty1.max(ty2));
-        } else if ray.origin.y <= min.y || ray.origin.y >= max.y {
-            return false;
-        }
-
-        tmax >= tmin && (tmin >= S::zero() || tmax >= S::zero())
+        self.get_bound().intersects(ray)
     }
 }
 
@@ -117,35 +94,7 @@ where
 
     /// Ray must be in object space of the rectangle
     fn intersection(&self, ray: &Ray2<S>) -> Option<Point2<S>> {
-        let min = Point2::new(-self.half_dim.x, -self.half_dim.y);
-        let max = Point2::new(self.half_dim.x, self.half_dim.y);
-        let mut tmin = S::neg_infinity();
-        let mut tmax = S::infinity();
-
-        if ray.direction.x != S::zero() {
-            let tx1 = (min.x - ray.origin.x) / ray.direction.x;
-            let tx2 = (max.x - ray.origin.x) / ray.direction.x;
-            tmin = tmin.max(tx1.min(tx2));
-            tmax = tmax.min(tx1.max(tx2));
-        } else if ray.origin.x <= min.x || ray.origin.x >= max.x {
-            return None;
-        }
-
-        if ray.direction.y != S::zero() {
-            let ty1 = (min.y - ray.origin.y) / ray.direction.y;
-            let ty2 = (max.y - ray.origin.y) / ray.direction.y;
-            tmin = tmin.max(ty1.min(ty2));
-            tmax = tmax.min(ty1.max(ty2));
-        } else if ray.origin.y <= min.y || ray.origin.y >= max.y {
-            return None;
-        }
-
-        if (tmin < S::zero() && tmax < S::zero()) || tmax < tmin {
-            None
-        } else {
-            let t = if tmin >= S::zero() { tmin } else { tmax };
-            Some(ray.origin + ray.direction * t)
-        }
+        self.get_bound().intersection(ray)
     }
 }
 

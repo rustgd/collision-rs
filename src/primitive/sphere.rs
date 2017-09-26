@@ -63,10 +63,7 @@ where
             return false;
         }
         let d2 = l.dot(l) - tca * tca;
-        if d2 > s.radius * s.radius {
-            return false;
-        }
-        return true;
+        d2 <= s.radius * s.radius
     }
 }
 

@@ -17,7 +17,7 @@
 
 use std::marker::PhantomData;
 
-use cgmath::{BaseNum, BaseFloat};
+use cgmath::{BaseFloat, BaseNum};
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 use cgmath::prelude::*;
@@ -81,8 +81,8 @@ impl<S: BaseFloat> Continuous<Line2<S>> for Ray2<S> {
             let q2mp = Vector2::new(line.dest.x - p.x, line.dest.y - p.y);
             let dot_1 = qmp.dot(r);
             let dot_2 = q2mp.dot(r);
-            if (dot_1 <= S::zero() && dot_2 >= S::zero()) ||
-                (dot_1 >= S::zero() && dot_2 <= S::zero())
+            if (dot_1 <= S::zero() && dot_2 >= S::zero())
+                || (dot_1 >= S::zero() && dot_2 <= S::zero())
             {
                 return Some(p);
             } else if dot_1 >= S::zero() && dot_2 >= S::zero() {

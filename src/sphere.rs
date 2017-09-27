@@ -18,7 +18,7 @@
 use cgmath::{BaseFloat, Point3};
 use cgmath::prelude::*;
 
-use {Plane, Ray3, Aabb3, Line3};
+use {Aabb3, Line3, Plane, Ray3};
 use prelude::*;
 
 /// Bounding sphere.

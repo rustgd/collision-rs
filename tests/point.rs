@@ -21,7 +21,7 @@ extern crate cgmath;
 extern crate collision;
 
 use cgmath::{Point3, Vector3};
-use collision::{Bound, Continuous, Relation, Plane, Ray3};
+use collision::{Bound, Continuous, Plane, Ray3, Relation};
 
 #[test]
 fn test_homogeneous() {

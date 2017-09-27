@@ -3,11 +3,11 @@
 
 use std::fmt;
 
-use cgmath::{Point2, Vector2, BaseNum, BaseFloat};
+use cgmath::{BaseFloat, BaseNum, Point2, Vector2};
 use cgmath::prelude::*;
 
-use super::{min, max};
-use {Ray2, Line2};
+use super::{max, min};
+use {Line2, Ray2};
 use prelude::*;
 
 /// A two-dimensional AABB, aka a rectangle.
@@ -78,9 +78,9 @@ impl<S: BaseNum> Aabb for Aabb2<S> {
         let corners = self.to_corners();
         let transformed_first = transform.transform_point(corners[0]);
         let base = Self::new(transformed_first, transformed_first);
-        corners[1..].iter().fold(base, |u, &corner| {
-            u.grow(transform.transform_point(corner))
-        })
+        corners[1..]
+            .iter()
+            .fold(base, |u, &corner| u.grow(transform.transform_point(corner)))
     }
 }
 
@@ -105,8 +105,8 @@ impl<S: BaseNum> Contains<Aabb2<S>> for Aabb2<S> {
         let other_min = other.min();
         let other_max = other.max();
 
-        other_min.x >= self.min.x && other_min.y >= self.min.y && other_max.x <= self.max.x &&
-            other_max.y <= self.max.y
+        other_min.x >= self.min.x && other_min.y >= self.min.y && other_max.x <= self.max.x
+            && other_max.y <= self.max.y
     }
 }
 

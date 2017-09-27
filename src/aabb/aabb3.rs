@@ -3,11 +3,11 @@
 
 use std::fmt;
 
-use cgmath::{Point3, Vector3, BaseNum, BaseFloat};
+use cgmath::{BaseFloat, BaseNum, Point3, Vector3};
 use cgmath::prelude::*;
 
-use super::{min, max};
-use {Ray3, Line3, Sphere, Plane};
+use super::{max, min};
+use {Line3, Plane, Ray3, Sphere};
 use prelude::*;
 
 /// A three-dimensional AABB, aka a rectangular prism.
@@ -90,9 +90,9 @@ impl<S: BaseNum> Aabb for Aabb3<S> {
         let corners = self.to_corners();
         let transformed_first = transform.transform_point(corners[0]);
         let base = Self::new(transformed_first, transformed_first);
-        corners[1..].iter().fold(base, |u, &corner| {
-            u.grow(transform.transform_point(corner))
-        })
+        corners[1..]
+            .iter()
+            .fold(base, |u, &corner| u.grow(transform.transform_point(corner)))
     }
 }
 
@@ -107,8 +107,8 @@ impl<S: BaseNum> Contains<Point3<S>> for Aabb3<S> {
     fn contains(&self, p: &Point3<S>) -> bool {
         let v_min = p - self.min();
         let v_max = self.max() - p;
-        v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() &&
-            v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
+        v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() && v_max.x > S::zero()
+            && v_max.y > S::zero() && v_max.z > S::zero()
     }
 }
 
@@ -118,9 +118,9 @@ impl<S: BaseNum> Contains<Aabb3<S>> for Aabb3<S> {
         let other_min = other.min();
         let other_max = other.max();
 
-        other_min.x >= self.min.x && other_min.y >= self.min.y && other_min.z >= self.min.z &&
-            other_max.x <= self.max.x &&
-            other_max.y <= self.max.y && other_max.z <= self.max.z
+        other_min.x >= self.min.x && other_min.y >= self.min.y && other_min.z >= self.min.z
+            && other_max.x <= self.max.x && other_max.y <= self.max.y
+            && other_max.z <= self.max.z
     }
 }
 
@@ -128,12 +128,12 @@ impl<S: BaseFloat> Contains<Sphere<S>> for Aabb3<S> {
     // will return true for border hits on both min and max extents
     #[inline]
     fn contains(&self, sphere: &Sphere<S>) -> bool {
-        (sphere.center.x - sphere.radius) >= self.min.x &&
-            (sphere.center.y - sphere.radius) >= self.min.y &&
-            (sphere.center.z - sphere.radius) >= self.min.z &&
-            (sphere.center.x + sphere.radius) <= self.max.x &&
-            (sphere.center.y + sphere.radius) <= self.max.y &&
-            (sphere.center.z + sphere.radius) <= self.max.z
+        (sphere.center.x - sphere.radius) >= self.min.x
+            && (sphere.center.y - sphere.radius) >= self.min.y
+            && (sphere.center.z - sphere.radius) >= self.min.z
+            && (sphere.center.x + sphere.radius) <= self.max.x
+            && (sphere.center.y + sphere.radius) <= self.max.y
+            && (sphere.center.z + sphere.radius) <= self.max.z
     }
 }
 

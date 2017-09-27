@@ -291,11 +291,7 @@ enum Node<B> {
 impl<T> DynamicBoundingVolumeTree<T>
 where
     T: TreeValue,
-    T::Bound: Clone
-        + Debug
-        + Contains<T::Bound>
-        + Union<T::Bound, Output = T::Bound>
-        + SurfaceArea,
+    T::Bound: Clone + Debug + Contains<T::Bound> + Union<T::Bound, Output = T::Bound> + SurfaceArea,
 {
     /// Create a new tree.
     ///
@@ -422,7 +418,6 @@ where
         let mut stack_pointer = 1;
         let mut values = Vec::default();
         while stack_pointer > 0 {
-
             // depth search, use last added as next test subject
             stack_pointer -= 1;
             let node_index = stack[stack_pointer];
@@ -606,9 +601,9 @@ where
                 let add_branch = match self.nodes[node_index] {
                     Node::Leaf(ref leaf) => {
                         let new_branch = Branch {
-                            left: node_index, // old leaf at the current position is the left child
+                            left: node_index,      // old leaf at the current position is left child
                             right: new_leaf_index, // new leaf node is the right child
-                            parent: leaf.parent, // parent of the branch is the old leaf parent
+                            parent: leaf.parent,   // parent of the branch is the old leaf parent
                             height: 2, // leafs have height 1, so new branch have height 2
                             bound: leaf.bound.union(&new_leaf.bound),
                         };
@@ -636,7 +631,6 @@ where
 
                 // time to actually update the tree
                 if let Some((leaf_index, branch)) = add_branch {
-
                     // the old leaf node needs to point to the new branch node as its parent
                     if let Node::Leaf(ref mut n) = self.nodes[leaf_index] {
                         n.parent = new_branch_index;
@@ -754,7 +748,6 @@ where
             if parent_parent_index == 0 {
                 self.root_index = sibling_index;
             } else {
-
                 // else we have a remaining branch, and need to update either left or right to point
                 // to the sibling, based on where the old branch node was
                 match self.nodes[parent_parent_index] {
@@ -899,7 +892,6 @@ where
     /// The parent index of the given node
     ///
     fn rotate(&mut self, node_index: usize) -> Option<usize> {
-
         let improvement_percentage: <T::Bound as SurfaceArea>::Scalar =
             NumCast::from(SURFACE_AREA_IMPROVEMENT_FOR_ROTATION).unwrap();
 
@@ -920,7 +912,6 @@ where
 
         // if the node is a grandparent, we can do rotation checks
         if !left_is_leaf || !right_is_leaf {
-
             let (rot, min_sa) = get_best_rotation(
                 &self.nodes,
                 left_index,
@@ -1116,10 +1107,12 @@ where
     // either the left child or the left left grandchild
     if !right_is_leaf {
         let (rl_bound, rr_bound) = match nodes[right_index] {
-            Node::Branch(ref right) => (
-                get_bound(&nodes[right.left]),
-                get_bound(&nodes[right.right]),
-            ),
+            Node::Branch(ref right) => {
+                (
+                    get_bound(&nodes[right.left]),
+                    get_bound(&nodes[right.right]),
+                )
+            }
             _ => panic!(),
         };
 
@@ -1140,10 +1133,9 @@ where
         // check for left left grandchild swapped with either of the right grandchildren
         if !left_is_leaf {
             let (ll_bound, lr_bound) = match nodes[left_index] {
-                Node::Branch(ref left) => (
-                    get_bound(&nodes[left.left]),
-                    get_bound(&nodes[left.right]),
-                ),
+                Node::Branch(ref left) => {
+                    (get_bound(&nodes[left.left]), get_bound(&nodes[left.right]))
+                }
                 _ => panic!(),
             };
 

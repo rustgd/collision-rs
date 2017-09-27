@@ -1,10 +1,10 @@
-extern crate collision;
 extern crate cgmath;
+extern crate collision;
 extern crate rand;
 
-use cgmath::{Point2, Vector2, PerspectiveFov, Deg, Point3, Vector3};
+use cgmath::{Deg, PerspectiveFov, Point2, Point3, Vector2, Vector3};
 use cgmath::prelude::*;
-use collision::{Aabb2, Ray2, Frustum, Projection, Relation, Aabb3};
+use collision::{Aabb2, Aabb3, Frustum, Projection, Ray2, Relation};
 use collision::dbvt::*;
 use collision::prelude::*;
 use rand::Rng;
@@ -125,12 +125,7 @@ fn test_add_20() {
         let offset = rng.gen_range(-10., 10.);
         tree.insert(Value2::new(
             i,
-            aabb2(
-                offset + 0.1,
-                offset + 0.1,
-                offset + 0.3,
-                offset + 0.3,
-            ),
+            aabb2(offset + 0.1, offset + 0.1, offset + 0.3, offset + 0.3),
         ));
         tree.do_refit();
     }

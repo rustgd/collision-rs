@@ -16,7 +16,7 @@
 extern crate cgmath;
 extern crate collision;
 
-use cgmath::{Point3, PerspectiveFov, Rad};
+use cgmath::{PerspectiveFov, Point3, Rad};
 use collision::{Projection, Relation, Sphere};
 
 #[test]

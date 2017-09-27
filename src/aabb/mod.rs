@@ -23,9 +23,9 @@
 pub use self::aabb2::Aabb2;
 pub use self::aabb3::Aabb3;
 
-use std::cmp::{PartialOrd, Ordering};
+use std::cmp::{Ordering, PartialOrd};
 
-use cgmath::{Point2, Point3, BaseNum};
+use cgmath::{BaseNum, Point2, Point3};
 use cgmath::prelude::*;
 
 mod aabb2;
@@ -33,18 +33,14 @@ mod aabb3;
 
 pub(crate) fn min<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     match lhs.partial_cmp(&rhs) {
-        Some(Ordering::Less) |
-        Some(Ordering::Equal) |
-        None => lhs,
+        Some(Ordering::Less) | Some(Ordering::Equal) | None => lhs,
         _ => rhs,
     }
 }
 
 pub(crate) fn max<S: PartialOrd + Copy>(lhs: S, rhs: S) -> S {
     match lhs.partial_cmp(&rhs) {
-        Some(Ordering::Greater) |
-        Some(Ordering::Equal) |
-        None => lhs,
+        Some(Ordering::Greater) | Some(Ordering::Equal) | None => lhs,
         _ => rhs,
     }
 }

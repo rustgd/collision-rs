@@ -67,10 +67,9 @@ where
                 } else {
                     None
                 }
-            },
+            }
             None => None,
         }
-
     }
 }
 

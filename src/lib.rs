@@ -39,9 +39,9 @@ extern crate cgmath;
 extern crate num;
 extern crate rand;
 
-#[cfg(feature = "eders")]
+#[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(feature = "eders")]
+#[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde_derive;
 

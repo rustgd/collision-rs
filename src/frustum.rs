@@ -24,7 +24,7 @@ use cgmath::Point3;
 
 /// View frustum, used for frustum culling
 #[derive(Copy, Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Frustum<S: BaseFloat> {
     /// Left plane
     pub left: Plane<S>,
@@ -113,7 +113,7 @@ impl<S: BaseFloat> Frustum<S> {
 
 /// View frustum corner points
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FrustumPoints<S> {
     /// Near top left point
     pub near_top_left: Point3<S>,

@@ -35,6 +35,7 @@
 #[macro_use]
 extern crate approx;
 
+extern crate bit_set;
 extern crate cgmath;
 extern crate num;
 extern crate rand;
@@ -47,29 +48,24 @@ extern crate serde_derive;
 
 // Re-exports
 
-pub use aabb::*;
 pub use bound::*;
-pub use cylinder::Cylinder;
 pub use frustum::*;
 pub use line::*;
-pub use obb::*;
 pub use plane::Plane;
 pub use ray::*;
-pub use sphere::Sphere;
 pub use traits::*;
+pub use volume::*;
 
 pub mod prelude;
 pub mod dbvt;
+pub mod primitive;
 
 // Modules
 
-mod aabb;
 mod bound;
-mod cylinder;
 mod frustum;
 mod traits;
-mod obb;
-mod sphere;
 mod plane;
 mod ray;
 mod line;
+mod volume;

@@ -96,7 +96,7 @@ pub trait Aabb: Sized {
 
     /// Create a new empty AABB
     fn zero() -> Self {
-        let p = Self::Point::from_value(Self::Scalar::zero());
+        let p = Self::Point::origin();
         Self::new(p, p)
     }
 

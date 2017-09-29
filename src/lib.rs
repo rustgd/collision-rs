@@ -3,20 +3,14 @@
 #![deny(missing_docs, missing_debug_implementations, trivial_casts, unsafe_code, unstable_features,
        unused_import_braces, unused_qualifications)]
 
-//! Computer graphics-centric math.
+//! Companion library to cgmath, dealing with collision detection centric data structures and
+//! algorithms.
 //!
-//! This crate provides useful mathematical primitives and operations on them.
-//! It is organized into one module per primitive. The core structures are
-//! vectors and matrices. A strongly-typed interface is provided, to prevent
-//! mixing units or violating mathematical invariants.
+//! This crate provides useful data structures and algorithms for doing collision detection.
+//! It is organized into a few distinct parts: generic geometry (ray, line, plane, frustum etc),
+//! bounding volumes (AABB, OBB, Sphere etc), collision primitives and algorithms used for
+//! collision detection, distance computation etc.
 //!
-//! Transformations are not usually done directly on matrices, but go through
-//! transformation objects that can be converted to matrices. Rotations go
-//! through the `Basis` types, which are guaranteed to be orthogonal matrices.
-//! Despite this, one can directly create a limited rotation matrix using the
-//! `look_at`, `from_angle`, `from_euler`, and `from_axis_angle` methods.
-//! These are provided for convenience.
-
 #[macro_use]
 extern crate approx;
 

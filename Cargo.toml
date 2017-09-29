@@ -40,3 +40,6 @@ cgmath = "0.15"
 serde = { version = "1.0", optional = true }
 serde_derive = { version = "1.0", optional = true }
 bit-set = "0.4"
+
+[dev-dependencies]
+genmesh = "*"

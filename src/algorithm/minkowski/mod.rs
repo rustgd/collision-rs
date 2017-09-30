@@ -1,0 +1,96 @@
+//! Algorithms using the Minkowski Sum/Difference
+
+pub use self::epa::{EPA2, EPA3, EPA};
+pub use self::gjk::{GJK2, GJK3, SimplexProcessor, GJK};
+
+use std::ops::Neg;
+
+use cgmath::prelude::*;
+use prelude::*;
+
+mod epa;
+mod gjk;
+
+/// Minkowski Sum/Difference support point
+#[derive(Clone, Debug)]
+pub struct SupportPoint<P>
+where
+    P: EuclideanSpace,
+{
+    v: P::Diff,
+    sup_a: P,
+    sup_b: P,
+}
+
+impl<P> SupportPoint<P>
+where
+    P: EuclideanSpace,
+{
+    /// Create a new support point at origin
+    pub fn new() -> Self {
+        Self {
+            v: P::Diff::zero(),
+            sup_a: P::origin(),
+            sup_b: P::origin(),
+        }
+    }
+
+    /// Create a new support point from the minkowski difference, using primitive support functions
+    pub fn from_minkowski<SL, SR, TL, TR>(
+        left: &SL,
+        left_transform: &TL,
+        right: &SR,
+        right_transform: &TR,
+        direction: &P::Diff,
+    ) -> Self
+    where
+        SL: SupportFunction<Point = P>,
+        SR: SupportFunction<Point = P>,
+        P::Diff: Neg<Output = P::Diff>,
+        TL: Transform<P>,
+        TR: Transform<P>,
+    {
+        let l = left.support_point(direction, left_transform);
+        let r = right.support_point(&direction.neg(), right_transform);
+        Self {
+            v: l - r,
+            sup_a: l,
+            sup_b: r,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use cgmath::{Basis2, Decomposed, Rad, Rotation2, Vector2};
+
+    use super::SupportPoint;
+    use primitive::*;
+
+    fn transform(x: f32, y: f32, angle: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {
+        Decomposed {
+            disp: Vector2::new(x, y),
+            rot: Rotation2::from_angle(Rad(angle)),
+            scale: 1.,
+        }
+    }
+
+    #[test]
+    fn test_support() {
+        let left = Rectangle::new(10., 10.);
+        let left_transform = transform(15., 0., 0.);
+        let right = Rectangle::new(10., 10.);
+        let right_transform = transform(-15., 0., 0.);
+        let direction = Vector2::new(1., 0.);
+        assert_eq!(
+            Vector2::new(40., 0.),
+            SupportPoint::from_minkowski(
+                &left,
+                &left_transform,
+                &right,
+                &right_transform,
+                &direction,
+            ).v
+        );
+    }
+}

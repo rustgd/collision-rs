@@ -28,6 +28,7 @@ extern crate serde_derive;
 // Re-exports
 
 pub use bound::*;
+pub use contact::*;
 pub use frustum::*;
 pub use line::*;
 pub use plane::Plane;
@@ -38,6 +39,7 @@ pub use volume::*;
 pub mod prelude;
 pub mod dbvt;
 pub mod primitive;
+pub mod algorithm;
 
 // Modules
 
@@ -48,3 +50,4 @@ mod plane;
 mod ray;
 mod line;
 mod volume;
+mod contact;

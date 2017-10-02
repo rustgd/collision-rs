@@ -1,7 +1,7 @@
 //! Broad phase collision detection algorithms
 
 pub use self::brute_force::BruteForce;
-pub use self::sweep_prune::{SweepAndPrune, SweepAndPrune2, SweepAndPrune3};
+pub use self::sweep_prune::{SweepAndPrune, SweepAndPrune2, SweepAndPrune3, Variance};
 
 use dbvt::TreeValue;
 

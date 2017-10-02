@@ -1,8 +1,10 @@
+pub use self::variance::Variance;
+
 use std::cmp::Ordering;
 
 use num::NumCast;
 
-use self::variance::{Variance, Variance2, Variance3};
+use self::variance::{Variance2, Variance3};
 use super::HasBound;
 use prelude::*;
 

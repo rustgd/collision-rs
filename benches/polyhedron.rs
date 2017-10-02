@@ -1,18 +1,18 @@
 #![feature(test)]
 
 extern crate cgmath;
+extern crate collision;
 extern crate genmesh;
 extern crate rand;
-extern crate collision;
 extern crate test;
 
-use cgmath::{Point3, Vector3, Decomposed, Quaternion};
+use cgmath::{Decomposed, Point3, Quaternion, Vector3};
 use cgmath::prelude::*;
+use collision::prelude::*;
+use collision::primitive::ConvexPolyhedron;
 use genmesh::Triangulate;
 use genmesh::generators::{IndexedPolygon, SharedVertex, SphereUV};
 use rand::Rng;
-use collision::primitive::ConvexPolyhedron;
-use collision::prelude::*;
 use test::{black_box, Bencher};
 
 #[bench]

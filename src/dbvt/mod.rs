@@ -340,6 +340,17 @@ where
         }
     }
 
+    /// Get an immutable list of all values in the tree.
+    ///
+    /// ### Returns
+    ///
+    /// A immutable reference to the [`Vec`](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+    /// of values in the tree.
+    ///
+    pub fn values(&self) -> &Vec<(usize, T)> {
+        &self.values
+    }
+
     /// Get a mutable list of all values in the tree.
     ///
     /// Do not insert or remove values directly in this list, instead use
@@ -359,7 +370,7 @@ where
     /// A mutable reference to the [`Vec`](https://doc.rust-lang.org/std/vec/struct.Vec.html)
     /// of values in the tree.
     ///
-    pub fn values(&mut self) -> &mut Vec<(usize, T)> {
+    pub fn values_mut(&mut self) -> &mut Vec<(usize, T)> {
         &mut self.values
     }
 
@@ -389,6 +400,14 @@ where
         self.values.clear();
     }
 
+    /// Return the value index for the given node index.
+    pub fn value_index(&self, node_index: usize) -> Option<usize> {
+        match self.nodes[node_index] {
+            Node::Leaf(ref leaf) => Some(leaf.value),
+            _ => None,
+        }
+    }
+
     /// Query the tree for all leafs that the given visitor accepts.
     ///
     /// Will do a depth first search of the tree and pass all bounding volumes on the way to the
@@ -413,6 +432,38 @@ where
     where
         V: Visitor<Bound = T::Bound>,
     {
+        self.query_for_indices(visitor)
+            .into_iter()
+            .map(|(value_index, result)| {
+                (&self.values[value_index].1, result)
+            })
+            .collect()
+    }
+
+    /// Query the tree for all leafs that the given visitor accepts.
+    ///
+    /// Will do a depth first search of the tree and pass all bounding volumes on the way to the
+    /// visitor.
+    ///
+    /// This function have approximate complexity O(log^2 n).
+    ///
+    /// ### Parameters:
+    ///
+    /// - `visitor`: The visitor to check for bounding volume tests.
+    ///
+    /// ### Type parameters:
+    ///
+    /// - `V`: Type that implements of [`Visitor`](trait.Visitor.html)
+    ///
+    /// ### Returns
+    ///
+    /// Will return a list of tuples of value indices accepted and the result returned by the
+    /// visitor for the acceptance test.
+    ///
+    pub fn query_for_indices<V>(&self, visitor: &mut V) -> Vec<(usize, V::Result)>
+    where
+        V: Visitor<Bound = T::Bound>,
+    {
         let mut stack = [0; 256];
         stack[0] = self.root_index;
         let mut stack_pointer = 1;
@@ -428,7 +479,7 @@ where
                     // if we encounter a leaf, do a real bound intersection test, and add to return
                     // values if there's an intersection
                     match visitor.accept(&self.values[leaf.value].1.bound(), true) {
-                        Some(result) => values.push((&self.values[leaf.value].1, result)),
+                        Some(result) => values.push((leaf.value, result)),
                         _ => (),
                     }
                 }

@@ -1,6 +1,8 @@
 //! Utilities
 //!
 
+use std::ops::Neg;
+
 use Aabb;
 use cgmath::{BaseFloat, BaseNum, Vector2};
 use cgmath::prelude::*;
@@ -93,6 +95,25 @@ where
     (u, v, w)
 }
 
+#[inline]
+pub(crate) fn get_closest_point_on_edge<V>(start: &V, end: &V, point: &V) -> V
+where
+    V: VectorSpace + InnerSpace + Neg<Output = V>,
+    V::Scalar: BaseFloat,
+{
+    let line = *end - *start;
+    let line_dir = line.normalize();
+    let v = *point - *start;
+    let d = v.dot(line_dir);
+    if d < V::Scalar::zero() {
+        start.clone()
+    } else if (d * d) > line.magnitude2() {
+        end.clone()
+    } else {
+        *start + line_dir * d
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std;
@@ -181,6 +202,30 @@ mod tests {
         ];
         let t = transform(0., 8., 0.);
         assert_eq!(point, get_max_point(triangle.iter(), &direction, &t));
+    }
+
+    #[test]
+    fn test_closest_point_2d() {
+        let start = Vector2::new(3., -1.);
+        let end = Vector2::new(-1., 3.);
+        let point = Vector2::zero();
+        let p = get_closest_point_on_edge(&start, &end, &point);
+        assert_ulps_eq!(Vector2::new(1f32, 1f32), p);
+
+        let start = Vector2::new(2., -2.);
+        let end = Vector2::new(2., 2.);
+        let p = get_closest_point_on_edge(&start, &end, &point);
+        assert_ulps_eq!(Vector2::new(2f32, 0f32), p);
+
+        let start = Vector2::new(2., 4.);
+        let end = Vector2::new(2., 2.);
+        let p = get_closest_point_on_edge(&start, &end, &point);
+        assert_ulps_eq!(Vector2::new(2f32, 2f32), p);
+
+        let start = Vector2::new(2., -2.);
+        let end = Vector2::new(2., -4.);
+        let p = get_closest_point_on_edge(&start, &end, &point);
+        assert_ulps_eq!(Vector2::new(2f32, -2f32), p);
     }
 
     fn transform(dx: f32, dy: f32, rot: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {

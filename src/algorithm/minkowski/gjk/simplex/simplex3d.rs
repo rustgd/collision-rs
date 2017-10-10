@@ -6,6 +6,7 @@ use cgmath::prelude::*;
 
 use super::SimplexProcessor;
 use algorithm::minkowski::SupportPoint;
+use primitive::util::{barycentric_vector, get_closest_point_on_edge};
 
 /// Simplex processor implementation for 3D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -19,7 +20,11 @@ where
 {
     type Point = Point3<S>;
 
-    fn check_origin(&self, simplex: &mut Vec<SupportPoint<Point3<S>>>, v: &mut Vector3<S>) -> bool {
+    fn reduce_to_closest_feature(
+        &self,
+        simplex: &mut Vec<SupportPoint<Point3<S>>>,
+        v: &mut Vector3<S>,
+    ) -> bool {
         // 4 points, full tetrahedron, origin could be inside
         if simplex.len() == 4 {
             let a = simplex[3].v;
@@ -88,12 +93,79 @@ where
         false
     }
 
+    /// Get the closest point on the simplex to the origin.
+    ///
+    /// Make simplex only retain the closest feature to the origin.
+    fn get_closest_point_to_origin(
+        &self,
+        simplex: &mut Vec<SupportPoint<Point3<S>>>,
+    ) -> Vector3<S> {
+        let mut d = Vector3::zero();
+
+        // reduce simplex to the closest feature to the origin
+        // if check_origin return true, the origin is inside the simplex, so return the zero vector
+        // if not, the simplex will be the closest face or edge to the origin, and d the normal of
+        // the feature in the direction of the origin
+        if self.reduce_to_closest_feature(simplex, &mut d) {
+            return d;
+        }
+
+        if simplex.len() == 2 {
+            get_closest_point_on_edge(&simplex[1].v, &simplex[0].v, &Vector3::zero())
+        } else {
+            get_closest_point_on_face(&simplex[2].v, &simplex[1].v, &simplex[0].v, &d)
+        }
+    }
+
     fn new() -> Self {
         Self {
             m: marker::PhantomData,
         }
     }
 }
+
+#[inline]
+fn get_closest_point_on_face<S>(
+    a: &Vector3<S>,
+    b: &Vector3<S>,
+    c: &Vector3<S>,
+    normal: &Vector3<S>,
+) -> Vector3<S>
+where
+    S: BaseFloat,
+{
+    use {Continuous, Plane, Ray3};
+    let ap = Point3::from_vec(*a);
+    let bp = Point3::from_vec(*b);
+    let cp = Point3::from_vec(*c);
+    let ray = Ray3::new(Point3::origin(), -*normal);
+    // unwrapping is safe, because the degenerate face will have been removed by the outer algorithm
+    let plane = Plane::from_points(ap, bp, cp).unwrap();
+    match plane.intersection(&ray) {
+        Some(point) => {
+            let (u, v, w) = barycentric_vector(point.to_vec(), *a, *b, *c);
+            assert!(
+                in_range(u) && in_range(v) && in_range(w),
+                "Simplex processing failed to deduce that this simplex {:?} is an edge case",
+                [a, b, c]
+            );
+
+            point.to_vec()
+        }
+
+        _ => Vector3::zero(),
+    }
+}
+
+
+#[inline]
+fn in_range<S>(v: S) -> bool
+where
+    S: BaseFloat,
+{
+    v >= S::zero() && v <= S::one()
+}
+
 
 #[inline]
 fn cross_aba<S>(a: &Vector3<S>, b: &Vector3<S>) -> Vector3<S>
@@ -301,7 +373,7 @@ mod tests {
 
     fn test_check_origin(simplex: &mut Vec<SupportPoint<Point3<f32>>>) -> (bool, Vector3<f32>) {
         let mut v = Vector3::zero();
-        let b = SimplexProcessor3::new().check_origin(simplex, &mut v);
+        let b = SimplexProcessor3::new().reduce_to_closest_feature(simplex, &mut v);
         (b, v)
     }
 

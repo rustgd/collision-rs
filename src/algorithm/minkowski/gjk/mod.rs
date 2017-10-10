@@ -7,6 +7,7 @@ use std::ops::Neg;
 
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
+use num::NumCast;
 
 use self::simplex::{SimplexProcessor2, SimplexProcessor3};
 use {CollisionStrategy, Contact};
@@ -16,6 +17,7 @@ use prelude::*;
 mod simplex;
 
 const MAX_ITERATIONS: u32 = 100;
+const GJK_DISTANCE_TOLERANCE: f32 = 0.000001;
 
 /// GJK algorithm for 2D, see [GJK](struct.GJK.html) for more information.
 pub type GJK2<S> = GJK<SimplexProcessor2<S>, EPA2<S>>;
@@ -96,22 +98,83 @@ where
         let mut simplex: Vec<SupportPoint<P>> = Vec::default();
         simplex.push(a);
         d = d.neg();
-        let mut i = 0;
-        loop {
+        for _ in 0..MAX_ITERATIONS {
             let a = SupportPoint::from_minkowski(left, left_transform, right, right_transform, &d);
             if a.v.dot(d) <= P::Scalar::zero() {
                 return None;
             } else {
                 simplex.push(a);
-                if self.simplex_processor.check_origin(&mut simplex, &mut d) {
+                if self.simplex_processor
+                    .reduce_to_closest_feature(&mut simplex, &mut d)
+                {
                     return Some(simplex);
                 }
             }
-            i += 1;
-            if i >= MAX_ITERATIONS {
+        }
+
+        None
+    }
+
+    /// Compute the distance between the given primitives.
+    ///
+    /// ## Parameters:
+    ///
+    /// - `left`: left primitive
+    /// - `left_transform`: model-to-world-transform for the left primitive
+    /// - `right`: right primitive,
+    /// - `right_transform`: model-to-world-transform for the right primitive
+    ///
+    /// ## Returns:
+    ///
+    /// Will optionally return the distance between the objects. Will return None, if the objects
+    /// are colliding.
+    pub fn distance<P, PL, PR, TL, TR>(
+        &self,
+        left: &PL,
+        left_transform: &TL,
+        right: &PR,
+        right_transform: &TR,
+    ) -> Option<P::Scalar>
+    where
+        P: EuclideanSpace,
+        P::Scalar: BaseFloat,
+        PL: SupportFunction<Point = P>,
+        PR: SupportFunction<Point = P>,
+        SP: SimplexProcessor<Point = P>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        TL: Transform<P>,
+        TR: Transform<P>,
+    {
+        let zero = P::Diff::zero();
+        let tolerance: P::Scalar = NumCast::from(GJK_DISTANCE_TOLERANCE).unwrap();
+        let right_pos = right_transform.transform_point(P::origin());
+        let left_pos = left_transform.transform_point(P::origin());
+        let mut simplex = Vec::with_capacity(5);
+        for d in &[right_pos - left_pos, left_pos - right_pos] {
+            simplex.push(SupportPoint::from_minkowski(
+                left,
+                left_transform,
+                right,
+                right_transform,
+                &d,
+            ));
+        }
+        for _ in 0..MAX_ITERATIONS {
+            let d = self.simplex_processor
+                .get_closest_point_to_origin(&mut simplex);
+            if ulps_eq!(d, zero) {
                 return None;
             }
+            let d = d.neg();
+            let p = SupportPoint::from_minkowski(left, left_transform, right, right_transform, &d);
+            let dp = p.v.dot(d);
+            let d0 = simplex[0].v.dot(d);
+            if dp - d0 < tolerance {
+                return Some(d.magnitude());
+            }
+            simplex.push(p);
         }
+        None
     }
 
     /// Given a GJK simplex that encloses the origin, compute the contact manifold.
@@ -379,5 +442,44 @@ mod tests {
         assert_eq!(Vector3::new(-1., 0., 0.), contact.normal);
         assert_eq!(2., contact.penetration_depth);
         assert_ulps_eq!(Point3::new(10., 1., 5.), contact.contact_point);
+    }
+
+    #[test]
+    fn test_gjk_distance_2d() {
+        let left = Rectangle::new(10., 10.);
+        let left_transform = transform(15., 0., 0.);
+        let right = Rectangle::new(10., 10.);
+        let right_transform = transform(0., 0., 0.);
+        let gjk = GJK2::new();
+        assert_eq!(
+            Some(5.),
+            gjk.distance(&left, &left_transform, &right, &right_transform)
+        );
+
+        // intersects
+        let right_transform = transform(7., 2., 0.);
+        assert_eq!(
+            None,
+            gjk.distance(&left, &left_transform, &right, &right_transform)
+        );
+    }
+
+    #[test]
+    fn test_gjk_distance_3d() {
+        let left = Cuboid::new(10., 10., 10.);
+        let left_transform = transform_3d(15., 0., 0., 0.);
+        let right = Cuboid::new(10., 10., 10.);
+        let right_transform = transform_3d(7., 2., 0., 0.);
+        let gjk = GJK3::new();
+        assert_eq!(
+            None,
+            gjk.distance(&left, &left_transform, &right, &right_transform)
+        );
+
+        let right_transform = transform_3d(1., 0., 0., 0.);
+        assert_eq!(
+            Some(4.),
+            gjk.distance(&left, &left_transform, &right, &right_transform)
+        );
     }
 }

@@ -128,3 +128,110 @@ where
     T: Debug + Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>,
 {
 }
+
+/// Trait used for interpolation of values
+///
+/// ## Type parameters:
+///
+/// - `S`: The scalar type used for amount
+pub trait Interpolate<S> {
+    /// Interpolate between `self` and `other`, using amount to calculate how much of other to use.
+    ///
+    /// ## Parameters:
+    ///
+    /// - `amount`: amount in the range 0. .. 1.
+    /// - `other`: the other value to interpolate with
+    ///
+    /// ## Returns
+    ///
+    /// A new value approximately equal to `self * (1. - amount) + other * amount`.
+    fn interpolate(&self, other: &Self, amount: S) -> Self;
+}
+
+/// Trait used for interpolation of translation only in transforms
+pub trait TranslationInterpolate<S> {
+    /// Interpolate between `self` and `other`, using amount to calculate how much of other to use.
+    ///
+    /// ## Parameters:
+    ///
+    /// - `amount`: amount in the range 0. .. 1.
+    /// - `other`: the other value to interpolate with
+    ///
+    /// ## Returns
+    ///
+    /// A new value approximately equal to `self * (1. - amount) + other * amount`.
+    fn translation_interpolate(&self, other: &Self, amount: S) -> Self;
+}
+
+mod interpolate {
+    use super::{Interpolate, TranslationInterpolate};
+    use cgmath::{BaseFloat, Basis2, Basis3, Decomposed, Quaternion, Rad};
+    use cgmath::prelude::*;
+
+    impl<S> Interpolate<S> for Quaternion<S>
+    where
+        S: BaseFloat,
+    {
+        fn interpolate(&self, other: &Self, amount: S) -> Self {
+            self.lerp(*other, amount)
+        }
+    }
+
+    impl<S> Interpolate<S> for Basis3<S>
+    where
+        S: BaseFloat,
+    {
+        fn interpolate(&self, other: &Self, amount: S) -> Self {
+            Basis3::from(
+                Quaternion::from(*self.as_ref()).lerp(Quaternion::from(*other.as_ref()), amount),
+            )
+        }
+    }
+
+    impl<S> Interpolate<S> for Basis2<S>
+    where
+        S: BaseFloat,
+    {
+        fn interpolate(&self, other: &Self, amount: S) -> Self {
+            // to complex numbers
+            let self_mat = self.as_ref();
+            let other_mat = other.as_ref();
+            let self_c = self_mat.x;
+            let other_c = other_mat.x;
+            // do interpolation
+            let c = self_c.lerp(other_c, amount);
+            // to basis
+            Rotation2::from_angle(Rad(c.x.acos()))
+        }
+    }
+
+    impl<V, R> Interpolate<V::Scalar> for Decomposed<V, R>
+    where
+        V: VectorSpace + InnerSpace,
+        R: Interpolate<V::Scalar>,
+        V::Scalar: BaseFloat,
+    {
+        fn interpolate(&self, other: &Self, amount: V::Scalar) -> Self {
+            Decomposed {
+                disp: self.disp.lerp(other.disp, amount),
+                rot: self.rot.interpolate(&other.rot, amount),
+                scale: self.scale * (V::Scalar::one() - amount) + other.scale * amount,
+            }
+        }
+    }
+
+    impl<V, R> TranslationInterpolate<V::Scalar> for Decomposed<V, R>
+    where
+        V: VectorSpace + InnerSpace,
+        R: Clone,
+        V::Scalar: BaseFloat,
+    {
+        fn translation_interpolate(&self, other: &Self, amount: V::Scalar) -> Self {
+            Decomposed {
+                disp: self.disp.lerp(other.disp, amount),
+                rot: other.rot.clone(),
+                scale: other.scale,
+            }
+        }
+    }
+}

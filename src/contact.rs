@@ -34,6 +34,10 @@ pub struct Contact<P: EuclideanSpace> {
 
     /// The contact point. Only applicable if the collision strategy is not `CollisionOnly`
     pub contact_point: P,
+
+    /// The time of impact, only applicable for continuous collision detection, value is in
+    /// range 0.0..1.0
+    pub time_of_impact: P::Scalar,
 }
 
 impl<P> Contact<P>
@@ -67,6 +71,7 @@ where
             normal,
             penetration_depth,
             contact_point,
+            time_of_impact: P::Scalar::zero(),
         }
     }
 }

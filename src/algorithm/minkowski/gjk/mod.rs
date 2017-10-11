@@ -8,7 +8,7 @@ use std::ops::{Neg, Range};
 
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
-use num::NumCast;
+use num::{Float, NumCast};
 
 use self::simplex::{SimplexProcessor2, SimplexProcessor3};
 use {CollisionStrategy, Contact};
@@ -478,16 +478,10 @@ where
                 ) {
                     None => return None, // colliding,
                     Some(distance) => {
-                        min_distance = match min_distance {
-                            None => Some(distance),
-                            Some(min_distance) => {
-                                if distance < min_distance {
-                                    Some(distance)
-                                } else {
-                                    Some(min_distance)
-                                }
-                            }
-                        };
+                        min_distance = Some(
+                            min_distance
+                                .map_or(distance, |min_distance| distance.min(min_distance)),
+                        )
                     }
                 }
             }

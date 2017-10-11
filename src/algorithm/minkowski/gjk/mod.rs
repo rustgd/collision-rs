@@ -3,7 +3,8 @@
 
 pub use self::simplex::SimplexProcessor;
 
-use std::ops::Neg;
+use std::cmp::Ordering;
+use std::ops::{Neg, Range};
 
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
@@ -18,6 +19,7 @@ mod simplex;
 
 const MAX_ITERATIONS: u32 = 100;
 const GJK_DISTANCE_TOLERANCE: f32 = 0.000001;
+const GJK_CONTINUOUS_TOLERANCE: f32 = 0.000001;
 
 /// GJK algorithm for 2D, see [GJK](struct.GJK.html) for more information.
 pub type GJK2<S> = GJK<SimplexProcessor2<S>, EPA2<S>>;
@@ -112,6 +114,117 @@ where
             }
         }
 
+        None
+    }
+
+    /// Do time of impact intersection testing on the given primitives, and return a valid collision
+    /// time of impact.
+    ///
+    /// ## Parameters:
+    ///
+    /// - `left`: left primitive
+    /// - `left_transform`: model-to-world-transform for the left primitive
+    /// - `right`: right primitive,
+    /// - `right_transform`: model-to-world-transform for the right primitive
+    ///
+    /// ## Returns:
+    ///
+    /// Will optionally return the time of impact. If no collision was detected, None is returned.
+    #[allow(unused_variables)]
+    pub fn intersect_time_of_impact<P, PL, PR, TL, TR>(
+        &self,
+        left: &PL,
+        left_transform: Range<&TL>,
+        right: &PR,
+        right_transform: Range<&TR>,
+    ) -> Option<P::Scalar>
+    where
+        P: EuclideanSpace,
+        P::Scalar: BaseFloat,
+        PL: SupportFunction<Point = P>,
+        PR: SupportFunction<Point = P>,
+        SP: SimplexProcessor<Point = P>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        TL: Transform<P> + TranslationInterpolate<P::Scalar>,
+        TR: Transform<P> + TranslationInterpolate<P::Scalar>,
+    {
+        let tolerance: P::Scalar = NumCast::from(GJK_CONTINUOUS_TOLERANCE).unwrap();
+        // build the ray, A.velocity - B.velocity is the ray direction
+        let left_lin_vel = left_transform.end.transform_point(P::origin())
+            - left_transform.start.transform_point(P::origin());
+        let right_lin_vel = right_transform.end.transform_point(P::origin())
+            - right_transform.start.transform_point(P::origin());
+        let r = left_lin_vel - right_lin_vel;
+
+        // initialize time of impact
+        let mut lambda = P::Scalar::zero();
+
+        // build the start transforms
+        let mut left_curr_transform = left_transform
+            .start
+            .translation_interpolate(left_transform.end, lambda);
+        let mut right_curr_transform = right_transform
+            .start
+            .translation_interpolate(right_transform.end, lambda);
+
+        // build simplex and get the first support point
+        let mut simplex = Vec::with_capacity(5);
+        simplex.push(SupportPoint::from_minkowski(
+            left,
+            &left_curr_transform,
+            right,
+            &right_curr_transform,
+            &-r,
+        ));
+        let mut d = simplex[0].v.clone();
+        for _ in 0..MAX_ITERATIONS {
+            // d almost at origin means we have a hit
+            if d.magnitude2() <= tolerance {
+                return Some(lambda);
+            }
+
+            // time of impact > 1 means miss
+            if lambda > P::Scalar::one() {
+                return None;
+            }
+
+            let p = SupportPoint::from_minkowski(
+                left,
+                &left_curr_transform,
+                right,
+                &right_curr_transform,
+                &-d,
+            );
+
+            let vp = d.dot(p.v);
+            if vp > P::Scalar::zero() {
+                let vr = d.dot(r);
+                if vr >= -tolerance {
+                    return None;
+                } else {
+                    // we have a potential hit, move origin forwards along the ray
+                    lambda = lambda - vp / vr;
+
+                    // interpolate translation of shapes along the ray
+                    left_curr_transform = left_transform
+                        .start
+                        .translation_interpolate(left_transform.end, lambda);
+                    right_curr_transform = right_transform
+                        .start
+                        .translation_interpolate(right_transform.end, lambda);
+                }
+            }
+            simplex.push(p);
+
+            // if reduction returns true, we have a hit, so return time of impact
+            // if not, the simplex is reduced to the closest feature to the origin, and v is the
+            // normal of the feature in the direction of the origin
+            if self.simplex_processor
+                .reduce_to_closest_feature(&mut simplex, &mut d)
+            {
+                return Some(lambda);
+            }
+        }
         None
     }
 
@@ -234,25 +347,20 @@ where
         TR: Transform<P>,
         SP: SimplexProcessor<Point = P>,
     {
-        match self.intersect(left, left_transform, right, right_transform) {
-            None => None,
-            Some(mut simplex) => {
-                match *strategy {
-                    CollisionStrategy::CollisionOnly => {
-                        Some(Contact::new(CollisionStrategy::CollisionOnly))
-                    }
-                    CollisionStrategy::FullResolution => {
-                        self.get_contact_manifold(
-                            &mut simplex,
-                            left,
-                            left_transform,
-                            right,
-                            right_transform,
-                        )
-                    }
+        use CollisionStrategy::*;
+        self.intersect(left, left_transform, right, right_transform)
+            .and_then(|mut simplex| match *strategy {
+                CollisionOnly => Some(Contact::new(CollisionOnly)),
+                FullResolution => {
+                    self.get_contact_manifold(
+                        &mut simplex,
+                        left,
+                        left_transform,
+                        right,
+                        right_transform,
+                    )
                 }
-            }
-        }
+            })
     }
 
     /// Do intersection test on the given complex shapes, and return the actual intersection point
@@ -292,35 +400,161 @@ where
         TR: Transform<P>,
         SP: SimplexProcessor<Point = P>,
     {
+        use CollisionStrategy::*;
         let mut contacts = Vec::default();
         for &(ref left_primitive, ref left_local_transform) in left.iter() {
             let left_transform = left_transform.concat(left_local_transform);
             for &(ref right_primitive, ref right_local_transform) in right.iter() {
                 let right_transform = right_transform.concat(right_local_transform);
-                match self.intersect(
+                if let Some(contact) = self.intersection(
+                    strategy,
                     left_primitive,
                     &left_transform,
                     right_primitive,
                     &right_transform,
                 ) {
-                    None => (),
-                    Some(mut simplex) => {
+                    match *strategy {
+                        CollisionOnly => {
+                            return Some(contact);
+                        }
+                        FullResolution => contacts.push(contact),
+                    }
+                }
+            }
+        }
+
+        // CollisionOnly handling will have returned already if there was a contact, so this
+        // scenario will only happen when we have a contact in FullResolution mode, or no contact
+        // at all.
+        contacts.into_iter().max_by(|l, r| {
+            // Penetration depth defaults to 0., and can't be nan from EPA,
+            // so unwrapping is safe
+            l.penetration_depth
+                .partial_cmp(&r.penetration_depth)
+                .unwrap()
+        })
+    }
+
+    /// Compute the distance between the given shapes.
+    ///
+    /// ## Parameters:
+    ///
+    /// - `left`: left shape
+    /// - `left_transform`: model-to-world-transform for the left shape
+    /// - `right`: right shape,
+    /// - `right_transform`: model-to-world-transform for the right shape
+    ///
+    /// ## Returns:
+    ///
+    /// Will optionally return the smallest distance between the objects. Will return None, if the
+    /// objects are colliding.
+    pub fn distance_complex<P, PL, PR, TL, TR>(
+        &self,
+        left: &[(PL, TL)],
+        left_transform: &TL,
+        right: &[(PR, TR)],
+        right_transform: &TR,
+    ) -> Option<P::Scalar>
+    where
+        P: EuclideanSpace,
+        P::Scalar: BaseFloat,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        PL: SupportFunction<Point = P>,
+        PR: SupportFunction<Point = P>,
+        TL: Transform<P>,
+        TR: Transform<P>,
+        SP: SimplexProcessor<Point = P>,
+    {
+        let mut min_distance = None;
+        for &(ref left_primitive, ref left_local_transform) in left.iter() {
+            let left_transform = left_transform.concat(left_local_transform);
+            for &(ref right_primitive, ref right_local_transform) in right.iter() {
+                let right_transform = right_transform.concat(right_local_transform);
+                match self.distance(
+                    left_primitive,
+                    &left_transform,
+                    right_primitive,
+                    &right_transform,
+                ) {
+                    None => return None, // colliding,
+                    Some(distance) => {
+                        min_distance = match min_distance {
+                            None => Some(distance),
+                            Some(min_distance) => {
+                                if distance < min_distance {
+                                    Some(distance)
+                                } else {
+                                    Some(min_distance)
+                                }
+                            }
+                        };
+                    }
+                }
+            }
+        }
+
+        min_distance
+    }
+
+    /// Do intersection time of impact test on the given complex shapes, and return the time of
+    /// impact
+    ///
+    /// ## Parameters:
+    ///
+    /// - `strategy`: strategy to use, if `CollisionOnly` it will only return a boolean result,
+    ///               otherwise, EPA will be used to compute the exact contact point.
+    /// - `left`: shape consisting of a slice of primitive + local-to-model-transform for each
+    ///           primitive,
+    /// - `left_transform`: model-to-world-transform for the left shape
+    /// - `right`: shape consisting of a slice of primitive + local-to-model-transform for each
+    ///           primitive,
+    /// - `right_transform`: model-to-world-transform for the right shape
+    ///
+    /// ## Returns:
+    ///
+    /// Will optionally return time of impact if a collision was detected.
+    /// In `CollisionOnly` mode, this contact will only be a time of impact. For `FullResolution`
+    /// mode, the time of impact will be the earliest found among all shape primitives.
+    /// Will return None if no collision was found.
+    pub fn intersect_complex_time_of_impact<P, PL, PR, TL, TR>(
+        &self,
+        strategy: &CollisionStrategy,
+        left: &[(PL, TL)],
+        left_transform: Range<&TL>,
+        right: &[(PR, TR)],
+        right_transform: Range<&TR>,
+    ) -> Option<P::Scalar>
+    where
+        P: EuclideanSpace,
+        P::Scalar: BaseFloat,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        PL: SupportFunction<Point = P>,
+        PR: SupportFunction<Point = P>,
+        TL: Transform<P> + TranslationInterpolate<P::Scalar>,
+        TR: Transform<P> + TranslationInterpolate<P::Scalar>,
+        SP: SimplexProcessor<Point = P>,
+    {
+        use CollisionStrategy::*;
+        let mut contacts = Vec::default();
+        for &(ref left_primitive, ref left_local_transform) in left.iter() {
+            let left_start_transform = left_transform.start.concat(left_local_transform);
+            let left_end_transform = left_transform.end.concat(left_local_transform);
+            for &(ref right_primitive, ref right_local_transform) in right.iter() {
+                let right_start_transform = right_transform.start.concat(right_local_transform);
+                let right_end_transform = right_transform.end.concat(right_local_transform);
+                match self.intersect_time_of_impact(
+                    left_primitive,
+                    &left_start_transform..&left_end_transform,
+                    right_primitive,
+                    &right_start_transform..&right_end_transform,
+                ) {
+                    None => return None,
+                    Some(toi) => {
                         match *strategy {
-                            CollisionStrategy::CollisionOnly => {
-                                return Some(Contact::new(CollisionStrategy::CollisionOnly));
+                            CollisionOnly => {
+                                return Some(toi);
                             }
-                            CollisionStrategy::FullResolution => {
-                                match self.get_contact_manifold(
-                                    &mut simplex,
-                                    left_primitive,
-                                    &left_transform,
-                                    right_primitive,
-                                    &right_transform,
-                                ) {
-                                    Some(contact) => contacts.push(contact),
-                                    None => (),
-                                };
-                            }
+                            FullResolution => contacts.push(toi),
                         }
                     }
                 };
@@ -328,21 +562,11 @@ where
         }
 
         // CollisionOnly handling will have returned already if there was a contact, so this
-        // scenario will only happen when we have a contact in FullResolution mode
-        if contacts.len() > 0 {
-            // penetration depth defaults to 0., and can't be nan from EPA,
-            // so unwrapping is safe
-            contacts
-                .iter()
-                .max_by(|l, r| {
-                    l.penetration_depth
-                        .partial_cmp(&r.penetration_depth)
-                        .unwrap()
-                })
-                .cloned()
-        } else {
-            None
-        }
+        // scenario will only happen when we have a contact in FullResolution mode or no contact
+        // at all
+        contacts
+            .into_iter()
+            .min_by(|l, r| l.partial_cmp(&r).unwrap_or(Ordering::Equal))
     }
 }
 
@@ -480,6 +704,66 @@ mod tests {
         assert_eq!(
             Some(4.),
             gjk.distance(&left, &left_transform, &right, &right_transform)
+        );
+    }
+
+    #[test]
+    fn test_gjk_time_of_impact_2d() {
+        let left = Rectangle::new(10., 10.);
+        let left_start_transform = transform(0., 0., 0.);
+        let left_end_transform = transform(30., 0., 0.);
+        let right = Rectangle::new(10., 10.);
+        let right_transform = transform(15., 0., 0.);
+        let gjk = GJK2::new();
+
+        assert_ulps_eq!(
+            0.1666667,
+            gjk.intersect_time_of_impact(
+                &left,
+                &left_start_transform..&left_end_transform,
+                &right,
+                &right_transform..&right_transform
+            ).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            gjk.intersect_time_of_impact(
+                &left,
+                &left_start_transform..&left_start_transform,
+                &right,
+                &right_transform..&right_transform
+            )
+        );
+    }
+
+    #[test]
+    fn test_gjk_time_of_impact_3d() {
+        let left = Cuboid::new(10., 10., 10.);
+        let left_start_transform = transform_3d(0., 0., 0., 0.);
+        let left_end_transform = transform_3d(30., 0., 0., 0.);
+        let right = Cuboid::new(10., 10., 10.);
+        let right_transform = transform_3d(15., 0., 0., 0.);
+        let gjk = GJK3::new();
+
+        assert_ulps_eq!(
+            0.1666667,
+            gjk.intersect_time_of_impact(
+                &left,
+                &left_start_transform..&left_end_transform,
+                &right,
+                &right_transform..&right_transform
+            ).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            gjk.intersect_time_of_impact(
+                &left,
+                &left_start_transform..&left_start_transform,
+                &right,
+                &right_transform..&right_transform
+            )
         );
     }
 }

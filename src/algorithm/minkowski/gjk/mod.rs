@@ -117,8 +117,8 @@ where
         None
     }
 
-    /// Do time of impact intersection testing on the given primitives, and return a valid collision
-    /// time of impact.
+    /// Do time of impact intersection testing on the given primitives, and return a valid contact
+    /// at the time of impact.
     ///
     /// ## Parameters:
     ///
@@ -129,15 +129,16 @@ where
     ///
     /// ## Returns:
     ///
-    /// Will optionally return the time of impact. If no collision was detected, None is returned.
+    /// Will optionally return a contact manifold at the time of impact. If no collision was
+    /// detected, None is returned.
     #[allow(unused_variables)]
-    pub fn intersect_time_of_impact<P, PL, PR, TL, TR>(
+    pub fn intersection_time_of_impact<P, PL, PR, TL, TR>(
         &self,
         left: &PL,
         left_transform: Range<&TL>,
         right: &PR,
         right_transform: Range<&TR>,
-    ) -> Option<P::Scalar>
+    ) -> Option<Contact<P>>
     where
         P: EuclideanSpace,
         P::Scalar: BaseFloat,
@@ -158,6 +159,7 @@ where
 
         // initialize time of impact
         let mut lambda = P::Scalar::zero();
+        let mut normal = P::Diff::zero();
 
         // build the start transforms
         let mut left_curr_transform = left_transform
@@ -180,7 +182,14 @@ where
         for _ in 0..MAX_ITERATIONS {
             // d almost at origin means we have a hit
             if d.magnitude2() <= tolerance {
-                return Some(lambda);
+                let mut contact = Contact::new_with_point(
+                    CollisionStrategy::FullResolution,
+                    normal.normalize(),
+                    d.magnitude(),
+                    simplex.last().unwrap().sup_a,
+                );
+                contact.time_of_impact = lambda;
+                return Some(contact);
             }
 
             // time of impact > 1 means miss
@@ -212,6 +221,7 @@ where
                     right_curr_transform = right_transform
                         .start
                         .translation_interpolate(right_transform.end, lambda);
+                    normal = d.clone();
                 }
             }
             simplex.push(p);
@@ -222,7 +232,14 @@ where
             if self.simplex_processor
                 .reduce_to_closest_feature(&mut simplex, &mut d)
             {
-                return Some(lambda);
+                let mut contact = Contact::new_with_point(
+                    CollisionStrategy::FullResolution,
+                    normal.normalize(),
+                    d.magnitude(),
+                    simplex.last().unwrap().sup_a,
+                );
+                contact.time_of_impact = lambda;
+                return Some(contact);
             }
         }
         None
@@ -496,13 +513,13 @@ where
         min_distance
     }
 
-    /// Do intersection time of impact test on the given complex shapes, and return the time of
-    /// impact
+    /// Do intersection time of impact test on the given complex shapes, and return the contact at
+    /// the time of impact
     ///
     /// ## Parameters:
     ///
     /// - `strategy`: strategy to use, if `CollisionOnly` it will only return a boolean result,
-    ///               otherwise, EPA will be used to compute the exact contact point.
+    ///               otherwise, a full contact manifold will be returned.
     /// - `left`: shape consisting of a slice of primitive + local-to-model-transform for each
     ///           primitive,
     /// - `left_transform`: model-to-world-transform for the left shape
@@ -512,18 +529,18 @@ where
     ///
     /// ## Returns:
     ///
-    /// Will optionally return time of impact if a collision was detected.
+    /// Will optionally return the contact if a collision was detected.
     /// In `CollisionOnly` mode, this contact will only be a time of impact. For `FullResolution`
     /// mode, the time of impact will be the earliest found among all shape primitives.
     /// Will return None if no collision was found.
-    pub fn intersect_complex_time_of_impact<P, PL, PR, TL, TR>(
+    pub fn intersection_complex_time_of_impact<P, PL, PR, TL, TR>(
         &self,
         strategy: &CollisionStrategy,
         left: &[(PL, TL)],
         left_transform: Range<&TL>,
         right: &[(PR, TR)],
         right_transform: Range<&TR>,
-    ) -> Option<P::Scalar>
+    ) -> Option<Contact<P>>
     where
         P: EuclideanSpace,
         P::Scalar: BaseFloat,
@@ -542,19 +559,20 @@ where
             for &(ref right_primitive, ref right_local_transform) in right.iter() {
                 let right_start_transform = right_transform.start.concat(right_local_transform);
                 let right_end_transform = right_transform.end.concat(right_local_transform);
-                match self.intersect_time_of_impact(
+                match self.intersection_time_of_impact(
                     left_primitive,
                     &left_start_transform..&left_end_transform,
                     right_primitive,
                     &right_start_transform..&right_end_transform,
                 ) {
                     None => return None,
-                    Some(toi) => {
+                    Some(mut contact) => {
                         match *strategy {
                             CollisionOnly => {
-                                return Some(toi);
+                                contact.strategy = CollisionOnly;
+                                return Some(contact);
                             }
-                            FullResolution => contacts.push(toi),
+                            FullResolution => contacts.push(contact),
                         }
                     }
                 };
@@ -564,9 +582,11 @@ where
         // CollisionOnly handling will have returned already if there was a contact, so this
         // scenario will only happen when we have a contact in FullResolution mode or no contact
         // at all
-        contacts
-            .into_iter()
-            .min_by(|l, r| l.partial_cmp(&r).unwrap_or(Ordering::Equal))
+        contacts.into_iter().min_by(|l, r| {
+            l.time_of_impact
+                .partial_cmp(&r.time_of_impact)
+                .unwrap_or(Ordering::Equal)
+        })
     }
 }
 
@@ -716,24 +736,22 @@ mod tests {
         let right_transform = transform(15., 0., 0.);
         let gjk = GJK2::new();
 
-        assert_ulps_eq!(
-            0.1666667,
-            gjk.intersect_time_of_impact(
-                &left,
-                &left_start_transform..&left_end_transform,
-                &right,
-                &right_transform..&right_transform
-            ).unwrap()
-        );
+        let contact = gjk.intersection_time_of_impact(
+            &left,
+            &left_start_transform..&left_end_transform,
+            &right,
+            &right_transform..&right_transform,
+        ).unwrap();
 
-        assert_eq!(
-            None,
-            gjk.intersect_time_of_impact(
+        assert_ulps_eq!(0.1666667, contact.time_of_impact);
+
+        assert!(
+            gjk.intersection_time_of_impact(
                 &left,
                 &left_start_transform..&left_start_transform,
                 &right,
                 &right_transform..&right_transform
-            )
+            ).is_none()
         );
     }
 
@@ -746,24 +764,22 @@ mod tests {
         let right_transform = transform_3d(15., 0., 0., 0.);
         let gjk = GJK3::new();
 
-        assert_ulps_eq!(
-            0.1666667,
-            gjk.intersect_time_of_impact(
-                &left,
-                &left_start_transform..&left_end_transform,
-                &right,
-                &right_transform..&right_transform
-            ).unwrap()
-        );
+        let contact = gjk.intersection_time_of_impact(
+            &left,
+            &left_start_transform..&left_end_transform,
+            &right,
+            &right_transform..&right_transform,
+        ).unwrap();
 
-        assert_eq!(
-            None,
-            gjk.intersect_time_of_impact(
+        assert_ulps_eq!(0.1666667, contact.time_of_impact);
+
+        assert!(
+            gjk.intersection_time_of_impact(
                 &left,
                 &left_start_transform..&left_start_transform,
                 &right,
                 &right_transform..&right_transform
-            )
+            ).is_none()
         );
     }
 }

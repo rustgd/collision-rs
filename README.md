@@ -6,7 +6,8 @@
 [![License](https://img.shields.io/crates/l/collision.svg)](https://github.com/kvark/collision-rs/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/crates/d/collision.svg)](https://crates.io/crates/collision)
 
-This library is an extension of [cgmath](https://crates.io/crates/cgmath) that provides collision detection primitives.
+This library is an extension of [cgmath](https://crates.io/crates/cgmath) that provides collision detection primitives,
+bounding volumes and collision detection algorithms.
 
 The library provides:
 
@@ -15,11 +16,17 @@ The library provides:
 - a view frustum: `Frustum`
 - axis-aligned bounding boxes: `Aabb2`, `Aabb3`
 - oriented bounding boxes: `Obb2`, `Obb3`
-- collision primitives: `Sphere`, `Cylinder`
+- additional bounding volumes: `Sphere`, `Cylinder`
+- collision primitives: `Sphere`, `Circle`, `Rectangle`, `Cuboid`, `Particle`, `Convex Polygon`, `Convex Polyhedra`
+- a dynamic bounding volume tree (`DBVT`)
+- broad phase collision detection: `Brute Force`, `Sweep and Prune`
+- discrete narrow phase collision detection: `GJK` (including `EPA` for manifold computation)
+- continuous narrow phase collision detection: `GJK`
+- convex shape distance computation: `GJK`
 
 Not all of the functionality has been implemented yet, and the existing code
 is not fully covered by the testsuite. If you encounter any mistakes or
-omissions please let me know by posting an issue, or even better: send me a
+omissions please let us know by posting an issue, or even better: send us a
 pull request with a fix.
 
 ## Contributing

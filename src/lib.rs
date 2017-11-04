@@ -1,7 +1,7 @@
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
 #![deny(missing_docs, trivial_casts, unsafe_code, unstable_features, unused_import_braces,
-       unused_qualifications)]
+        unused_qualifications)]
 
 //! Companion library to cgmath, dealing with collision detection centric data structures and
 //! algorithms.

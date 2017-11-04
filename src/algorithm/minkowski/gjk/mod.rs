@@ -86,13 +86,16 @@ where
         PL: SupportFunction<Point = P>,
         PR: SupportFunction<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
         TL: Transform<P>,
         TR: Transform<P>,
     {
-        let right_pos = right_transform.transform_point(P::origin());
         let left_pos = left_transform.transform_point(P::origin());
+        let right_pos = right_transform.transform_point(P::origin());
         let mut d = right_pos - left_pos;
+        if ulps_eq!(d, P::Diff::zero()) {
+            d = P::Diff::from_value(P::Scalar::one());
+        }
         let a = SupportPoint::from_minkowski(left, left_transform, right, right_transform, &d);
         if a.v.dot(d) <= P::Scalar::zero() {
             return None;
@@ -145,7 +148,7 @@ where
         PL: SupportFunction<Point = P>,
         PR: SupportFunction<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
         TL: Transform<P> + TranslationInterpolate<P::Scalar>,
         TR: Transform<P> + TranslationInterpolate<P::Scalar>,
     {
@@ -271,7 +274,7 @@ where
         PL: SupportFunction<Point = P>,
         PR: SupportFunction<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
         TL: Transform<P>,
         TR: Transform<P>,
     {
@@ -280,7 +283,11 @@ where
         let right_pos = right_transform.transform_point(P::origin());
         let left_pos = left_transform.transform_point(P::origin());
         let mut simplex = Vec::with_capacity(5);
-        for d in &[right_pos - left_pos, left_pos - right_pos] {
+        let mut d = right_pos - left_pos;
+        if ulps_eq!(d, P::Diff::zero()) {
+            d = P::Diff::from_value(P::Scalar::one());
+        }
+        for d in &[d, d.neg()] {
             simplex.push(SupportPoint::from_minkowski(
                 left,
                 left_transform,
@@ -357,7 +364,7 @@ where
     where
         P: EuclideanSpace,
         P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
         PL: SupportFunction<Point = P>,
         PR: SupportFunction<Point = P>,
         TL: Transform<P>,
@@ -410,7 +417,7 @@ where
     where
         P: EuclideanSpace,
         P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
         PL: SupportFunction<Point = P>,
         PR: SupportFunction<Point = P>,
         TL: Transform<P>,
@@ -475,7 +482,7 @@ where
     where
         P: EuclideanSpace,
         P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
         PL: SupportFunction<Point = P>,
         PR: SupportFunction<Point = P>,
         TL: Transform<P>,
@@ -538,7 +545,7 @@ where
     where
         P: EuclideanSpace,
         P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
         PL: SupportFunction<Point = P>,
         PR: SupportFunction<Point = P>,
         TL: Transform<P> + TranslationInterpolate<P::Scalar>,
@@ -614,6 +621,39 @@ mod tests {
     }
 
     #[test]
+    fn test_gjk_exact() {
+        let shape = Rectangle::new(1., 1.);
+        let t = transform(0., 0., 0.);
+        let gjk = GJK2::new();
+        let p = gjk.intersection(&CollisionStrategy::FullResolution, &shape, &t, &shape, &t);
+        assert!(p.is_some());
+        let d = gjk.distance(&shape, &t, &shape, &t);
+        assert!(d.is_none());
+    }
+
+    #[test]
+    fn test_gjk_exact_3d() {
+        let shape = Cuboid::new(1., 1., 1.);
+        let t = transform_3d(0., 0., 0., 0.);
+        let gjk = GJK3::new();
+        let p = gjk.intersection(&CollisionStrategy::FullResolution, &shape, &t, &shape, &t);
+        assert!(p.is_some());
+        let d = gjk.distance(&shape, &t, &shape, &t);
+        assert!(d.is_none());
+    }
+
+    #[test]
+    fn test_gjk_sphere() {
+        let shape = Sphere::new(1.);
+        let t = transform_3d(0., 0., 0., 0.);
+        let gjk = GJK3::new();
+        let p = gjk.intersection(&CollisionStrategy::FullResolution, &shape, &t, &shape, &t);
+        assert!(p.is_some());
+        let d = gjk.distance(&shape, &t, &shape, &t);
+        assert!(d.is_none());
+    }
+
+    #[test]
     fn test_gjk_miss() {
         let left = Rectangle::new(10., 10.);
         let left_transform = transform(15., 0., 0.);
@@ -676,7 +716,6 @@ mod tests {
         );
         assert!(contact.is_some());
         let contact = contact.unwrap();
-        println!("{:?}", contact);
         assert_eq!(Vector3::new(-1., 0., 0.), contact.normal);
         assert_eq!(2., contact.penetration_depth);
         assert_ulps_eq!(Point3::new(10., 1., 5.), contact.contact_point);

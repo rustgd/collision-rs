@@ -58,6 +58,9 @@ where
             let ab = b - a;
 
             *d = triple_product(&ab, &ao, &ab);
+            if ulps_eq!(*d, Vector2::zero()) {
+                *d = Vector2::new(-ab.y, ab.x);
+            }
         }
         // 0-1 point means we can't really do anything
         false

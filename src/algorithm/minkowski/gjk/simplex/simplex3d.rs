@@ -3,6 +3,7 @@ use std::ops::Neg;
 
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
+use num::cast;
 
 use super::SimplexProcessor;
 use algorithm::minkowski::SupportPoint;
@@ -88,6 +89,9 @@ where
             let ab = b - a;
 
             *v = cross_aba(&ab, &ao);
+            if ulps_eq!(*v, Vector3::zero()) {
+                v.x = cast(0.1).unwrap();
+            }
         }
         // 0-1 points
         false

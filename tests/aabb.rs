@@ -293,6 +293,14 @@ fn test_aabb2_contains_point2() {
 
     assert!(aabb.contains(&inside));
     assert!(!aabb.contains(&outside));
+
+    let aabb = Aabb2::<usize>::new(Point2::new(0, 0), Point2::new(10, 10));
+
+    let inside = Point2::new(2, 2);
+    let outside = Point2::new(11, 11);
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
 }
 
 #[test]
@@ -327,6 +335,14 @@ fn test_aabb3_contains_point3() {
 
     let inside = Point3::new(3., 3., 3.);
     let outside = Point3::new(11., 11., 11.);
+
+    assert!(aabb.contains(&inside));
+    assert!(!aabb.contains(&outside));
+
+    let aabb = Aabb3::<usize>::new(Point3::new(0, 0, 0), Point3::new(10, 10, 10));
+
+    let inside = Point3::new(3, 3, 3);
+    let outside = Point3::new(11, 11, 11);
 
     assert!(aabb.contains(&inside));
     assert!(!aabb.contains(&outside));

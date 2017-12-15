@@ -93,9 +93,7 @@ impl<S: BaseNum> fmt::Debug for Aabb2<S> {
 impl<S: BaseNum> Contains<Point2<S>> for Aabb2<S> {
     #[inline]
     fn contains(&self, p: &Point2<S>) -> bool {
-        let v_min = p - self.min();
-        let v_max = self.max() - p;
-        v_min.x >= S::zero() && v_min.y >= S::zero() && v_max.x > S::zero() && v_max.y > S::zero()
+        self.min.x <= p.x && p.x < self.max.x && self.min.y <= p.y && p.y < self.max.y
     }
 }
 

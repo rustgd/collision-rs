@@ -106,8 +106,7 @@ mod tests {
         let processor = SimplexProcessor2::new();
         let mut direction = Vector2::new(1., 0.);
         let mut simplex = vec![];
-        assert!(!processor
-            .reduce_to_closest_feature(&mut simplex, &mut direction));
+        assert!(!processor.reduce_to_closest_feature(&mut simplex, &mut direction));
         assert_eq!(0, simplex.len());
         assert_eq!(Vector2::new(1., 0.), direction);
     }
@@ -117,8 +116,7 @@ mod tests {
         let processor = SimplexProcessor2::new();
         let mut direction = Vector2::new(1., 0.);
         let mut simplex = vec![sup(40., 0.)];
-        assert!(!processor
-            .reduce_to_closest_feature(&mut simplex, &mut direction));
+        assert!(!processor.reduce_to_closest_feature(&mut simplex, &mut direction));
         assert_eq!(1, simplex.len());
         assert_eq!(Vector2::new(1., 0.), direction);
     }
@@ -128,8 +126,7 @@ mod tests {
         let processor = SimplexProcessor2::new();
         let mut direction = Vector2::new(1., 0.);
         let mut simplex = vec![sup(40., 10.), sup(-10., 10.)];
-        assert!(!processor
-            .reduce_to_closest_feature(&mut simplex, &mut direction));
+        assert!(!processor.reduce_to_closest_feature(&mut simplex, &mut direction));
         assert_eq!(2, simplex.len());
         assert_eq!(0., direction.x);
         assert!(direction.y < 0.);
@@ -140,8 +137,7 @@ mod tests {
         let processor = SimplexProcessor2::new();
         let mut direction = Vector2::new(1., 0.);
         let mut simplex = vec![sup(40., 10.), sup(-10., 10.), sup(0., 3.)];
-        assert!(!processor
-            .reduce_to_closest_feature(&mut simplex, &mut direction));
+        assert!(!processor.reduce_to_closest_feature(&mut simplex, &mut direction));
         assert_eq!(2, simplex.len());
         assert!(direction.x < 0.);
         assert!(direction.y < 0.);
@@ -152,8 +148,7 @@ mod tests {
         let processor = SimplexProcessor2::new();
         let mut direction = Vector2::new(1., 0.);
         let mut simplex = vec![sup(40., 10.), sup(10., 10.), sup(3., -3.)];
-        assert!(!processor
-            .reduce_to_closest_feature(&mut simplex, &mut direction));
+        assert!(!processor.reduce_to_closest_feature(&mut simplex, &mut direction));
         assert_eq!(2, simplex.len());
         assert!(direction.x < 0.);
         assert!(direction.y > 0.);

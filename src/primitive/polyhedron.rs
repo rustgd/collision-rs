@@ -79,12 +79,10 @@ where
             mode: PolyhedronMode::VertexOnly,
             vertices: vertices
                 .iter()
-                .map(|v| {
-                    Vertex {
-                        position: v.clone(),
-                        edge: 0,
-                        ready: true,
-                    }
+                .map(|v| Vertex {
+                    position: v.clone(),
+                    edge: 0,
+                    ready: true,
                 })
                 .collect(),
             edges: Vec::default(),
@@ -119,6 +117,12 @@ where
         Self::new_with_faces(vertices, dedup_faces(faces, map))
     }
 
+    /// Return an iterator that will yield tuples of the 3 vertices of each face
+    pub fn faces_iter(&self) -> FaceIterator<S> {
+        assert_eq!(self.mode, PolyhedronMode::HalfEdge);
+        FaceIterator::new(self)
+    }
+
     #[inline]
     fn brute_force_support_point(&self, direction: Vector3<S>) -> Point3<S> {
         let (p, _) = self.vertices
@@ -126,10 +130,12 @@ where
             .map(|v| (v.position, v.position.dot(direction)))
             .fold(
                 (Point3::origin(), S::neg_infinity()),
-                |(max_p, max_dot), (v, dot)| if dot > max_dot {
-                    (v.clone(), dot)
-                } else {
-                    (max_p, max_dot)
+                |(max_p, max_dot), (v, dot)| {
+                    if dot > max_dot {
+                        (v.clone(), dot)
+                    } else {
+                        (max_p, max_dot)
+                    }
                 },
             );
         p
@@ -166,6 +172,49 @@ where
         }
 
         self.vertices[best_index].position.clone()
+    }
+}
+
+/// Iterate over polyhedron faces.
+/// Yields a tuple with the positions of the 3 vertices of each face
+pub struct FaceIterator<'a, S: 'a>
+where
+    S: BaseFloat,
+{
+    polyhedron: &'a ConvexPolyhedron<S>,
+    current: usize,
+}
+
+impl<'a, S: 'a> FaceIterator<'a, S>
+where
+    S: BaseFloat,
+{
+    pub fn new(polyhedron: &'a ConvexPolyhedron<S>) -> Self {
+        Self {
+            polyhedron,
+            current: 0,
+        }
+    }
+}
+
+impl<'a, S> Iterator for FaceIterator<'a, S>
+where
+    S: BaseFloat,
+{
+    type Item = (&'a Point3<S>, &'a Point3<S>, &'a Point3<S>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current >= self.polyhedron.faces.len() {
+            None
+        } else {
+            self.current += 1;
+            let face = &self.polyhedron.faces[self.current - 1];
+            Some((
+                &self.polyhedron.vertices[face.vertices.0].position,
+                &self.polyhedron.vertices[face.vertices.1].position,
+                &self.polyhedron.vertices[face.vertices.2].position,
+            ))
+        }
     }
 }
 
@@ -216,12 +265,10 @@ where
 {
     let mut vertices: Vec<Vertex<S>> = vertices
         .iter()
-        .map(|v| {
-            Vertex {
-                position: v.clone(),
-                edge: 0,
-                ready: false,
-            }
+        .map(|v| Vertex {
+            position: v.clone(),
+            edge: 0,
+            ready: false,
         })
         .collect();
     let mut edges: Vec<Edge> = vec![];
@@ -319,23 +366,19 @@ where
         T: Transform<Point3<S>>,
     {
         let p = match self.mode {
-            PolyhedronMode::VertexOnly => {
-                self.brute_force_support_point(
-                    transform
-                        .inverse_transform()
-                        .unwrap()
-                        .transform_vector(*direction),
-                )
-            }
+            PolyhedronMode::VertexOnly => self.brute_force_support_point(
+                transform
+                    .inverse_transform()
+                    .unwrap()
+                    .transform_vector(*direction),
+            ),
 
-            PolyhedronMode::HalfEdge => {
-                self.hill_climb_support_point(
-                    transform
-                        .inverse_transform()
-                        .unwrap()
-                        .transform_vector(*direction),
-                )
-            }
+            PolyhedronMode::HalfEdge => self.hill_climb_support_point(
+                transform
+                    .inverse_transform()
+                    .unwrap()
+                    .transform_vector(*direction),
+            ),
         };
         transform.transform_point(p)
     }

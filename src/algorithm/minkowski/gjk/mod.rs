@@ -375,15 +375,13 @@ where
         self.intersect(left, left_transform, right, right_transform)
             .and_then(|mut simplex| match *strategy {
                 CollisionOnly => Some(Contact::new(CollisionOnly)),
-                FullResolution => {
-                    self.get_contact_manifold(
-                        &mut simplex,
-                        left,
-                        left_transform,
-                        right,
-                        right_transform,
-                    )
-                }
+                FullResolution => self.get_contact_manifold(
+                    &mut simplex,
+                    left,
+                    left_transform,
+                    right,
+                    right_transform,
+                ),
             })
     }
 
@@ -567,15 +565,13 @@ where
                     &right_start_transform..&right_end_transform,
                 ) {
                     None => return None,
-                    Some(mut contact) => {
-                        match *strategy {
-                            CollisionOnly => {
-                                contact.strategy = CollisionOnly;
-                                return Some(contact);
-                            }
-                            FullResolution => contacts.push(contact),
+                    Some(mut contact) => match *strategy {
+                        CollisionOnly => {
+                            contact.strategy = CollisionOnly;
+                            return Some(contact);
                         }
-                    }
+                        FullResolution => contacts.push(contact),
+                    },
                 };
             }
         }
@@ -664,15 +660,13 @@ mod tests {
             gjk.intersect(&left, &left_transform, &right, &right_transform)
                 .is_none()
         );
-        assert!(
-            gjk.intersection(
-                &CollisionStrategy::FullResolution,
-                &left,
-                &left_transform,
-                &right,
-                &right_transform
-            ).is_none()
-        )
+        assert!(gjk.intersection(
+            &CollisionStrategy::FullResolution,
+            &left,
+            &left_transform,
+            &right,
+            &right_transform
+        ).is_none())
     }
 
     #[test]
@@ -778,14 +772,12 @@ mod tests {
 
         assert_ulps_eq!(0.1666667, contact.time_of_impact);
 
-        assert!(
-            gjk.intersection_time_of_impact(
-                &left,
-                &left_start_transform..&left_start_transform,
-                &right,
-                &right_transform..&right_transform
-            ).is_none()
-        );
+        assert!(gjk.intersection_time_of_impact(
+            &left,
+            &left_start_transform..&left_start_transform,
+            &right,
+            &right_transform..&right_transform
+        ).is_none());
     }
 
     #[test]
@@ -806,13 +798,11 @@ mod tests {
 
         assert_ulps_eq!(0.1666667, contact.time_of_impact);
 
-        assert!(
-            gjk.intersection_time_of_impact(
-                &left,
-                &left_start_transform..&left_start_transform,
-                &right,
-                &right_transform..&right_transform
-            ).is_none()
-        );
+        assert!(gjk.intersection_time_of_impact(
+            &left,
+            &left_start_transform..&left_start_transform,
+            &right,
+            &right_transform..&right_transform
+        ).is_none());
     }
 }

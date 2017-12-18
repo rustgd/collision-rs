@@ -434,9 +434,7 @@ where
     {
         self.query_for_indices(visitor)
             .into_iter()
-            .map(|(value_index, result)| {
-                (&self.values[value_index].1, result)
-            })
+            .map(|(value_index, result)| (&self.values[value_index].1, result))
             .collect()
     }
 
@@ -486,16 +484,14 @@ where
 
                 // if we encounter a branch, do intersection test, and push the children if the
                 // branch intersected
-                Node::Branch(ref branch) => {
-                    match visitor.accept(&branch.bound, false) {
-                        Some(_) => {
-                            stack[stack_pointer] = branch.left;
-                            stack[stack_pointer + 1] = branch.right;
-                            stack_pointer += 2;
-                        }
-                        _ => (),
+                Node::Branch(ref branch) => match visitor.accept(&branch.bound, false) {
+                    Some(_) => {
+                        stack[stack_pointer] = branch.left;
+                        stack[stack_pointer + 1] = branch.right;
+                        stack_pointer += 2;
                     }
-                }
+                    _ => (),
+                },
                 Node::Nil => (),
             }
         }
@@ -552,18 +548,16 @@ where
     pub fn update(&mut self) {
         let nodes = self.updated_list
             .iter()
-            .filter_map(|index| if let Node::Leaf(ref l) = self.nodes[*index] {
-                if !l.bound.contains(self.values[l.value].1.bound()) {
-                    Some((
-                        index.clone(),
-                        l.parent,
-                        self.values[l.value].1.fat_bound(),
-                    ))
+            .filter_map(|index| {
+                if let Node::Leaf(ref l) = self.nodes[*index] {
+                    if !l.bound.contains(self.values[l.value].1.bound()) {
+                        Some((index.clone(), l.parent, self.values[l.value].1.fat_bound()))
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }
-            } else {
-                None
             })
             .collect::<Vec<(usize, usize, T::Bound)>>();
 
@@ -1158,12 +1152,10 @@ where
     // either the left child or the left left grandchild
     if !right_is_leaf {
         let (rl_bound, rr_bound) = match nodes[right_index] {
-            Node::Branch(ref right) => {
-                (
-                    get_bound(&nodes[right.left]),
-                    get_bound(&nodes[right.right]),
-                )
-            }
+            Node::Branch(ref right) => (
+                get_bound(&nodes[right.left]),
+                get_bound(&nodes[right.right]),
+            ),
             _ => panic!(),
         };
 

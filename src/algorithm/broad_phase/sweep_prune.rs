@@ -86,11 +86,9 @@ where
             let cmp_min = a.get_bound().min()[self.sweep_axis]
                 .partial_cmp(&b.get_bound().min()[self.sweep_axis]);
             match cmp_min {
-                Some(Ordering::Equal) => {
-                    a.get_bound().max()[self.sweep_axis]
-                        .partial_cmp(&b.get_bound().max()[self.sweep_axis])
-                        .unwrap_or(Ordering::Equal)
-                }
+                Some(Ordering::Equal) => a.get_bound().max()[self.sweep_axis]
+                    .partial_cmp(&b.get_bound().max()[self.sweep_axis])
+                    .unwrap_or(Ordering::Equal),
                 None => Ordering::Equal,
                 Some(order) => order,
             }

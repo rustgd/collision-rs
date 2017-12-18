@@ -53,12 +53,12 @@ impl DbvtBroadPhase {
                         Ordering::Equal => None,
                         Ordering::Less => Some((shape_value_index, hit_value_index)),
                         Ordering::Greater => Some((hit_value_index, shape_value_index)),
-                    }.and_then(
-                        |pair| match potentials.binary_search(&pair) {
+                    }.and_then(|pair| {
+                        match potentials.binary_search(&pair) {
                             Err(pos) => Some((pos, pair)),
                             Ok(_) => None,
-                        },
-                    );
+                        }
+                    });
                     match insert {
                         Some((pos, pair)) => potentials.insert(pos, pair),
                         None => (),

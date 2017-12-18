@@ -21,10 +21,12 @@ where
         .transform_vector(*direction);
     let (p, _) = vertices.map(|v| (v, v.dot(direction))).fold(
         (P::origin(), P::Scalar::neg_infinity()),
-        |(max_p, max_dot), (v, dot)| if dot > max_dot {
-            (v.clone(), dot)
-        } else {
-            (max_p, max_dot)
+        |(max_p, max_dot), (v, dot)| {
+            if dot > max_dot {
+                (v.clone(), dot)
+            } else {
+                (max_p, max_dot)
+            }
         },
     );
     transform.transform_point(p)

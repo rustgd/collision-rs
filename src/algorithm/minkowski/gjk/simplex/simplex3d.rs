@@ -161,7 +161,6 @@ where
     }
 }
 
-
 #[inline]
 fn in_range<S>(v: S) -> bool
 where
@@ -169,7 +168,6 @@ where
 {
     v >= S::zero() && v <= S::one()
 }
-
 
 #[inline]
 fn cross_aba<S>(a: &Vector3<S>, b: &Vector3<S>) -> Vector3<S>

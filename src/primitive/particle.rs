@@ -170,10 +170,7 @@ mod tests {
     #[test]
     fn test_discrete() {
         let circle = Circle::new(4.);
-        assert!(circle.intersects(&(
-            Particle::new(),
-            Point2::new(-5., -5.)..Point2::new(5., 5.)
-        )));
+        assert!(circle.intersects(&(Particle::new(), Point2::new(-5., -5.)..Point2::new(5., 5.))));
         assert!(!circle.intersects(&(
             Particle::new(),
             Point2::new(-5., -5.)..Point2::new(-8., -8.)
@@ -208,10 +205,7 @@ mod tests {
         assert_ulps_eq!(
             Point2::new(-2.8284271247461903, -2.8284271247461903),
             circle
-                .intersection(&(
-                    Particle::new(),
-                    Point2::new(-5., -5.)..Point2::new(5., 5.)
-                ))
+                .intersection(&(Particle::new(), Point2::new(-5., -5.)..Point2::new(5., 5.)))
                 .unwrap()
         );
         assert_eq!(

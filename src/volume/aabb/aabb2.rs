@@ -209,7 +209,6 @@ impl<S: BaseFloat> Discrete<Ray2<S>> for Aabb2<S> {
     }
 }
 
-
 impl<S: BaseFloat> Discrete<Aabb2<S>> for Aabb2<S> {
     fn intersects(&self, aabb: &Aabb2<S>) -> bool {
         let (a0, a1) = (self.min(), self.max());

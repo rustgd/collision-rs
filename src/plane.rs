@@ -6,7 +6,6 @@ use cgmath::prelude::*;
 use Ray3;
 use prelude::*;
 
-
 /// A 3-dimensional plane formed from the equation: `A*x + B*y + C*z - D = 0`.
 ///
 /// # Fields
@@ -145,10 +144,7 @@ impl<S: BaseFloat> fmt::Debug for Plane<S> {
         write!(
             f,
             "{:?}x + {:?}y + {:?}z - {:?} = 0",
-            self.n.x,
-            self.n.y,
-            self.n.z,
-            self.d
+            self.n.x, self.n.y, self.n.z, self.d
         )
     }
 }

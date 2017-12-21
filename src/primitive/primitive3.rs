@@ -5,7 +5,7 @@ use cgmath::prelude::*;
 
 use {Aabb3, Ray3};
 use prelude::*;
-use primitive::{ConvexPolyhedron, Cuboid, Cylinder, Particle3, Sphere};
+use primitive::{Capsule, ConvexPolyhedron, Cuboid, Cylinder, Particle3, Sphere};
 
 /// Wrapper enum for 3D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
@@ -23,6 +23,8 @@ where
     Cuboid(Cuboid<S>),
     /// Cylinder
     Cylinder(Cylinder<S>),
+    /// Capsule
+    Capsule(Capsule<S>),
     /// Convex polyhedron with any number of vertices/faces
     ConvexPolyhedron(ConvexPolyhedron<S>),
 }
@@ -63,6 +65,15 @@ where
     }
 }
 
+impl<S> From<Capsule<S>> for Primitive3<S>
+where
+    S: BaseFloat,
+{
+    fn from(capsule: Capsule<S>) -> Primitive3<S> {
+        Primitive3::Capsule(capsule)
+    }
+}
+
 impl<S> From<ConvexPolyhedron<S>> for Primitive3<S>
 where
     S: BaseFloat,
@@ -84,6 +95,7 @@ where
             Primitive3::Sphere(ref sphere) => sphere.get_bound(),
             Primitive3::Cuboid(ref cuboid) => cuboid.get_bound(),
             Primitive3::Cylinder(ref cylinder) => cylinder.get_bound(),
+            Primitive3::Capsule(ref capsule) => capsule.get_bound(),
             Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.get_bound(),
         }
     }
@@ -104,6 +116,7 @@ where
             Primitive3::Sphere(ref sphere) => sphere.support_point(direction, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.support_point(direction, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.support_point(direction, transform),
+            Primitive3::Capsule(ref capsule) => capsule.support_point(direction, transform),
             Primitive3::ConvexPolyhedron(ref polyhedron) => {
                 polyhedron.support_point(direction, transform)
             }
@@ -126,6 +139,7 @@ where
             Primitive3::Sphere(ref sphere) => sphere.intersects_transformed(ray, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.intersects_transformed(ray, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.intersects_transformed(ray, transform),
+            Primitive3::Capsule(ref capsule) => capsule.intersects_transformed(ray, transform),
             Primitive3::ConvexPolyhedron(ref polyhedron) => {
                 polyhedron.intersects_transformed(ray, transform)
             }
@@ -149,6 +163,7 @@ where
             Primitive3::Sphere(ref sphere) => sphere.intersection_transformed(ray, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.intersection_transformed(ray, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.intersection_transformed(ray, transform),
+            Primitive3::Capsule(ref capsule) => capsule.intersection_transformed(ray, transform),
             Primitive3::ConvexPolyhedron(ref polyhedron) => {
                 polyhedron.intersection_transformed(ray, transform)
             }

@@ -38,15 +38,13 @@ where
             .unwrap()
             .transform_vector(*direction);
 
-        let mut result = Vector3::zero();
+        let mut result = Point3::origin();
         if direction.y.is_sign_negative() {
             result[1] = -self.half_height;
         } else {
             result[1] = self.half_height;
         }
-        transform.transform_point(Point3::from_vec(
-            result + direction.normalize_to(self.radius),
-        ))
+        transform.transform_point(result + direction.normalize_to(self.radius))
     }
 }
 

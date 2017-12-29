@@ -97,7 +97,6 @@ where
         }
         let four = two + two;
         let dr = b * b - four * a * c;
-        println!("{:?}", dr);
         if dr < S::zero() {
             return false;
         }
@@ -105,8 +104,6 @@ where
         let t1 = (-b + drsqrt) / (two * a);
         let t2 = (-b - drsqrt) / (two * a);
 
-        println!("{:?}", t1);
-        println!("{:?}", t2);
         if t1 < S::zero() && t2 < S::zero() {
             return false;
         }

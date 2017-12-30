@@ -1,7 +1,9 @@
 //! Collision primitives
 
+pub use self::capsule::Capsule;
 pub use self::circle::Circle;
 pub use self::cuboid::Cuboid;
+pub use self::cylinder::Cylinder;
 pub use self::particle::*;
 pub use self::polygon::ConvexPolygon;
 pub use self::polyhedron::ConvexPolyhedron;
@@ -14,6 +16,8 @@ mod circle;
 mod rectangle;
 mod polygon;
 mod sphere;
+mod cylinder;
+mod capsule;
 mod cuboid;
 mod polyhedron;
 mod particle;

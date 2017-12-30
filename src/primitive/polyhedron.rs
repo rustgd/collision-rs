@@ -120,7 +120,10 @@ where
     /// Return an iterator that will yield tuples of the 3 vertices of each face
     pub fn faces_iter(&self) -> FaceIterator<S> {
         assert_eq!(self.mode, PolyhedronMode::HalfEdge);
-        FaceIterator::new(self)
+        FaceIterator {
+            polyhedron: self,
+            current: 0,
+        }
     }
 
     #[inline]
@@ -183,18 +186,6 @@ where
 {
     polyhedron: &'a ConvexPolyhedron<S>,
     current: usize,
-}
-
-impl<'a, S: 'a> FaceIterator<'a, S>
-where
-    S: BaseFloat,
-{
-    pub fn new(polyhedron: &'a ConvexPolyhedron<S>) -> Self {
-        Self {
-            polyhedron,
-            current: 0,
-        }
-    }
 }
 
 impl<'a, S> Iterator for FaceIterator<'a, S>

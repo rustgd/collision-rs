@@ -3,7 +3,7 @@
 
 use std::ops::Neg;
 
-use Aabb;
+use {Aabb, Ray3};
 use cgmath::{BaseFloat, BaseNum, Vector2};
 use cgmath::prelude::*;
 use num::Float;
@@ -114,6 +114,27 @@ where
     } else {
         *start + line_dir * d
     }
+}
+
+pub(crate) fn cylinder_ray_quadratic_solve<S>(r: &Ray3<S>, radius: S) -> Option<(S, S)>
+where
+    S: BaseFloat,
+{
+    let two = S::one() + S::one();
+
+    let a = r.direction.x * r.direction.x + r.direction.z * r.direction.z;
+    let b = two * (r.direction.x * r.origin.x + r.direction.z * r.origin.z);
+    let c = r.origin.x * r.origin.x + r.origin.z * r.origin.z - radius * radius;
+
+    let four = two + two;
+    let dr = b * b - four * a * c;
+    if dr < S::zero() {
+        return None;
+    }
+    let drsqrt = dr.sqrt();
+    let t1 = (-b + drsqrt) / (two * a);
+    let t2 = (-b - drsqrt) / (two * a);
+    Some((t1, t2))
 }
 
 #[cfg(test)]

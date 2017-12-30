@@ -64,49 +64,49 @@ where
     S: BaseFloat,
 {
     fn intersects(&self, r: &Ray3<S>) -> bool {
-        match cylinder_ray_quadratic_solve(r, self.radius) {
-            None => false,
-            Some((t1, t2)) => {
-                if t1 < S::zero() && t2 < S::zero() {
-                    return false;
-                }
+        let (t1, t2) = match cylinder_ray_quadratic_solve(r, self.radius) {
+            None => return false,
+            Some(t) => t,
+        };
 
-                let t = if t1 < S::zero() {
-                    t2
-                } else if t2 < S::zero() {
-                    t1
-                } else {
-                    t1.min(t2)
-                };
+        if t1 < S::zero() && t2 < S::zero() {
+            return false;
+        }
 
-                let pc = r.origin + r.direction * t;
-                if pc.y <= self.half_height && pc.y >= -self.half_height {
-                    return true;
-                }
+        let t = if t1 < S::zero() {
+            t2
+        } else if t2 < S::zero() {
+            t1
+        } else {
+            t1.min(t2)
+        };
 
-                // top sphere
-                let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
-                let tca = l.dot(r.direction);
-                if tca > S::zero() {
-                    let d2 = l.dot(l) - tca * tca;
-                    if d2 <= self.radius * self.radius {
-                        return true;
-                    }
-                }
+        let pc = r.origin + r.direction * t;
+        if pc.y <= self.half_height && pc.y >= -self.half_height {
+            return true;
+        }
 
-                // bottom sphere
-                let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
-                let tca = l.dot(r.direction);
-                if tca > S::zero() {
-                    let d2 = l.dot(l) - tca * tca;
-                    if d2 <= self.radius * self.radius {
-                        return true;
-                    }
-                }
-
-                false
+        // top sphere
+        let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
+        let tca = l.dot(r.direction);
+        if tca > S::zero() {
+            let d2 = l.dot(l) - tca * tca;
+            if d2 <= self.radius * self.radius {
+                return true;
             }
         }
+
+        // bottom sphere
+        let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
+        let tca = l.dot(r.direction);
+        if tca > S::zero() {
+            let d2 = l.dot(l) - tca * tca;
+            if d2 <= self.radius * self.radius {
+                return true;
+            }
+        }
+
+        false
     }
 }
 
@@ -117,59 +117,62 @@ where
     type Result = Point3<S>;
 
     fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
-        cylinder_ray_quadratic_solve(r, self.radius).and_then(|(t1, t2)| {
-            if t1 < S::zero() && t2 < S::zero() {
-                None
-            } else {
-                let mut t = if t1 < S::zero() {
-                    t2
-                } else if t2 < S::zero() {
-                    t1
-                } else {
-                    t1.min(t2)
-                };
+        let (t1, t2) = match cylinder_ray_quadratic_solve(r, self.radius) {
+            None => return None,
+            Some(t) => t,
+        };
 
-                // top sphere
-                let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
-                let tca = l.dot(r.direction);
-                if tca > S::zero() {
-                    let d2 = l.dot(l) - tca * tca;
-                    if d2 <= self.radius * self.radius {
-                        let thc = (self.radius * self.radius - d2).sqrt();
-                        let t0 = tca - thc;
-                        if t0 >= S::zero() && (t.is_nan() || t0 < t) {
-                            t = t0;
-                        }
-                    }
-                }
+        if t1 < S::zero() && t2 < S::zero() {
+            return None;
+        }
 
-                // bottom sphere
-                let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
-                let tca = l.dot(r.direction);
-                if tca > S::zero() {
-                    let d2 = l.dot(l) - tca * tca;
-                    if d2 <= self.radius * self.radius {
-                        let thc = (self.radius * self.radius - d2).sqrt();
-                        let t0 = tca - thc;
-                        if t0 >= S::zero() && (t.is_nan() || t0 < t) {
-                            t = t0;
-                        }
-                    }
-                }
+        let mut t = if t1 < S::zero() {
+            t2
+        } else if t2 < S::zero() {
+            t1
+        } else {
+            t1.min(t2)
+        };
 
-                if t.is_nan() {
-                    None
-                } else {
-                    let pc = r.origin + r.direction * t;
-                    let full_half_height = self.half_height + self.radius;
-                    if (pc.y > full_half_height) || (pc.y < -full_half_height) {
-                        None
-                    } else {
-                        Some(pc)
-                    }
+        // top sphere
+        let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
+        let tca = l.dot(r.direction);
+        if tca > S::zero() {
+            let d2 = l.dot(l) - tca * tca;
+            if d2 <= self.radius * self.radius {
+                let thc = (self.radius * self.radius - d2).sqrt();
+                let t0 = tca - thc;
+                if t0 >= S::zero() && (t.is_nan() || t0 < t) {
+                    t = t0;
                 }
             }
-        })
+        }
+
+        // bottom sphere
+        let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
+        let tca = l.dot(r.direction);
+        if tca > S::zero() {
+            let d2 = l.dot(l) - tca * tca;
+            if d2 <= self.radius * self.radius {
+                let thc = (self.radius * self.radius - d2).sqrt();
+                let t0 = tca - thc;
+                if t0 >= S::zero() && (t.is_nan() || t0 < t) {
+                    t = t0;
+                }
+            }
+        }
+
+        if t.is_nan() {
+            return None;
+        }
+
+        let pc = r.origin + r.direction * t;
+        let full_half_height = self.half_height + self.radius;
+        if (pc.y > full_half_height) || (pc.y < -full_half_height) {
+            None
+        } else {
+            Some(pc)
+        }
     }
 }
 

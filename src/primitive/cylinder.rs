@@ -90,47 +90,47 @@ where
                 || (r.origin.y <= self.half_height && r.direction.y >= S::zero());
         }
 
-        match cylinder_ray_quadratic_solve(r, self.radius) {
-            None => false,
-            Some((t1, t2)) => {
-                if t1 < S::zero() && t2 < S::zero() {
-                    return false;
-                }
+        let (t1, t2) = match cylinder_ray_quadratic_solve(r, self.radius) {
+            None => return false,
+            Some(t) => t,
+        };
 
-                let t = if t1 < S::zero() {
-                    t2
-                } else if t2 < S::zero() {
-                    t1
-                } else {
-                    t1.min(t2)
-                };
+        if t1 < S::zero() && t2 < S::zero() {
+            return false;
+        }
 
-                let pc = r.origin + r.direction * t;
-                if pc.y <= self.half_height && pc.y >= -self.half_height {
-                    return true;
-                }
+        let t = if t1 < S::zero() {
+            t2
+        } else if t2 < S::zero() {
+            t1
+        } else {
+            t1.min(t2)
+        };
 
-                let n = -Vector3::unit_y();
-                let tp = -(self.half_height + r.origin.dot(n)) / r.direction.dot(n);
-                if tp >= S::zero() {
-                    let p = r.origin + r.direction * tp;
-                    if p.x * p.x + p.z * p.z < self.radius * self.radius {
-                        return true;
-                    }
-                }
+        let pc = r.origin + r.direction * t;
+        if pc.y <= self.half_height && pc.y >= -self.half_height {
+            return true;
+        }
 
-                let n = Vector3::unit_y();
-                let tb = -(-self.half_height + r.origin.dot(n)) / r.direction.dot(n);
-                if tb >= S::zero() {
-                    let p = r.origin + r.direction * tb;
-                    if p.x * p.x + p.z * p.z < self.radius * self.radius {
-                        return true;
-                    }
-                }
-
-                false
+        let n = -Vector3::unit_y();
+        let tp = -(self.half_height + r.origin.dot(n)) / r.direction.dot(n);
+        if tp >= S::zero() {
+            let p = r.origin + r.direction * tp;
+            if p.x * p.x + p.z * p.z < self.radius * self.radius {
+                return true;
             }
         }
+
+        let n = Vector3::unit_y();
+        let tb = -(-self.half_height + r.origin.dot(n)) / r.direction.dot(n);
+        if tb >= S::zero() {
+            let p = r.origin + r.direction * tb;
+            if p.x * p.x + p.z * p.z < self.radius * self.radius {
+                return true;
+            }
+        }
+
+        false
     }
 }
 
@@ -162,44 +162,47 @@ where
             return None;
         }
 
-        cylinder_ray_quadratic_solve(r, self.radius).and_then(|(t1, t2)| {
-            if t1 < S::zero() && t2 < S::zero() {
-                None
-            } else {
-                let mut t = if t1 < S::zero() {
-                    t2
-                } else if t2 < S::zero() {
-                    t1
-                } else {
-                    t1.min(t2)
-                };
+        let (t1, t2) = match cylinder_ray_quadratic_solve(r, self.radius) {
+            None => return None,
+            Some(t) => t,
+        };
 
-                let n = -Vector3::unit_y();
-                let tp = -(self.half_height + r.origin.dot(n)) / r.direction.dot(n);
-                if tp >= S::zero() && tp < t {
-                    let p = r.origin + r.direction * tp;
-                    if p.x * p.x + p.z * p.z < self.radius * self.radius {
-                        t = tp;
-                    }
-                }
+        if t1 < S::zero() && t2 < S::zero() {
+            return None;
+        }
 
-                let n = Vector3::unit_y();
-                let tb = -(-self.half_height + r.origin.dot(n)) / r.direction.dot(n);
-                if tb >= S::zero() && tb < t {
-                    let p = r.origin + r.direction * tb;
-                    if p.x * p.x + p.z * p.z < self.radius * self.radius {
-                        t = tb;
-                    }
-                }
+        let mut t = if t1 < S::zero() {
+            t2
+        } else if t2 < S::zero() {
+            t1
+        } else {
+            t1.min(t2)
+        };
 
-                let pc = r.origin + r.direction * t;
-                if (pc.y > self.half_height) || (pc.y < -self.half_height) {
-                    None
-                } else {
-                    Some(pc)
-                }
+        let n = -Vector3::unit_y();
+        let tp = -(self.half_height + r.origin.dot(n)) / r.direction.dot(n);
+        if tp >= S::zero() && tp < t {
+            let p = r.origin + r.direction * tp;
+            if p.x * p.x + p.z * p.z < self.radius * self.radius {
+                t = tp;
             }
-        })
+        }
+
+        let n = Vector3::unit_y();
+        let tb = -(-self.half_height + r.origin.dot(n)) / r.direction.dot(n);
+        if tb >= S::zero() && tb < t {
+            let p = r.origin + r.direction * tb;
+            if p.x * p.x + p.z * p.z < self.radius * self.radius {
+                t = tb;
+            }
+        }
+
+        let pc = r.origin + r.direction * t;
+        if (pc.y > self.half_height) || (pc.y < -self.half_height) {
+            None
+        } else {
+            Some(pc)
+        }
     }
 }
 

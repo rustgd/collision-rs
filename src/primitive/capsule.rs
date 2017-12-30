@@ -3,6 +3,7 @@ use cgmath::prelude::*;
 
 use {Aabb3, Ray3};
 use prelude::*;
+use primitive::util::cylinder_ray_quadratic_solve;
 
 /// Capsule primitive
 /// Capsule body is aligned with the Y axis, with local origin in the center of the capsule.
@@ -39,11 +40,7 @@ where
             .transform_vector(*direction);
 
         let mut result = Point3::origin();
-        if direction.y.is_sign_negative() {
-            result[1] = -self.half_height;
-        } else {
-            result[1] = self.half_height;
-        }
+        result.y = direction.y.signum() * self.half_height;
         transform.transform_point(result + direction.normalize_to(self.radius))
     }
 }
@@ -67,60 +64,49 @@ where
     S: BaseFloat,
 {
     fn intersects(&self, r: &Ray3<S>) -> bool {
-        // cylinder
-        let two = S::one() + S::one();
+        match cylinder_ray_quadratic_solve(r, self.radius) {
+            None => false,
+            Some((t1, t2)) => {
+                if t1 < S::zero() && t2 < S::zero() {
+                    return false;
+                }
 
-        let a = r.direction.x * r.direction.x + r.direction.z * r.direction.z;
-        let b = two * (r.direction.x * r.origin.x + r.direction.z * r.origin.z);
-        let c = r.origin.x * r.origin.x + r.origin.z * r.origin.z - self.radius * self.radius;
+                let t = if t1 < S::zero() {
+                    t2
+                } else if t2 < S::zero() {
+                    t1
+                } else {
+                    t1.min(t2)
+                };
 
-        let four = two + two;
-        let dr = b * b - four * a * c;
-        if dr < S::zero() {
-            return false;
-        }
-        let drsqrt = dr.sqrt();
-        let t1 = (-b + drsqrt) / (two * a);
-        let t2 = (-b - drsqrt) / (two * a);
+                let pc = r.origin + r.direction * t;
+                if pc.y <= self.half_height && pc.y >= -self.half_height {
+                    return true;
+                }
 
-        if t1 < S::zero() && t2 < S::zero() {
-            return false;
-        }
+                // top sphere
+                let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
+                let tca = l.dot(r.direction);
+                if tca > S::zero() {
+                    let d2 = l.dot(l) - tca * tca;
+                    if d2 <= self.radius * self.radius {
+                        return true;
+                    }
+                }
 
-        let t = if t1 < S::zero() {
-            t2
-        } else if t2 < S::zero() {
-            t1
-        } else {
-            t1.min(t2)
-        };
+                // bottom sphere
+                let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
+                let tca = l.dot(r.direction);
+                if tca > S::zero() {
+                    let d2 = l.dot(l) - tca * tca;
+                    if d2 <= self.radius * self.radius {
+                        return true;
+                    }
+                }
 
-        let pc = r.origin + r.direction * t;
-        if pc.y <= self.half_height && pc.y >= -self.half_height {
-            return true;
-        }
-
-        // top sphere
-        let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
-        let tca = l.dot(r.direction);
-        if tca > S::zero() {
-            let d2 = l.dot(l) - tca * tca;
-            if d2 <= self.radius * self.radius {
-                return true;
+                false
             }
         }
-
-        // bottom sphere
-        let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
-        let tca = l.dot(r.direction);
-        if tca > S::zero() {
-            let d2 = l.dot(l) - tca * tca;
-            if d2 <= self.radius * self.radius {
-                return true;
-            }
-        }
-
-        false
     }
 }
 
@@ -131,73 +117,59 @@ where
     type Result = Point3<S>;
 
     fn intersection(&self, r: &Ray3<S>) -> Option<Point3<S>> {
-        // cylinder
-        let two = S::one() + S::one();
+        cylinder_ray_quadratic_solve(r, self.radius).and_then(|(t1, t2)| {
+            if t1 < S::zero() && t2 < S::zero() {
+                None
+            } else {
+                let mut t = if t1 < S::zero() {
+                    t2
+                } else if t2 < S::zero() {
+                    t1
+                } else {
+                    t1.min(t2)
+                };
 
-        let a = r.direction.x * r.direction.x + r.direction.z * r.direction.z;
-        let b = two * (r.direction.x * r.origin.x + r.direction.z * r.origin.z);
-        let c = r.origin.x * r.origin.x + r.origin.z * r.origin.z - self.radius * self.radius;
+                // top sphere
+                let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
+                let tca = l.dot(r.direction);
+                if tca > S::zero() {
+                    let d2 = l.dot(l) - tca * tca;
+                    if d2 <= self.radius * self.radius {
+                        let thc = (self.radius * self.radius - d2).sqrt();
+                        let t0 = tca - thc;
+                        if t0 >= S::zero() && (t.is_nan() || t0 < t) {
+                            t = t0;
+                        }
+                    }
+                }
 
-        let four = two + two;
-        let dr = b * b - four * a * c;
-        if dr < S::zero() {
-            return None;
-        }
-        let drsqrt = dr.sqrt();
-        let t1 = (-b + drsqrt) / (two * a);
-        let t2 = (-b - drsqrt) / (two * a);
+                // bottom sphere
+                let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
+                let tca = l.dot(r.direction);
+                if tca > S::zero() {
+                    let d2 = l.dot(l) - tca * tca;
+                    if d2 <= self.radius * self.radius {
+                        let thc = (self.radius * self.radius - d2).sqrt();
+                        let t0 = tca - thc;
+                        if t0 >= S::zero() && (t.is_nan() || t0 < t) {
+                            t = t0;
+                        }
+                    }
+                }
 
-        if t1 < S::zero() && t2 < S::zero() {
-            return None;
-        }
-
-        let mut t = if t1 < S::zero() {
-            t2
-        } else if t2 < S::zero() {
-            t1
-        } else {
-            t1.min(t2)
-        };
-
-        // top sphere
-        let l = Vector3::new(-r.origin.x, self.half_height - r.origin.y, -r.origin.z);
-        let tca = l.dot(r.direction);
-        if tca > S::zero() {
-            let d2 = l.dot(l) - tca * tca;
-            if d2 <= self.radius * self.radius {
-                let thc = (self.radius * self.radius - d2).sqrt();
-                let t0 = tca - thc;
-                if t0 >= S::zero() && (t.is_nan() || t0 < t) {
-                    t = t0;
+                if t.is_nan() {
+                    None
+                } else {
+                    let pc = r.origin + r.direction * t;
+                    let full_half_height = self.half_height + self.radius;
+                    if (pc.y > full_half_height) || (pc.y < -full_half_height) {
+                        None
+                    } else {
+                        Some(pc)
+                    }
                 }
             }
-        }
-
-        // bottom sphere
-        let l = Vector3::new(-r.origin.x, -self.half_height - r.origin.y, -r.origin.z);
-        let tca = l.dot(r.direction);
-        if tca > S::zero() {
-            let d2 = l.dot(l) - tca * tca;
-            if d2 <= self.radius * self.radius {
-                let thc = (self.radius * self.radius - d2).sqrt();
-                let t0 = tca - thc;
-                if t0 >= S::zero() && (t.is_nan() || t0 < t) {
-                    t = t0;
-                }
-            }
-        }
-
-        if t.is_nan() {
-            return None;
-        }
-
-        let pc = r.origin + r.direction * t;
-        let full_half_height = self.half_height + self.radius;
-        if (pc.y > full_half_height) || (pc.y < -full_half_height) {
-            return None;
-        }
-
-        Some(r.origin + r.direction * t)
+        })
     }
 }
 

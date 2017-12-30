@@ -121,6 +121,18 @@ pub trait TreeValue: Clone {
     fn fat_bound(&self) -> Self::Bound;
 }
 
+impl<T> HasBound for (usize, T)
+where
+    T: TreeValue,
+    T::Bound: BoundingVolume,
+{
+    type Bound = T::Bound;
+
+    fn get_bound(&self) -> &Self::Bound {
+        self.1.bound()
+    }
+}
+
 /// Visitor trait used for [querying](struct.DynamicBoundingVolumeTree.html#method.query) the tree.
 pub trait Visitor {
     /// Bounding volume accepted by the visitor

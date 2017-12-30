@@ -62,6 +62,18 @@ where
     }
 }
 
+impl<'a, S> From<&'a Rectangle<S>> for Aabb2<S>
+where
+    S: BaseFloat,
+{
+    fn from(rectangle: &Rectangle<S>) -> Self {
+        Aabb2::new(
+            Point2::from_vec(-rectangle.half_dim),
+            Point2::from_vec(rectangle.half_dim),
+        )
+    }
+}
+
 impl<S> HasAabb for Rectangle<S>
 where
     S: BaseFloat,

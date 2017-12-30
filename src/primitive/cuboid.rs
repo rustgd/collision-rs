@@ -4,6 +4,7 @@ use cgmath::prelude::*;
 use {Aabb3, Ray3};
 use prelude::*;
 use primitive::util::get_max_point;
+use volume::Sphere;
 
 /// Cuboid primitive.
 ///
@@ -61,6 +62,35 @@ where
         T: Transform<Point3<S>>,
     {
         get_max_point(self.corners.iter(), direction, transform)
+    }
+}
+
+impl<'a, S> From<&'a Cuboid<S>> for Aabb3<S>
+where
+    S: BaseFloat,
+{
+    fn from(cuboid: &Cuboid<S>) -> Aabb3<S> {
+        Aabb3::new(
+            Point3::from_vec(-cuboid.half_dim),
+            Point3::from_vec(cuboid.half_dim),
+        )
+    }
+}
+
+impl<'a, S> From<&'a Cuboid<S>> for Sphere<S>
+where
+    S: BaseFloat,
+{
+    fn from(cuboid: &Cuboid<S>) -> Sphere<S> {
+        let max = cuboid
+            .half_dim
+            .x
+            .max(cuboid.half_dim.y)
+            .max(cuboid.half_dim.z);
+        Sphere {
+            center: Point3::origin(),
+            radius: max,
+        }
     }
 }
 

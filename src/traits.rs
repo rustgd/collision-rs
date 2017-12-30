@@ -12,14 +12,14 @@ pub trait Continuous<RHS> {
     type Result;
 
     /// Intersection test
-    fn intersection(&self, &RHS) -> Option<Self::Result>;
+    fn intersection(&self, _: &RHS) -> Option<Self::Result>;
 }
 
 /// A boolean intersection test.
 ///
 pub trait Discrete<RHS> {
     /// Intersection test
-    fn intersects(&self, &RHS) -> bool;
+    fn intersects(&self, _: &RHS) -> bool;
 }
 
 /// Boolean containment test.
@@ -27,7 +27,7 @@ pub trait Discrete<RHS> {
 pub trait Contains<RHS> {
     /// Containment test
     #[inline]
-    fn contains(&self, &RHS) -> bool;
+    fn contains(&self, _: &RHS) -> bool;
 }
 
 /// Shape surface area
@@ -47,7 +47,29 @@ pub trait Union<RHS = Self> {
     type Output;
 
     /// Build the union shape of self and the given shape.
-    fn union(&self, &RHS) -> Self::Output;
+    fn union(&self, _: &RHS) -> Self::Output;
+}
+
+/// Bounding volume abstraction for use with algorithms
+pub trait BoundingVolume {
+    /// Point type for the bounding volume (for dimensionality)
+    type Point: EuclideanSpace;
+
+    /// Minimum extents of the bounding volume
+    fn min_extent(&self) -> Self::Point;
+    /// Maximum extents of the bounding volume
+    fn max_extent(&self) -> Self::Point;
+    /// Create a new bounding volume extended by the given amount
+    fn with_margin(&self, add: <Self::Point as EuclideanSpace>::Diff) -> Self;
+}
+
+/// Primitive with bounding volume
+pub trait HasBound {
+    /// Bounding volume type
+    type Bound: BoundingVolume;
+
+    /// Borrow the bounding volume
+    fn get_bound(&self) -> &Self::Bound;
 }
 
 /// Primitive with axis aligned bounding box
@@ -95,7 +117,7 @@ pub trait DiscreteTransformed<RHS> {
     type Point: EuclideanSpace;
 
     /// Intersection test for transformed self
-    fn intersects_transformed<T>(&self, &RHS, &T) -> bool
+    fn intersects_transformed<T>(&self, _: &RHS, _: &T) -> bool
     where
         T: Transform<Self::Point>;
 }
@@ -109,21 +131,18 @@ pub trait ContinuousTransformed<RHS> {
     type Result: EuclideanSpace;
 
     /// Intersection test for transformed self
-    fn intersection_transformed<T>(&self, &RHS, &T) -> Option<Self::Result>
+    fn intersection_transformed<T>(&self, _: &RHS, _: &T) -> Option<Self::Result>
     where
         T: Transform<Self::Point>;
 }
 
 /// Marker trait for a collision primitive.
-pub trait Primitive
-    : Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>
-    {
-}
+pub trait Primitive: Clone + SupportFunction {}
 
 /// Implementation of marker trait for all types where the bounds are fulfilled
 impl<T> Primitive for T
 where
-    T: Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>,
+    T: Clone + SupportFunction,
 {
 }
 

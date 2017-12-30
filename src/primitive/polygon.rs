@@ -43,6 +43,15 @@ where
     }
 }
 
+impl<'a, S> From<&'a ConvexPolygon<S>> for Aabb2<S>
+where
+    S: BaseFloat,
+{
+    fn from(polygon: &ConvexPolygon<S>) -> Self {
+        get_bound(polygon.vertices.iter())
+    }
+}
+
 impl<S> HasAabb for ConvexPolygon<S>
 where
     S: BaseFloat,

@@ -4,6 +4,7 @@ use cgmath::prelude::*;
 use {Aabb3, Ray3};
 use prelude::*;
 use primitive::util::cylinder_ray_quadratic_solve;
+use volume::Sphere;
 
 /// Cylinder primitive
 /// Cylinder body is aligned with the Y axis, with local origin in the center of the cylinders.
@@ -72,6 +73,32 @@ where
             result.y = self.half_height;
         }
         transform.transform_point(Point3::from_vec(result))
+    }
+}
+
+impl<'a, S> From<&'a Cylinder<S>> for Aabb3<S>
+where
+    S: BaseFloat,
+{
+    fn from(cylinder: &Cylinder<S>) -> Aabb3<S> {
+        Aabb3::new(
+            Point3::new(-cylinder.radius, -cylinder.half_height, -cylinder.radius),
+            Point3::new(cylinder.radius, cylinder.half_height, cylinder.radius),
+        )
+    }
+}
+
+impl<'a, S> From<&'a Cylinder<S>> for Sphere<S>
+where
+    S: BaseFloat,
+{
+    fn from(cylinder: &Cylinder<S>) -> Self {
+        Self {
+            center: Point3::origin(),
+            radius: ((cylinder.radius * cylinder.radius)
+                + (cylinder.half_height * cylinder.half_height))
+                .sqrt(),
+        }
     }
 }
 

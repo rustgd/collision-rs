@@ -1,4 +1,3 @@
-use super::*;
 use prelude::*;
 
 /// Broad phase collision detection brute force implementation.

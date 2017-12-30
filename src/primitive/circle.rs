@@ -39,6 +39,18 @@ where
     }
 }
 
+impl<'a, S> From<&'a Circle<S>> for Aabb2<S>
+where
+    S: BaseFloat,
+{
+    fn from(circle: &Circle<S>) -> Self {
+        Aabb2::new(
+            Point2::new(-circle.radius, -circle.radius),
+            Point2::new(circle.radius, circle.radius),
+        )
+    }
+}
+
 impl<S> HasAabb for Circle<S>
 where
     S: BaseFloat,

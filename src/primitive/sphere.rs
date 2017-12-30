@@ -37,6 +37,30 @@ where
     }
 }
 
+impl<'a, S> From<&'a Sphere<S>> for Aabb3<S>
+where
+    S: BaseFloat,
+{
+    fn from(sphere: &Sphere<S>) -> Aabb3<S> {
+        Aabb3::new(
+            Point3::from_value(-sphere.radius),
+            Point3::from_value(sphere.radius),
+        )
+    }
+}
+
+impl<'a, S> From<&'a Sphere<S>> for ::volume::Sphere<S>
+where
+    S: BaseFloat,
+{
+    fn from(sphere: &Sphere<S>) -> Self {
+        Self {
+            center: Point3::origin(),
+            radius: sphere.radius,
+        }
+    }
+}
+
 impl<S> HasAabb for Sphere<S>
 where
     S: BaseFloat,

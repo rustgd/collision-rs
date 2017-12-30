@@ -25,3 +25,38 @@ mod primitive2;
 mod primitive3;
 
 pub(crate) mod util;
+
+use cgmath::{EuclideanSpace, Transform};
+
+use prelude::*;
+
+impl<B, P> HasBound for (P, B)
+where
+    P: Primitive,
+    B: BoundingVolume,
+{
+    type Bound = B;
+
+    fn get_bound(&self) -> &Self::Bound {
+        &self.1
+    }
+}
+
+impl<B, P> SupportFunction for (P, B)
+where
+    P: Primitive,
+    B: BoundingVolume,
+{
+    type Point = P::Point;
+
+    fn support_point<T>(
+        &self,
+        direction: &<Self::Point as EuclideanSpace>::Diff,
+        transform: &T,
+    ) -> Self::Point
+    where
+        T: Transform<Self::Point>,
+    {
+        self.0.support_point(direction, transform)
+    }
+}

@@ -13,6 +13,8 @@ use std::cmp::{Ordering, PartialOrd};
 use cgmath::{BaseNum, Point2, Point3};
 use cgmath::prelude::*;
 
+use traits::BoundingVolume;
+
 mod aabb2;
 mod aabb3;
 
@@ -143,4 +145,24 @@ pub trait Aabb: Sized {
     fn transform<T>(&self, transform: &T) -> Self
     where
         T: Transform<Self::Point>;
+}
+
+impl<A> BoundingVolume for A
+where
+    A: Aabb,
+    A::Point: EuclideanSpace,
+{
+    type Point = A::Point;
+
+    fn min_extent(&self) -> A::Point {
+        self.min()
+    }
+
+    fn max_extent(&self) -> A::Point {
+        self.max()
+    }
+
+    fn with_margin(&self, add: <A::Point as EuclideanSpace>::Diff) -> Self {
+        self.add_margin(add)
+    }
 }

@@ -83,6 +83,41 @@ where
     }
 }
 
+impl<'a, S> From<&'a Primitive3<S>> for Aabb3<S>
+where
+    S: BaseFloat,
+{
+    fn from(primitive: &Primitive3<S>) -> Self {
+        match *primitive {
+            Primitive3::Particle(_) => Aabb3::zero(),
+            Primitive3::Cuboid(ref cuboid) => cuboid.into(),
+            Primitive3::Sphere(ref sphere) => sphere.into(),
+            Primitive3::Cylinder(ref cylinder) => cylinder.into(),
+            Primitive3::Capsule(ref capsule) => capsule.into(),
+            Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.into(),
+        }
+    }
+}
+
+impl<'a, S> From<&'a Primitive3<S>> for ::volume::Sphere<S>
+where
+    S: BaseFloat,
+{
+    fn from(primitive: &Primitive3<S>) -> Self {
+        match *primitive {
+            Primitive3::Particle(_) => Self {
+                center: Point3::origin(),
+                radius: S::zero(),
+            },
+            Primitive3::Cuboid(ref cuboid) => cuboid.into(),
+            Primitive3::Sphere(ref sphere) => sphere.into(),
+            Primitive3::Cylinder(ref cylinder) => cylinder.into(),
+            Primitive3::Capsule(ref capsule) => capsule.into(),
+            Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.into(),
+        }
+    }
+}
+
 impl<S> HasAabb for Primitive3<S>
 where
     S: BaseFloat,

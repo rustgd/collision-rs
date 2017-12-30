@@ -4,6 +4,7 @@ use cgmath::prelude::*;
 use {Aabb3, Ray3};
 use prelude::*;
 use primitive::util::cylinder_ray_quadratic_solve;
+use volume::Sphere;
 
 /// Capsule primitive
 /// Capsule body is aligned with the Y axis, with local origin in the center of the capsule.
@@ -58,6 +59,38 @@ where
     }
 }
 
+impl<'a, S> From<&'a Capsule<S>> for Aabb3<S>
+where
+    S: BaseFloat,
+{
+    fn from(capsule: &Capsule<S>) -> Aabb3<S> {
+        Aabb3::new(
+            Point3::new(
+                -capsule.radius,
+                -capsule.half_height - capsule.radius,
+                -capsule.radius,
+            ),
+            Point3::new(
+                capsule.radius,
+                capsule.half_height + capsule.radius,
+                capsule.radius,
+            ),
+        )
+    }
+}
+
+impl<'a, S> From<&'a Capsule<S>> for Sphere<S>
+where
+    S: BaseFloat,
+{
+    fn from(capsule: &Capsule<S>) -> Sphere<S> {
+        Sphere {
+            center: Point3::origin(),
+            radius: capsule.half_height + capsule.radius,
+        }
+    }
+}
+
 impl<S> HasAabb for Capsule<S>
 where
     S: BaseFloat,
@@ -65,10 +98,7 @@ where
     type Aabb = Aabb3<S>;
 
     fn get_bound(&self) -> Self::Aabb {
-        Aabb3::new(
-            Point3::new(-self.radius, -self.half_height - self.radius, -self.radius),
-            Point3::new(self.radius, self.half_height + self.radius, self.radius),
-        )
+        self.into()
     }
 }
 

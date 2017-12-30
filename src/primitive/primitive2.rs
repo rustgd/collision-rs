@@ -46,6 +46,20 @@ impl<S> From<ConvexPolygon<S>> for Primitive2<S> {
     }
 }
 
+impl<'a, S> From<&'a Primitive2<S>> for Aabb2<S>
+where
+    S: BaseFloat,
+{
+    fn from(primitive: &Primitive2<S>) -> Self {
+        match *primitive {
+            Primitive2::Particle(_) => Aabb2::zero(),
+            Primitive2::Circle(ref circle) => circle.into(),
+            Primitive2::Rectangle(ref rectangle) => rectangle.into(),
+            Primitive2::ConvexPolygon(ref polygon) => polygon.into(),
+        }
+    }
+}
+
 impl<S> HasAabb for Primitive2<S>
 where
     S: BaseFloat,

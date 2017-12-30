@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 use bit_set::BitSet;
@@ -7,6 +8,7 @@ use cgmath::prelude::*;
 use {Aabb3, Plane, Ray3};
 use prelude::*;
 use primitive::util::barycentric_point;
+use volume::Sphere;
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
@@ -67,6 +69,7 @@ where
     edges: Vec<Edge>,
     faces: Vec<Face<S>>,
     bound: Aabb3<S>,
+    max_extent: S,
 }
 
 impl<S> ConvexPolyhedron<S>
@@ -90,6 +93,11 @@ where
             bound: vertices
                 .iter()
                 .fold(Aabb3::zero(), |bound, p| bound.grow(*p)),
+            max_extent: vertices
+                .iter()
+                .map(|p| p.to_vec().magnitude())
+                .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+                .unwrap_or(S::zero()),
         }
     }
 
@@ -101,6 +109,11 @@ where
             bound: vertices
                 .iter()
                 .fold(Aabb3::zero(), |bound, p| bound.grow(p.position)),
+            max_extent: vertices
+                .iter()
+                .map(|p| p.position.to_vec().magnitude())
+                .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+                .unwrap_or(S::zero()),
             vertices,
             edges,
             faces,
@@ -372,6 +385,27 @@ where
             ),
         };
         transform.transform_point(p)
+    }
+}
+
+impl<'a, S> From<&'a ConvexPolyhedron<S>> for Aabb3<S>
+where
+    S: BaseFloat,
+{
+    fn from(polyhedra: &ConvexPolyhedron<S>) -> Aabb3<S> {
+        polyhedra.bound.clone()
+    }
+}
+
+impl<'a, S> From<&'a ConvexPolyhedron<S>> for Sphere<S>
+where
+    S: BaseFloat,
+{
+    fn from(polyhedra: &ConvexPolyhedron<S>) -> Self {
+        Self {
+            center: Point3::origin(),
+            radius: polyhedra.max_extent,
+        }
     }
 }
 

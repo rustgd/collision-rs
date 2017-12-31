@@ -61,6 +61,12 @@ pub trait BoundingVolume {
     fn max_extent(&self) -> Self::Point;
     /// Create a new bounding volume extended by the given amount
     fn with_margin(&self, add: <Self::Point as EuclideanSpace>::Diff) -> Self;
+    /// Apply an arbitrary transform to the bounding volume.
+    fn transform_volume<T>(&self, transform: &T) -> Self
+    where
+        T: Transform<Self::Point>;
+    /// Create empty volume
+    fn empty() -> Self;
 }
 
 /// Primitive with bounding volume

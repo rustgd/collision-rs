@@ -45,6 +45,23 @@ where
             radius: self.radius + max,
         }
     }
+
+    fn transform_volume<T>(&self, transform: &T) -> Self
+    where
+        T: Transform<Self::Point>,
+    {
+        Sphere {
+            center: transform.transform_point(self.center),
+            radius: self.radius,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            center: Point3::origin(),
+            radius: S::zero(),
+        }
+    }
 }
 
 impl<S: BaseFloat> Continuous<Ray3<S>> for Sphere<S> {

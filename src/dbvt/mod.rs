@@ -89,6 +89,7 @@
 
 pub use self::util::*;
 pub use self::visitor::*;
+pub use self::wrapped::TreeValueWrapped;
 
 use std::cmp::max;
 use std::fmt;
@@ -99,6 +100,7 @@ use rand::Rng;
 
 use prelude::*;
 
+mod wrapped;
 mod visitor;
 mod util;
 

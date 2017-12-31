@@ -14,13 +14,26 @@ pub struct Capsule<S> {
     radius: S,
 }
 
-impl<S> Capsule<S> {
+impl<S> Capsule<S>
+where
+    S: BaseFloat,
+{
     /// Create a new Capsule
     pub fn new(half_height: S, radius: S) -> Self {
         Self {
             half_height,
             radius,
         }
+    }
+
+    /// Get radius
+    pub fn radius(&self) -> S {
+        self.radius
+    }
+
+    /// Get height
+    pub fn height(&self) -> S {
+        self.half_height + self.half_height
     }
 }
 

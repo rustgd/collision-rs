@@ -1,5 +1,3 @@
-use std::fmt::Debug;
-
 use cgmath::BaseNum;
 use cgmath::prelude::*;
 
@@ -55,7 +53,7 @@ pub trait Union<RHS = Self> {
 /// Primitive with axis aligned bounding box
 pub trait HasAabb {
     /// Bounding box type
-    type Aabb: Aabb + Clone + Union<Self::Aabb, Output = Self::Aabb> + Debug;
+    type Aabb: Aabb + Clone + Union<Self::Aabb, Output = Self::Aabb>;
 
     /// Get the bounding box of the primitive in local space coordinates.
     fn get_bound(&self) -> Self::Aabb;
@@ -118,14 +116,14 @@ pub trait ContinuousTransformed<RHS> {
 
 /// Marker trait for a collision primitive.
 pub trait Primitive
-    : Debug + Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>
+    : Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>
     {
 }
 
 /// Implementation of marker trait for all types where the bounds are fulfilled
 impl<T> Primitive for T
 where
-    T: Debug + Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>,
+    T: Clone + HasAabb + SupportFunction<Point = <<Self as HasAabb>::Aabb as Aabb>::Point>,
 {
 }
 

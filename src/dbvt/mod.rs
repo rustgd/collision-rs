@@ -92,7 +92,6 @@ pub use self::visitor::*;
 
 use std::cmp::max;
 use std::fmt;
-use std::fmt::Debug;
 
 use num::NumCast;
 use rand;
@@ -109,7 +108,7 @@ const PERFORM_ROTATION_PERCENTAGE: u32 = 10;
 /// Trait that needs to be implemented for any value that is to be used in the
 /// [`DynamicBoundingVolumeTree`](struct.DynamicBoundingVolumeTree.html).
 ///
-pub trait TreeValue: Clone + Debug {
+pub trait TreeValue: Clone {
     /// Bounding volume type
     type Bound;
 
@@ -236,10 +235,10 @@ where
     refit_nodes: Vec<(u32, usize)>,
 }
 
-impl<T> Debug for DynamicBoundingVolumeTree<T>
+impl<T> fmt::Debug for DynamicBoundingVolumeTree<T>
 where
     T: TreeValue,
-    T::Bound: Debug,
+    T::Bound: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "graph tree {{")?;
@@ -291,7 +290,7 @@ enum Node<B> {
 impl<T> DynamicBoundingVolumeTree<T>
 where
     T: TreeValue,
-    T::Bound: Clone + Debug + Contains<T::Bound> + Union<T::Bound, Output = T::Bound> + SurfaceArea,
+    T::Bound: Clone + Contains<T::Bound> + Union<T::Bound, Output = T::Bound> + SurfaceArea,
 {
     /// Create a new tree.
     ///

@@ -2,7 +2,6 @@
 //! [`DynamicBoundingVolumeTree`](struct.DynamicBoundingVolumeTree.html).
 //!
 
-use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use cgmath::BaseFloat;
@@ -45,7 +44,6 @@ where
     P: EuclideanSpace<Scalar = S>,
     P::Diff: VectorSpace<Scalar = S> + InnerSpace,
     T::Bound: Clone
-        + Debug
         + Contains<T::Bound>
         + SurfaceArea<Scalar = S>
         + Union<T::Bound, Output = T::Bound>
@@ -95,7 +93,6 @@ where
     P: EuclideanSpace<Scalar = S>,
     P::Diff: VectorSpace<Scalar = S> + InnerSpace,
     T::Bound: Clone
-        + Debug
         + Contains<T::Bound>
         + SurfaceArea<Scalar = S>
         + Union<T::Bound, Output = T::Bound>

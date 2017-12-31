@@ -2,7 +2,6 @@
 //! broad phase collision detection algorithm
 
 use std::cmp::Ordering;
-use std::fmt::Debug;
 
 use dbvt::{DiscreteVisitor, DynamicBoundingVolumeTree, TreeValue};
 use prelude::*;
@@ -33,7 +32,6 @@ impl DbvtBroadPhase {
         T: TreeValue,
         T::Bound: Discrete<T::Bound>
             + Clone
-            + Debug
             + Contains<T::Bound>
             + SurfaceArea
             + Union<T::Bound, Output = T::Bound>,

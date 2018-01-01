@@ -392,7 +392,7 @@ impl<'a, S> From<&'a ConvexPolyhedron<S>> for Aabb3<S>
 where
     S: BaseFloat,
 {
-    fn from(polyhedra: &ConvexPolyhedron<S>) -> Aabb3<S> {
+    fn from(polyhedra: &ConvexPolyhedron<S>) -> Self {
         polyhedra.bound.clone()
     }
 }

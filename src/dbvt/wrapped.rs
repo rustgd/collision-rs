@@ -27,11 +27,7 @@ where
     <B::Point as EuclideanSpace>::Diff: Debug,
 {
     /// Create a new shape
-    pub fn new(
-        value: V,
-        bound: &B,
-        fat_factor: <B::Point as EuclideanSpace>::Diff,
-    ) -> Self
+    pub fn new(value: V, bound: &B, fat_factor: <B::Point as EuclideanSpace>::Diff) -> Self
     where
         B: Clone,
     {
@@ -67,7 +63,7 @@ where
 {
     type Bound = B;
 
-    fn get_bound(&self) -> &Self::Bound {
+    fn bound(&self) -> &Self::Bound {
         &self.bound
     }
 }
@@ -79,6 +75,10 @@ where
     <<H::Bound as BoundingVolume>::Point as EuclideanSpace>::Diff: Debug + Zero,
 {
     fn from((value, f): (V, &H)) -> Self {
-        Self::new(value, f.get_bound(), <<H::Bound as BoundingVolume>::Point as EuclideanSpace>::Diff::zero())
+        Self::new(
+            value,
+            f.bound(),
+            <<H::Bound as BoundingVolume>::Point as EuclideanSpace>::Diff::zero(),
+        )
     }
 }

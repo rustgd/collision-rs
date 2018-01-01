@@ -37,7 +37,7 @@ where
 {
     type Bound = B;
 
-    fn get_bound(&self) -> &Self::Bound {
+    fn bound(&self) -> &Self::Bound {
         &self.1
     }
 }

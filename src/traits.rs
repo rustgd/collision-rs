@@ -75,7 +75,7 @@ pub trait HasBound {
     type Bound: BoundingVolume;
 
     /// Borrow the bounding volume
-    fn get_bound(&self) -> &Self::Bound;
+    fn bound(&self) -> &Self::Bound;
 }
 
 /// Primitive with axis aligned bounding box

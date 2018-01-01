@@ -80,7 +80,7 @@ impl<'a, S> From<&'a Cylinder<S>> for Aabb3<S>
 where
     S: BaseFloat,
 {
-    fn from(cylinder: &Cylinder<S>) -> Aabb3<S> {
+    fn from(cylinder: &Cylinder<S>) -> Self {
         Aabb3::new(
             Point3::new(-cylinder.radius, -cylinder.half_height, -cylinder.radius),
             Point3::new(cylinder.radius, cylinder.half_height, cylinder.radius),

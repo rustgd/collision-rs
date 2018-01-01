@@ -63,7 +63,7 @@ impl<'a, S> From<&'a Capsule<S>> for Aabb3<S>
 where
     S: BaseFloat,
 {
-    fn from(capsule: &Capsule<S>) -> Aabb3<S> {
+    fn from(capsule: &Capsule<S>) -> Self {
         Aabb3::new(
             Point3::new(
                 -capsule.radius,
@@ -83,7 +83,7 @@ impl<'a, S> From<&'a Capsule<S>> for Sphere<S>
 where
     S: BaseFloat,
 {
-    fn from(capsule: &Capsule<S>) -> Sphere<S> {
+    fn from(capsule: &Capsule<S>) -> Self {
         Sphere {
             center: Point3::origin(),
             radius: capsule.half_height + capsule.radius,

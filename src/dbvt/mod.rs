@@ -130,7 +130,7 @@ where
 {
     type Bound = T::Bound;
 
-    fn get_bound(&self) -> &Self::Bound {
+    fn bound(&self) -> &Self::Bound {
         self.1.bound()
     }
 }

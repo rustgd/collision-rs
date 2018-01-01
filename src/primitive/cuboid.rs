@@ -69,7 +69,7 @@ impl<'a, S> From<&'a Cuboid<S>> for Aabb3<S>
 where
     S: BaseFloat,
 {
-    fn from(cuboid: &Cuboid<S>) -> Aabb3<S> {
+    fn from(cuboid: &Cuboid<S>) -> Self {
         Aabb3::new(
             Point3::from_vec(-cuboid.half_dim),
             Point3::from_vec(cuboid.half_dim),
@@ -81,7 +81,7 @@ impl<'a, S> From<&'a Cuboid<S>> for Sphere<S>
 where
     S: BaseFloat,
 {
-    fn from(cuboid: &Cuboid<S>) -> Sphere<S> {
+    fn from(cuboid: &Cuboid<S>) -> Self {
         let max = cuboid
             .half_dim
             .x

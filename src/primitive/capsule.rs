@@ -59,46 +59,27 @@ where
     }
 }
 
-impl<'a, S> From<&'a Capsule<S>> for Aabb3<S>
+impl<S> ComputeBound<Aabb3<S>> for Capsule<S>
 where
     S: BaseFloat,
 {
-    fn from(capsule: &Capsule<S>) -> Self {
+    fn compute_bound(&self) -> Aabb3<S> {
         Aabb3::new(
-            Point3::new(
-                -capsule.radius,
-                -capsule.half_height - capsule.radius,
-                -capsule.radius,
-            ),
-            Point3::new(
-                capsule.radius,
-                capsule.half_height + capsule.radius,
-                capsule.radius,
-            ),
+            Point3::new(-self.radius, -self.half_height - self.radius, -self.radius),
+            Point3::new(self.radius, self.half_height + self.radius, self.radius),
         )
     }
 }
 
-impl<'a, S> From<&'a Capsule<S>> for Sphere<S>
+impl<S> ComputeBound<Sphere<S>> for Capsule<S>
 where
     S: BaseFloat,
 {
-    fn from(capsule: &Capsule<S>) -> Self {
+    fn compute_bound(&self) -> Sphere<S> {
         Sphere {
             center: Point3::origin(),
-            radius: capsule.half_height + capsule.radius,
+            radius: self.half_height + self.radius,
         }
-    }
-}
-
-impl<S> HasAabb for Capsule<S>
-where
-    S: BaseFloat,
-{
-    type Aabb = Aabb3<S>;
-
-    fn get_bound(&self) -> Self::Aabb {
-        self.into()
     }
 }
 
@@ -232,7 +213,7 @@ mod tests {
         let capsule = Capsule::new(2., 1.);
         assert_eq!(
             Aabb3::new(Point3::new(-1., -3., -1.), Point3::new(1., 3., 1.)),
-            capsule.get_bound()
+            capsule.compute_bound()
         );
     }
 

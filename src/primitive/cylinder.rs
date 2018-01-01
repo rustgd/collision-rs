@@ -76,43 +76,27 @@ where
     }
 }
 
-impl<'a, S> From<&'a Cylinder<S>> for Aabb3<S>
+impl<S> ComputeBound<Aabb3<S>> for Cylinder<S>
 where
     S: BaseFloat,
 {
-    fn from(cylinder: &Cylinder<S>) -> Self {
-        Aabb3::new(
-            Point3::new(-cylinder.radius, -cylinder.half_height, -cylinder.radius),
-            Point3::new(cylinder.radius, cylinder.half_height, cylinder.radius),
-        )
-    }
-}
-
-impl<'a, S> From<&'a Cylinder<S>> for Sphere<S>
-where
-    S: BaseFloat,
-{
-    fn from(cylinder: &Cylinder<S>) -> Self {
-        Self {
-            center: Point3::origin(),
-            radius: ((cylinder.radius * cylinder.radius)
-                + (cylinder.half_height * cylinder.half_height))
-                .sqrt(),
-        }
-    }
-}
-
-impl<S> HasAabb for Cylinder<S>
-where
-    S: BaseFloat,
-{
-    type Aabb = Aabb3<S>;
-
-    fn get_bound(&self) -> Self::Aabb {
+    fn compute_bound(&self) -> Aabb3<S> {
         Aabb3::new(
             Point3::new(-self.radius, -self.half_height, -self.radius),
             Point3::new(self.radius, self.half_height, self.radius),
         )
+    }
+}
+
+impl<S> ComputeBound<Sphere<S>> for Cylinder<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> Sphere<S> {
+        Sphere {
+            center: Point3::origin(),
+            radius: ((self.radius * self.radius) + (self.half_height * self.half_height)).sqrt(),
+        }
     }
 }
 
@@ -259,7 +243,7 @@ mod tests {
         let cylinder = Cylinder::new(2., 1.);
         assert_eq!(
             Aabb3::new(Point3::new(-1., -2., -1.), Point3::new(1., 2., 1.)),
-            cylinder.get_bound()
+            cylinder.compute_bound()
         );
     }
 

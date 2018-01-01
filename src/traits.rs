@@ -1,8 +1,6 @@
 use cgmath::BaseNum;
 use cgmath::prelude::*;
 
-use Aabb;
-
 /// An intersection test with a result.
 ///
 /// An example would be a Ray vs AABB intersection test that returns a Point in space.
@@ -78,13 +76,13 @@ pub trait HasBound {
     fn bound(&self) -> &Self::Bound;
 }
 
-/// Primitive with axis aligned bounding box
-pub trait HasAabb {
-    /// Bounding box type
-    type Aabb: Aabb + Clone + Union<Self::Aabb, Output = Self::Aabb>;
-
-    /// Get the bounding box of the primitive in local space coordinates.
-    fn get_bound(&self) -> Self::Aabb;
+/// Utilities for computing bounding volumes of primitives
+pub trait ComputeBound<B>
+where
+    B: BoundingVolume,
+{
+    /// Compute the bounding volume
+    fn compute_bound(&self) -> B;
 }
 
 /// Minkowski support function for primitive

@@ -62,25 +62,11 @@ where
     }
 }
 
-impl<'a, S> From<&'a Rectangle<S>> for Aabb2<S>
+impl<S> ComputeBound<Aabb2<S>> for Rectangle<S>
 where
     S: BaseFloat,
 {
-    fn from(rectangle: &Rectangle<S>) -> Self {
-        Aabb2::new(
-            Point2::from_vec(-rectangle.half_dim),
-            Point2::from_vec(rectangle.half_dim),
-        )
-    }
-}
-
-impl<S> HasAabb for Rectangle<S>
-where
-    S: BaseFloat,
-{
-    type Aabb = Aabb2<S>;
-
-    fn get_bound(&self) -> Aabb2<S> {
+    fn compute_bound(&self) -> Aabb2<S> {
         Aabb2::new(
             Point2::from_vec(-self.half_dim),
             Point2::from_vec(self.half_dim),
@@ -94,7 +80,7 @@ where
 {
     /// Ray must be in object space of the rectangle
     fn intersects(&self, ray: &Ray2<S>) -> bool {
-        self.get_bound().intersects(ray)
+        self.compute_bound().intersects(ray)
     }
 }
 
@@ -106,7 +92,7 @@ where
 
     /// Ray must be in object space of the rectangle
     fn intersection(&self, ray: &Ray2<S>) -> Option<Point2<S>> {
-        self.get_bound().intersection(ray)
+        self.compute_bound().intersection(ray)
     }
 }
 
@@ -119,7 +105,7 @@ mod tests {
     #[test]
     fn test_rectangle_bound() {
         let r = Rectangle::new(10., 10.);
-        assert_eq!(bound(-5., -5., 5., 5.), r.get_bound())
+        assert_eq!(bound(-5., -5., 5., 5.), r.compute_bound())
     }
 
     #[test]

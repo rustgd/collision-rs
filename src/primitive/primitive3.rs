@@ -83,55 +83,37 @@ where
     }
 }
 
-impl<'a, S> From<&'a Primitive3<S>> for Aabb3<S>
+impl<S> ComputeBound<Aabb3<S>> for Primitive3<S>
 where
     S: BaseFloat,
 {
-    fn from(primitive: &Primitive3<S>) -> Self {
-        match *primitive {
+    fn compute_bound(&self) -> Aabb3<S> {
+        match *self {
             Primitive3::Particle(_) => Aabb3::zero(),
-            Primitive3::Cuboid(ref cuboid) => cuboid.into(),
-            Primitive3::Sphere(ref sphere) => sphere.into(),
-            Primitive3::Cylinder(ref cylinder) => cylinder.into(),
-            Primitive3::Capsule(ref capsule) => capsule.into(),
-            Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.into(),
+            Primitive3::Cuboid(ref cuboid) => cuboid.compute_bound(),
+            Primitive3::Sphere(ref sphere) => sphere.compute_bound(),
+            Primitive3::Cylinder(ref cylinder) => cylinder.compute_bound(),
+            Primitive3::Capsule(ref capsule) => capsule.compute_bound(),
+            Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.compute_bound(),
         }
     }
 }
 
-impl<'a, S> From<&'a Primitive3<S>> for ::volume::Sphere<S>
+impl<S> ComputeBound<::volume::Sphere<S>> for Primitive3<S>
 where
     S: BaseFloat,
 {
-    fn from(primitive: &Primitive3<S>) -> Self {
-        match *primitive {
-            Primitive3::Particle(_) => Self {
+    fn compute_bound(&self) -> ::volume::Sphere<S> {
+        match *self {
+            Primitive3::Particle(_) => ::volume::Sphere {
                 center: Point3::origin(),
                 radius: S::zero(),
             },
-            Primitive3::Cuboid(ref cuboid) => cuboid.into(),
-            Primitive3::Sphere(ref sphere) => sphere.into(),
-            Primitive3::Cylinder(ref cylinder) => cylinder.into(),
-            Primitive3::Capsule(ref capsule) => capsule.into(),
-            Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.into(),
-        }
-    }
-}
-
-impl<S> HasAabb for Primitive3<S>
-where
-    S: BaseFloat,
-{
-    type Aabb = Aabb3<S>;
-
-    fn get_bound(&self) -> Self::Aabb {
-        match *self {
-            Primitive3::Particle(_) => Aabb3::zero(),
-            Primitive3::Sphere(ref sphere) => sphere.get_bound(),
-            Primitive3::Cuboid(ref cuboid) => cuboid.get_bound(),
-            Primitive3::Cylinder(ref cylinder) => cylinder.get_bound(),
-            Primitive3::Capsule(ref capsule) => capsule.get_bound(),
-            Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.get_bound(),
+            Primitive3::Cuboid(ref cuboid) => cuboid.compute_bound(),
+            Primitive3::Sphere(ref sphere) => sphere.compute_bound(),
+            Primitive3::Cylinder(ref cylinder) => cylinder.compute_bound(),
+            Primitive3::Capsule(ref capsule) => capsule.compute_bound(),
+            Primitive3::ConvexPolyhedron(ref polyhedron) => polyhedron.compute_bound(),
         }
     }
 }

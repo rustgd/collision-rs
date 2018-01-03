@@ -4,6 +4,7 @@ use cgmath::prelude::*;
 use {Aabb3, Ray3};
 use prelude::*;
 use primitive::util::get_max_point;
+use volume::Sphere;
 
 /// Cuboid primitive.
 ///
@@ -64,17 +65,28 @@ where
     }
 }
 
-impl<S> HasAabb for Cuboid<S>
+impl<S> ComputeBound<Aabb3<S>> for Cuboid<S>
 where
     S: BaseFloat,
 {
-    type Aabb = Aabb3<S>;
-
-    fn get_bound(&self) -> Aabb3<S> {
+    fn compute_bound(&self) -> Aabb3<S> {
         Aabb3::new(
             Point3::from_vec(-self.half_dim),
             Point3::from_vec(self.half_dim),
         )
+    }
+}
+
+impl<S> ComputeBound<Sphere<S>> for Cuboid<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> Sphere<S> {
+        let max = self.half_dim.x.max(self.half_dim.y).max(self.half_dim.z);
+        Sphere {
+            center: Point3::origin(),
+            radius: max,
+        }
     }
 }
 
@@ -83,7 +95,10 @@ where
     S: BaseFloat,
 {
     fn intersects(&self, ray: &Ray3<S>) -> bool {
-        self.get_bound().intersects(ray)
+        Aabb3::new(
+            Point3::from_vec(-self.half_dim),
+            Point3::from_vec(self.half_dim),
+        ).intersects(ray)
     }
 }
 
@@ -94,7 +109,10 @@ where
     type Result = Point3<S>;
 
     fn intersection(&self, ray: &Ray3<S>) -> Option<Point3<S>> {
-        self.get_bound().intersection(ray)
+        Aabb3::new(
+            Point3::from_vec(-self.half_dim),
+            Point3::from_vec(self.half_dim),
+        ).intersection(ray)
     }
 }
 
@@ -109,7 +127,7 @@ mod tests {
     #[test]
     fn test_rectangle_bound() {
         let r = Cuboid::new(10., 10., 10.);
-        assert_eq!(bound(-5., -5., -5., 5., 5., 5.), r.get_bound())
+        assert_eq!(bound(-5., -5., -5., 5., 5., 5.), r.compute_bound())
     }
 
     #[test]

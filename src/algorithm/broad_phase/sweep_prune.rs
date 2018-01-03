@@ -5,16 +5,15 @@ use std::cmp::Ordering;
 use num::NumCast;
 
 use self::variance::{Variance2, Variance3};
-use super::HasBound;
 use prelude::*;
 
 /// Broad phase sweep and prune algorithm for 2D, see
 /// [SweepAndPrune](struct.SweepAndPrune.html) for more information.
-pub type SweepAndPrune2<S> = SweepAndPrune<Variance2<S>>;
+pub type SweepAndPrune2<S, B> = SweepAndPrune<Variance2<S, B>>;
 
 /// Broad phase sweep and prune algorithm for 3D, see
 /// [SweepAndPrune](struct.SweepAndPrune.html) for more information.
-pub type SweepAndPrune3<S> = SweepAndPrune<Variance3<S>>;
+pub type SweepAndPrune3<S, B> = SweepAndPrune<Variance3<S, B>>;
 
 /// Sweep and prune broad phase collision detection algorithm.
 ///
@@ -74,7 +73,7 @@ where
     pub fn find_collider_pairs<A>(&mut self, shapes: &mut [A]) -> Vec<(usize, usize)>
     where
         A: HasBound,
-        A::Bound: Aabb + Discrete<A::Bound>,
+        A::Bound: BoundingVolume + Discrete<A::Bound>,
         V: Variance<Bound = A::Bound>,
     {
         let mut pairs = Vec::default();
@@ -83,11 +82,11 @@ where
         }
 
         shapes.sort_by(|a, b| {
-            let cmp_min = a.get_bound().min()[self.sweep_axis]
-                .partial_cmp(&b.get_bound().min()[self.sweep_axis]);
+            let cmp_min = a.bound().min_extent()[self.sweep_axis]
+                .partial_cmp(&b.bound().min_extent()[self.sweep_axis]);
             match cmp_min {
-                Some(Ordering::Equal) => a.get_bound().max()[self.sweep_axis]
-                    .partial_cmp(&b.get_bound().max()[self.sweep_axis])
+                Some(Ordering::Equal) => a.bound().max_extent()[self.sweep_axis]
+                    .partial_cmp(&b.bound().max_extent()[self.sweep_axis])
                     .unwrap_or(Ordering::Equal),
                 None => Ordering::Equal,
                 Some(order) => order,
@@ -95,7 +94,7 @@ where
         });
 
         self.variance.clear();
-        self.variance.add_bound(&shapes[0].get_bound());
+        self.variance.add_bound(&shapes[0].bound());
 
         let mut active = vec![0];
         // Remember that the index here will be the index of the iterator, which starts at index 1
@@ -105,17 +104,14 @@ where
             // for all currently active bounds, go through and remove any that are to the left of
             // the current bound
             active.retain(|active_index| {
-                shapes[*active_index].get_bound().max()[self.sweep_axis]
-                    >= shape.get_bound().min()[self.sweep_axis]
+                shapes[*active_index].bound().max_extent()[self.sweep_axis]
+                    >= shape.bound().min_extent()[self.sweep_axis]
             });
 
             // all shapes in the active list are potential hits, do a real bound intersection test
             // for those, and add to pairs if the bounds intersect.
             for active_index in &active {
-                if shapes[*active_index]
-                    .get_bound()
-                    .intersects(&shape.get_bound())
-                {
+                if shapes[*active_index].bound().intersects(&shape.bound()) {
                     pairs.push((*active_index, shape_index));
                 }
             }
@@ -124,7 +120,7 @@ where
             active.push(shape_index);
 
             // update variance
-            self.variance.add_bound(&shape.get_bound());
+            self.variance.add_bound(&shape.bound());
         }
 
         // compute sweep axis for the next iteration
@@ -137,14 +133,16 @@ where
 }
 
 mod variance {
-    use {Aabb, Aabb2, Aabb3};
-    use cgmath::{BaseFloat, Vector2, Vector3};
+    use std::marker;
+
+    use BoundingVolume;
+    use cgmath::{BaseFloat, Point2, Point3, Vector2, Vector3};
     use cgmath::prelude::*;
 
     /// Trait for variance calculation in sweep and prune algorithm
     pub trait Variance {
         /// Point type
-        type Bound: Aabb;
+        type Bound: BoundingVolume;
 
         /// Create new variance object
         fn new() -> Self;
@@ -158,27 +156,33 @@ mod variance {
         /// Compute the sweep axis based on the internal values
         fn compute_axis(
             &self,
-            n: <Self::Bound as Aabb>::Scalar,
-        ) -> (usize, <Self::Bound as Aabb>::Scalar);
+            n: <<Self::Bound as BoundingVolume>::Point as EuclideanSpace>::Scalar,
+        ) -> (
+            usize,
+            <<Self::Bound as BoundingVolume>::Point as EuclideanSpace>::Scalar,
+        );
     }
 
     /// Variance for 2D sweep and prune
     #[derive(Debug)]
-    pub struct Variance2<S> {
+    pub struct Variance2<S, B> {
         csum: Vector2<S>,
         csumsq: Vector2<S>,
+        m: marker::PhantomData<B>,
     }
 
-    impl<S> Variance for Variance2<S>
+    impl<S, B> Variance for Variance2<S, B>
     where
         S: BaseFloat,
+        B: BoundingVolume<Point = Point2<S>>,
     {
-        type Bound = Aabb2<S>;
+        type Bound = B;
 
         fn new() -> Self {
             Self {
                 csum: Vector2::zero(),
                 csumsq: Vector2::zero(),
+                m: marker::PhantomData,
             }
         }
 
@@ -188,9 +192,9 @@ mod variance {
         }
 
         #[inline]
-        fn add_bound(&mut self, bound: &Aabb2<S>) {
-            let min_vec = bound.min().to_vec();
-            let max_vec = bound.max().to_vec();
+        fn add_bound(&mut self, bound: &B) {
+            let min_vec = bound.min_extent().to_vec();
+            let max_vec = bound.max_extent().to_vec();
             let sum = min_vec.add_element_wise(max_vec);
             let c = sum / (S::one() + S::one());
             self.csum.add_element_wise(c);
@@ -216,21 +220,24 @@ mod variance {
 
     /// Variance for 3D sweep and prune
     #[derive(Debug)]
-    pub struct Variance3<S> {
+    pub struct Variance3<S, B> {
         csum: Vector3<S>,
         csumsq: Vector3<S>,
+        m: marker::PhantomData<B>,
     }
 
-    impl<S> Variance for Variance3<S>
+    impl<S, B> Variance for Variance3<S, B>
     where
         S: BaseFloat,
+        B: BoundingVolume<Point = Point3<S>>,
     {
-        type Bound = Aabb3<S>;
+        type Bound = B;
 
         fn new() -> Self {
             Self {
                 csum: Vector3::zero(),
                 csumsq: Vector3::zero(),
+                m: marker::PhantomData,
             }
         }
 
@@ -240,9 +247,9 @@ mod variance {
         }
 
         #[inline]
-        fn add_bound(&mut self, bound: &Aabb3<S>) {
-            let min_vec = bound.min().to_vec();
-            let max_vec = bound.max().to_vec();
+        fn add_bound(&mut self, bound: &B) {
+            let min_vec = bound.min_extent().to_vec();
+            let max_vec = bound.max_extent().to_vec();
             let sum = min_vec.add_element_wise(max_vec);
             let c = sum / (S::one() + S::one());
             self.csum.add_element_wise(c);
@@ -298,7 +305,7 @@ mod tests {
     impl HasBound for BroadCollisionInfo2 {
         type Bound = Aabb2<f32>;
 
-        fn get_bound(&self) -> &Aabb2<f32> {
+        fn bound(&self) -> &Aabb2<f32> {
             &self.bound
         }
     }

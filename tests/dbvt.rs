@@ -33,7 +33,7 @@ impl TreeValue for Value2 {
         &self.aabb
     }
 
-    fn fat_bound(&self) -> Aabb2<f32> {
+    fn get_bound_with_margin(&self) -> Aabb2<f32> {
         self.fat_aabb.clone()
     }
 }
@@ -62,7 +62,7 @@ impl TreeValue for Value3 {
         &self.aabb
     }
 
-    fn fat_bound(&self) -> Aabb3<f32> {
+    fn get_bound_with_margin(&self) -> Aabb3<f32> {
         self.fat_aabb.clone()
     }
 }

@@ -1,4 +1,3 @@
-use super::*;
 use prelude::*;
 
 /// Broad phase collision detection brute force implementation.
@@ -31,7 +30,7 @@ impl BruteForce {
         for left_index in 0..(shapes.len() - 1) {
             let left = &shapes[left_index];
             for right_index in (left_index + 1)..shapes.len() {
-                if left.get_bound().intersects(shapes[right_index].get_bound()) {
+                if left.bound().intersects(shapes[right_index].bound()) {
                     pairs.push((left_index, right_index));
                 }
             }
@@ -71,7 +70,7 @@ mod tests {
     impl HasBound for BroadCollisionInfo2 {
         type Bound = Aabb2<f32>;
 
-        fn get_bound(&self) -> &Aabb2<f32> {
+        fn bound(&self) -> &Aabb2<f32> {
             &self.bound
         }
     }

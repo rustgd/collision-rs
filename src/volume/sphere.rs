@@ -1,6 +1,6 @@
 //! Bounding sphere
 
-use cgmath::{BaseFloat, Point3};
+use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
 use {Aabb3, Line3, Plane, Ray3};
@@ -14,6 +14,46 @@ pub struct Sphere<S: BaseFloat> {
     pub center: Point3<S>,
     /// Sphere radius
     pub radius: S,
+}
+
+impl<S> BoundingVolume for Sphere<S>
+where
+    S: BaseFloat,
+{
+    type Point = Point3<S>;
+
+    fn min_extent(&self) -> Point3<S> {
+        self.center + Vector3::from_value(-self.radius)
+    }
+
+    fn max_extent(&self) -> Point3<S> {
+        self.center + Vector3::from_value(self.radius)
+    }
+
+    fn with_margin(&self, add: Vector3<S>) -> Self {
+        let max = add.x.max(add.y).max(add.z);
+        Sphere {
+            center: self.center.clone(),
+            radius: self.radius + max,
+        }
+    }
+
+    fn transform_volume<T>(&self, transform: &T) -> Self
+    where
+        T: Transform<Self::Point>,
+    {
+        Sphere {
+            center: transform.transform_point(self.center),
+            radius: self.radius,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            center: Point3::origin(),
+            radius: S::zero(),
+        }
+    }
 }
 
 impl<S: BaseFloat> Continuous<Ray3<S>> for Sphere<S> {

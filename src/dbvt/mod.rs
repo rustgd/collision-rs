@@ -58,7 +58,7 @@
 //!         &self.aabb
 //!     }
 //!
-//!     fn fat_bound(&self) -> Aabb2<f32> {
+//!     fn get_bound_with_margin(&self) -> Aabb2<f32> {
 //!         self.fat_aabb.clone()
 //!     }
 //! }
@@ -89,6 +89,7 @@
 
 pub use self::util::*;
 pub use self::visitor::*;
+pub use self::wrapped::TreeValueWrapped;
 
 use std::cmp::max;
 use std::fmt;
@@ -99,6 +100,7 @@ use rand::Rng;
 
 use prelude::*;
 
+mod wrapped;
 mod visitor;
 mod util;
 
@@ -118,7 +120,20 @@ pub trait TreeValue: Clone {
     /// Return a fattened bounding volume. For shapes that do not move, this can be the same as the
     /// base bounding volume. It is recommended for moving shapes to have a larger fat bound, so
     /// tree rotations don't have to be performed every frame.
-    fn fat_bound(&self) -> Self::Bound;
+    fn get_bound_with_margin(&self) -> Self::Bound;
+}
+
+/// Make it possible to run broad phase algorithms directly on the value storage in DBVT
+impl<T> HasBound for (usize, T)
+where
+    T: TreeValue,
+    T::Bound: BoundingVolume,
+{
+    type Bound = T::Bound;
+
+    fn bound(&self) -> &Self::Bound {
+        self.1.bound()
+    }
 }
 
 /// Visitor trait used for [querying](struct.DynamicBoundingVolumeTree.html#method.query) the tree.
@@ -195,7 +210,7 @@ pub trait Visitor {
 ///         &self.aabb
 ///     }
 ///
-///     fn fat_bound(&self) -> Aabb2<f32> {
+///     fn get_bound_with_margin(&self) -> Aabb2<f32> {
 ///         self.fat_aabb.clone()
 ///     }
 /// }
@@ -550,7 +565,11 @@ where
             .filter_map(|index| {
                 if let Node::Leaf(ref l) = self.nodes[*index] {
                     if !l.bound.contains(self.values[l.value].1.bound()) {
-                        Some((index.clone(), l.parent, self.values[l.value].1.fat_bound()))
+                        Some((
+                            index.clone(),
+                            l.parent,
+                            self.values[l.value].1.get_bound_with_margin(),
+                        ))
                     } else {
                         None
                     }
@@ -605,7 +624,7 @@ where
     /// The node index of the inserted value. This value should never change after insertion.
     ///
     pub fn insert(&mut self, value: T) -> usize {
-        let fat_bound = value.fat_bound();
+        let fat_bound = value.get_bound_with_margin();
         let value_index = self.values.len();
         self.values.push((0, value));
 

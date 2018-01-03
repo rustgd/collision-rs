@@ -37,17 +37,27 @@ where
     }
 }
 
-impl<S> HasAabb for Sphere<S>
+impl<S> ComputeBound<Aabb3<S>> for Sphere<S>
 where
     S: BaseFloat,
 {
-    type Aabb = Aabb3<S>;
-
-    fn get_bound(&self) -> Aabb3<S> {
+    fn compute_bound(&self) -> Aabb3<S> {
         Aabb3::new(
             Point3::from_value(-self.radius),
             Point3::from_value(self.radius),
         )
+    }
+}
+
+impl<S> ComputeBound<::volume::Sphere<S>> for Sphere<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> ::volume::Sphere<S> {
+        ::volume::Sphere {
+            center: Point3::origin(),
+            radius: self.radius,
+        }
     }
 }
 
@@ -142,7 +152,10 @@ mod tests {
     #[test]
     fn test_sphere_bound() {
         let sphere = Sphere::new(10.);
-        assert_eq!(bound(-10., -10., -10., 10., 10., 10.), sphere.get_bound())
+        assert_eq!(
+            bound(-10., -10., -10., 10., 10., 10.),
+            sphere.compute_bound()
+        )
     }
 
     #[test]

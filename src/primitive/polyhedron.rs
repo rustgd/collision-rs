@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 use bit_set::BitSet;
@@ -7,6 +8,7 @@ use cgmath::prelude::*;
 use {Aabb3, Plane, Ray3};
 use prelude::*;
 use primitive::util::barycentric_point;
+use volume::Sphere;
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
@@ -67,6 +69,7 @@ where
     edges: Vec<Edge>,
     faces: Vec<Face<S>>,
     bound: Aabb3<S>,
+    max_extent: S,
 }
 
 impl<S> ConvexPolyhedron<S>
@@ -90,6 +93,11 @@ where
             bound: vertices
                 .iter()
                 .fold(Aabb3::zero(), |bound, p| bound.grow(*p)),
+            max_extent: vertices
+                .iter()
+                .map(|p| p.to_vec().magnitude())
+                .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+                .unwrap_or(S::zero()),
         }
     }
 
@@ -101,6 +109,11 @@ where
             bound: vertices
                 .iter()
                 .fold(Aabb3::zero(), |bound, p| bound.grow(p.position)),
+            max_extent: vertices
+                .iter()
+                .map(|p| p.position.to_vec().magnitude())
+                .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+                .unwrap_or(S::zero()),
             vertices,
             edges,
             faces,
@@ -375,14 +388,24 @@ where
     }
 }
 
-impl<S> HasAabb for ConvexPolyhedron<S>
+impl<S> ComputeBound<Aabb3<S>> for ConvexPolyhedron<S>
 where
     S: BaseFloat,
 {
-    type Aabb = Aabb3<S>;
-
-    fn get_bound(&self) -> Aabb3<S> {
+    fn compute_bound(&self) -> Aabb3<S> {
         self.bound.clone()
+    }
+}
+
+impl<S> ComputeBound<Sphere<S>> for ConvexPolyhedron<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> Sphere<S> {
+        Sphere {
+            center: Point3::origin(),
+            radius: self.max_extent,
+        }
     }
 }
 
@@ -614,7 +637,7 @@ mod tests {
         let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
         assert_eq!(
             Aabb3::new(Point3::new(0., 0., 0.), Point3::new(1., 1., 1.)),
-            polytope.get_bound()
+            polytope.compute_bound()
         );
     }
 

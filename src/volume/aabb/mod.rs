@@ -165,4 +165,15 @@ where
     fn with_margin(&self, add: <A::Point as EuclideanSpace>::Diff) -> Self {
         self.add_margin(add)
     }
+
+    fn transform_volume<T>(&self, transform: &T) -> Self
+    where
+        T: Transform<Self::Point>,
+    {
+        self.transform(transform)
+    }
+
+    fn empty() -> Self {
+        A::zero()
+    }
 }

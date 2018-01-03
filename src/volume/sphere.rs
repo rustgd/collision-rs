@@ -23,19 +23,11 @@ where
     type Point = Point3<S>;
 
     fn min_extent(&self) -> Point3<S> {
-        Point3::new(
-            self.center.x - self.radius,
-            self.center.y - self.radius,
-            self.center.z - self.radius,
-        )
+        self.center + -Vector3::from_value(self.radius)
     }
 
     fn max_extent(&self) -> Point3<S> {
-        Point3::new(
-            self.center.x + self.radius,
-            self.center.y + self.radius,
-            self.center.z + self.radius,
-        )
+        self.center + Vector3::from_value(self.radius)
     }
 
     fn with_margin(&self, add: Vector3<S>) -> Self {
@@ -43,6 +35,23 @@ where
         Sphere {
             center: self.center.clone(),
             radius: self.radius + max,
+        }
+    }
+
+    fn transform_volume<T>(&self, transform: &T) -> Self
+    where
+        T: Transform<Self::Point>,
+    {
+        Sphere {
+            center: transform.transform_point(self.center),
+            radius: self.radius,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            center: Point3::origin(),
+            radius: S::zero(),
         }
     }
 }

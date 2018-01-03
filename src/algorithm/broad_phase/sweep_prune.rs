@@ -82,11 +82,11 @@ where
         }
 
         shapes.sort_by(|a, b| {
-            let cmp_min = a.get_bound().min_extent()[self.sweep_axis]
-                .partial_cmp(&b.get_bound().min_extent()[self.sweep_axis]);
+            let cmp_min = a.bound().min_extent()[self.sweep_axis]
+                .partial_cmp(&b.bound().min_extent()[self.sweep_axis]);
             match cmp_min {
-                Some(Ordering::Equal) => a.get_bound().max_extent()[self.sweep_axis]
-                    .partial_cmp(&b.get_bound().max_extent()[self.sweep_axis])
+                Some(Ordering::Equal) => a.bound().max_extent()[self.sweep_axis]
+                    .partial_cmp(&b.bound().max_extent()[self.sweep_axis])
                     .unwrap_or(Ordering::Equal),
                 None => Ordering::Equal,
                 Some(order) => order,
@@ -94,7 +94,7 @@ where
         });
 
         self.variance.clear();
-        self.variance.add_bound(&shapes[0].get_bound());
+        self.variance.add_bound(&shapes[0].bound());
 
         let mut active = vec![0];
         // Remember that the index here will be the index of the iterator, which starts at index 1
@@ -104,17 +104,14 @@ where
             // for all currently active bounds, go through and remove any that are to the left of
             // the current bound
             active.retain(|active_index| {
-                shapes[*active_index].get_bound().max_extent()[self.sweep_axis]
-                    >= shape.get_bound().min_extent()[self.sweep_axis]
+                shapes[*active_index].bound().max_extent()[self.sweep_axis]
+                    >= shape.bound().min_extent()[self.sweep_axis]
             });
 
             // all shapes in the active list are potential hits, do a real bound intersection test
             // for those, and add to pairs if the bounds intersect.
             for active_index in &active {
-                if shapes[*active_index]
-                    .get_bound()
-                    .intersects(&shape.get_bound())
-                {
+                if shapes[*active_index].bound().intersects(&shape.bound()) {
                     pairs.push((*active_index, shape_index));
                 }
             }
@@ -123,7 +120,7 @@ where
             active.push(shape_index);
 
             // update variance
-            self.variance.add_bound(&shape.get_bound());
+            self.variance.add_bound(&shape.bound());
         }
 
         // compute sweep axis for the next iteration
@@ -308,7 +305,7 @@ mod tests {
     impl HasBound for BroadCollisionInfo2 {
         type Bound = Aabb2<f32>;
 
-        fn get_bound(&self) -> &Aabb2<f32> {
+        fn bound(&self) -> &Aabb2<f32> {
             &self.bound
         }
     }

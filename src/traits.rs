@@ -49,7 +49,7 @@ pub trait Union<RHS = Self> {
 }
 
 /// Bounding volume abstraction for use with algorithms
-pub trait BoundingVolume {
+pub trait Bound {
     /// Point type for the bounding volume (for dimensionality)
     type Point: EuclideanSpace;
 
@@ -70,7 +70,7 @@ pub trait BoundingVolume {
 /// Primitive with bounding volume
 pub trait HasBound {
     /// Bounding volume type
-    type Bound: BoundingVolume;
+    type Bound: Bound;
 
     /// Borrow the bounding volume
     fn bound(&self) -> &Self::Bound;
@@ -79,7 +79,7 @@ pub trait HasBound {
 /// Utilities for computing bounding volumes of primitives
 pub trait ComputeBound<B>
 where
-    B: BoundingVolume,
+    B: Bound,
 {
     /// Compute the bounding volume
     fn compute_bound(&self) -> B;

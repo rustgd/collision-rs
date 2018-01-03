@@ -33,7 +33,7 @@ use prelude::*;
 impl<B, P> HasBound for (P, B)
 where
     P: Primitive,
-    B: BoundingVolume,
+    B: Bound,
 {
     type Bound = B;
 
@@ -45,7 +45,7 @@ where
 impl<B, P> Primitive for (P, B)
 where
     P: Primitive,
-    B: BoundingVolume,
+    B: Bound,
 {
     type Point = P::Point;
 

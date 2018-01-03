@@ -13,7 +13,7 @@ use std::cmp::{Ordering, PartialOrd};
 use cgmath::{BaseNum, Point2, Point3};
 use cgmath::prelude::*;
 
-use traits::BoundingVolume;
+use traits::Bound;
 
 mod aabb2;
 mod aabb3;
@@ -147,7 +147,7 @@ pub trait Aabb: Sized {
         T: Transform<Self::Point>;
 }
 
-impl<A> BoundingVolume for A
+impl<A> Bound for A
 where
     A: Aabb,
     A::Point: EuclideanSpace,

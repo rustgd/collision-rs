@@ -3,13 +3,13 @@ use std::fmt::Debug;
 use cgmath::{EuclideanSpace, Zero};
 
 use super::TreeValue;
-use {BoundingVolume, HasBound};
+use {Bound, HasBound};
 
 /// Value together with bounding volume, for use with DBVT.
 #[derive(Debug, Clone)]
 pub struct TreeValueWrapped<V, B>
 where
-    B: BoundingVolume,
+    B: Bound,
     <B::Point as EuclideanSpace>::Diff: Debug,
 {
     /// The value
@@ -23,7 +23,7 @@ where
 
 impl<V, B> TreeValueWrapped<V, B>
 where
-    B: BoundingVolume,
+    B: Bound,
     <B::Point as EuclideanSpace>::Diff: Debug,
 {
     /// Create a new shape
@@ -39,7 +39,7 @@ where
 impl<V, B> TreeValue for TreeValueWrapped<V, B>
 where
     V: Clone,
-    B: BoundingVolume + Clone,
+    B: Bound + Clone,
     <B::Point as EuclideanSpace>::Diff: Debug,
 {
     type Bound = B;
@@ -55,7 +55,7 @@ where
 
 impl<V, B> HasBound for TreeValueWrapped<V, B>
 where
-    B: BoundingVolume,
+    B: Bound,
     <B::Point as EuclideanSpace>::Diff: Debug,
 {
     type Bound = B;
@@ -68,11 +68,11 @@ where
 impl<V, B, P> From<(V, B, P::Diff)> for TreeValueWrapped<V, B>
 where
     P: EuclideanSpace,
-    B: BoundingVolume<Point = P> + Clone,
+    B: Bound<Point = P> + Clone,
     P::Diff: Debug,
 {
     fn from(
-        (value, bound, margin): (V, B, <<B as BoundingVolume>::Point as EuclideanSpace>::Diff),
+        (value, bound, margin): (V, B, <<B as Bound>::Point as EuclideanSpace>::Diff),
     ) -> Self {
         Self::new(value, bound, margin)
     }
@@ -80,14 +80,14 @@ where
 
 impl<V, B> From<(V, B)> for TreeValueWrapped<V, B>
 where
-    B: BoundingVolume + Clone,
-    <<B as BoundingVolume>::Point as EuclideanSpace>::Diff: Debug + Zero,
+    B: Bound + Clone,
+    <<B as Bound>::Point as EuclideanSpace>::Diff: Debug + Zero,
 {
     fn from((value, bound): (V, B)) -> Self {
         Self::new(
             value,
             bound,
-            <<B as BoundingVolume>::Point as EuclideanSpace>::Diff::zero(),
+            <<B as Bound>::Point as EuclideanSpace>::Diff::zero(),
         )
     }
 }

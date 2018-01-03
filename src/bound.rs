@@ -21,7 +21,7 @@ pub enum Relation {
 }
 
 /// Generic 3D bound.
-pub trait Bound<S: BaseFloat>: fmt::Debug {
+pub trait PlaneBound<S: BaseFloat>: fmt::Debug {
     /// Classify the spatial relation with a plane.
     fn relate_plane(&self, Plane<S>) -> Relation;
     /// Classify the relation with a projection matrix.
@@ -48,7 +48,7 @@ pub trait Bound<S: BaseFloat>: fmt::Debug {
     }
 }
 
-impl<S: BaseFloat> Bound<S> for Point3<S> {
+impl<S: BaseFloat> PlaneBound<S> for Point3<S> {
     fn relate_plane(&self, plane: Plane<S>) -> Relation {
         let dist = self.dot(plane.n);
         if dist > plane.d {

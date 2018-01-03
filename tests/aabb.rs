@@ -5,7 +5,7 @@ use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 use cgmath::InnerSpace;
 use collision::{Aabb, Aabb2, Aabb3};
-use collision::{Bound, Plane, Ray, Relation};
+use collision::{PlaneBound, Plane, Ray, Relation};
 use collision::{Contains, Continuous, Discrete, SurfaceArea, Union};
 use collision::{Line2, Line3, Ray2, Ray3, Sphere};
 

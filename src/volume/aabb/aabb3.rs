@@ -240,7 +240,7 @@ impl<S: BaseFloat> Discrete<Aabb3<S>> for Aabb3<S> {
     }
 }
 
-impl<S: BaseFloat> Bound<S> for Aabb3<S> {
+impl<S: BaseFloat> PlaneBound<S> for Aabb3<S> {
     fn relate_plane(&self, plane: Plane<S>) -> Relation {
         let corners = self.to_corners();
         let first = corners[0].relate_plane(plane);

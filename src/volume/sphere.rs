@@ -16,7 +16,7 @@ pub struct Sphere<S: BaseFloat> {
     pub radius: S,
 }
 
-impl<S> BoundingVolume for Sphere<S>
+impl<S> Bound for Sphere<S>
 where
     S: BaseFloat,
 {
@@ -102,7 +102,7 @@ impl<S: BaseFloat> Discrete<Sphere<S>> for Sphere<S> {
     }
 }
 
-impl<S: BaseFloat> Bound<S> for Sphere<S> {
+impl<S: BaseFloat> PlaneBound<S> for Sphere<S> {
     fn relate_plane(&self, plane: Plane<S>) -> Relation {
         let dist = self.center.dot(plane.n) - plane.d;
         if dist > self.radius {

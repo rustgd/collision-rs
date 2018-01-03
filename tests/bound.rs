@@ -1,8 +1,8 @@
 extern crate collision;
 
-use collision::Bound;
+use collision::PlaneBound;
 
-fn _box(_: Box<Bound<f32>>) {}
+fn _box(_: Box<PlaneBound<f32>>) {}
 
 #[test]
 fn bound_box() {}

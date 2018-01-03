@@ -127,7 +127,7 @@ pub trait TreeValue: Clone {
 impl<T> HasBound for (usize, T)
 where
     T: TreeValue,
-    T::Bound: BoundingVolume,
+    T::Bound: Bound,
 {
     type Bound = T::Bound;
 

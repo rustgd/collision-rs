@@ -73,7 +73,7 @@ where
     pub fn find_collider_pairs<A>(&mut self, shapes: &mut [A]) -> Vec<(usize, usize)>
     where
         A: HasBound,
-        A::Bound: BoundingVolume + Discrete<A::Bound>,
+        A::Bound: Bound + Discrete<A::Bound>,
         V: Variance<Bound = A::Bound>,
     {
         let mut pairs = Vec::default();
@@ -135,14 +135,14 @@ where
 mod variance {
     use std::marker;
 
-    use BoundingVolume;
+    use Bound;
     use cgmath::{BaseFloat, Point2, Point3, Vector2, Vector3};
     use cgmath::prelude::*;
 
     /// Trait for variance calculation in sweep and prune algorithm
     pub trait Variance {
         /// Point type
-        type Bound: BoundingVolume;
+        type Bound: Bound;
 
         /// Create new variance object
         fn new() -> Self;
@@ -156,10 +156,10 @@ mod variance {
         /// Compute the sweep axis based on the internal values
         fn compute_axis(
             &self,
-            n: <<Self::Bound as BoundingVolume>::Point as EuclideanSpace>::Scalar,
+            n: <<Self::Bound as Bound>::Point as EuclideanSpace>::Scalar,
         ) -> (
             usize,
-            <<Self::Bound as BoundingVolume>::Point as EuclideanSpace>::Scalar,
+            <<Self::Bound as Bound>::Point as EuclideanSpace>::Scalar,
         );
     }
 
@@ -174,7 +174,7 @@ mod variance {
     impl<S, B> Variance for Variance2<S, B>
     where
         S: BaseFloat,
-        B: BoundingVolume<Point = Point2<S>>,
+        B: Bound<Point = Point2<S>>,
     {
         type Bound = B;
 
@@ -229,7 +229,7 @@ mod variance {
     impl<S, B> Variance for Variance3<S, B>
     where
         S: BaseFloat,
-        B: BoundingVolume<Point = Point3<S>>,
+        B: Bound<Point = Point3<S>>,
     {
         type Bound = B;
 

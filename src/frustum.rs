@@ -76,7 +76,7 @@ impl<S: BaseFloat> Frustum<S> {
     }
 
     /// Find the spatial relation of a bound inside this frustum.
-    pub fn contains<B: Bound<S>>(&self, bound: &B) -> Relation {
+    pub fn contains<B: PlaneBound<S>>(&self, bound: &B) -> Relation {
         [
             self.left,
             self.right,

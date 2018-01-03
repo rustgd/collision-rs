@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use cgmath::BaseFloat;
 
 use super::{TreeValue, Visitor};
-use {Bound, Frustum, Relation};
+use {PlaneBound, Frustum, Relation};
 use prelude::*;
 
 /// Visitor for doing continuous intersection testing on the DBVT.
@@ -112,7 +112,7 @@ impl<'a, S, T> FrustumVisitor<'a, S, T>
 where
     S: BaseFloat,
     T: TreeValue,
-    T::Bound: Bound<S>,
+    T::Bound: PlaneBound<S>,
 {
     /// Create a new visitor that will do containment tests using the given frustum
     pub fn new(frustum: &'a Frustum<S>) -> Self {
@@ -127,7 +127,7 @@ impl<'a, S, T> Visitor for FrustumVisitor<'a, S, T>
 where
     S: BaseFloat,
     T: TreeValue,
-    T::Bound: Bound<S>,
+    T::Bound: PlaneBound<S>,
 {
     type Bound = T::Bound;
     type Result = Relation;

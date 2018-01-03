@@ -71,9 +71,7 @@ where
     B: Bound<Point = P> + Clone,
     P::Diff: Debug,
 {
-    fn from(
-        (value, bound, margin): (V, B, <<B as Bound>::Point as EuclideanSpace>::Diff),
-    ) -> Self {
+    fn from((value, bound, margin): (V, B, P::Diff)) -> Self {
         Self::new(value, bound, margin)
     }
 }

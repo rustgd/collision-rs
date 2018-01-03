@@ -21,7 +21,7 @@ impl<S> Circle<S> {
     }
 }
 
-impl<S> SupportFunction for Circle<S>
+impl<S> Primitive for Circle<S>
 where
     S: BaseFloat,
 {

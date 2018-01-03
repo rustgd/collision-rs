@@ -19,7 +19,7 @@ impl<S> Sphere<S> {
     }
 }
 
-impl<S> SupportFunction for Sphere<S>
+impl<S> Primitive for Sphere<S>
 where
     S: BaseFloat,
 {

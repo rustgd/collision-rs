@@ -86,7 +86,7 @@ where
 }
 
 /// Minkowski support function for primitive
-pub trait SupportFunction {
+pub trait Primitive {
     /// Point type
     type Point: EuclideanSpace;
 
@@ -138,16 +138,6 @@ pub trait ContinuousTransformed<RHS> {
     fn intersection_transformed<T>(&self, _: &RHS, _: &T) -> Option<Self::Result>
     where
         T: Transform<Self::Point>;
-}
-
-/// Marker trait for a collision primitive.
-pub trait Primitive: Clone + SupportFunction {}
-
-/// Implementation of marker trait for all types where the bounds are fulfilled
-impl<T> Primitive for T
-where
-    T: Clone + SupportFunction,
-{
 }
 
 /// Trait used for interpolation of values

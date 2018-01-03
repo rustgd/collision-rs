@@ -25,7 +25,7 @@ impl<S> ConvexPolygon<S> {
     }
 }
 
-impl<S> SupportFunction for ConvexPolygon<S>
+impl<S> Primitive for ConvexPolygon<S>
 where
     S: BaseFloat,
 {

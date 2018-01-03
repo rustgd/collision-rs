@@ -118,7 +118,7 @@ where
     }
 }
 
-impl<S> SupportFunction for Primitive3<S>
+impl<S> Primitive for Primitive3<S>
 where
     S: BaseFloat,
 {

@@ -60,7 +60,7 @@ where
     }
 }
 
-impl<S> SupportFunction for Primitive2<S>
+impl<S> Primitive for Primitive2<S>
 where
     S: BaseFloat,
 {

@@ -42,7 +42,7 @@ where
     }
 }
 
-impl<B, P> SupportFunction for (P, B)
+impl<B, P> Primitive for (P, B)
 where
     P: Primitive,
     B: BoundingVolume,

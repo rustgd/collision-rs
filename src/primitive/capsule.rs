@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<S> SupportFunction for Capsule<S>
+impl<S> Primitive for Capsule<S>
 where
     S: BaseFloat,
 {

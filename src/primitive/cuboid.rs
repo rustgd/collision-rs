@@ -51,7 +51,7 @@ where
     }
 }
 
-impl<S> SupportFunction for Cuboid<S>
+impl<S> Primitive for Cuboid<S>
 where
     S: BaseFloat,
 {

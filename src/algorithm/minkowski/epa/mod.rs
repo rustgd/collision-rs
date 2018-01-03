@@ -33,8 +33,8 @@ pub trait EPA {
         right_transform: &TR,
     ) -> Option<Contact<Self::Point>>
     where
-        SL: SupportFunction<Point = Self::Point>,
-        SR: SupportFunction<Point = Self::Point>,
+        SL: Primitive<Point = Self::Point>,
+        SR: Primitive<Point = Self::Point>,
         TL: Transform<Self::Point>,
         TR: Transform<Self::Point>;
 

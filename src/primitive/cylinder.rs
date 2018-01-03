@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<S> SupportFunction for Cylinder<S>
+impl<S> Primitive for Cylinder<S>
 where
     S: BaseFloat,
 {

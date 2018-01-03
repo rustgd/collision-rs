@@ -44,8 +44,8 @@ where
         direction: &P::Diff,
     ) -> Self
     where
-        SL: SupportFunction<Point = P>,
-        SR: SupportFunction<Point = P>,
+        SL: Primitive<Point = P>,
+        SR: Primitive<Point = P>,
         P::Diff: Neg<Output = P::Diff>,
         TL: Transform<P>,
         TR: Transform<P>,

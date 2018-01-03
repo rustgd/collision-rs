@@ -359,7 +359,7 @@ where
     (vertices, edges, faces)
 }
 
-impl<S> SupportFunction for ConvexPolyhedron<S>
+impl<S> Primitive for ConvexPolyhedron<S>
 where
     S: BaseFloat,
 {

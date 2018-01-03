@@ -48,7 +48,7 @@ where
     }
 }
 
-impl<S> SupportFunction for Rectangle<S>
+impl<S> Primitive for Rectangle<S>
 where
     S: BaseFloat,
 {

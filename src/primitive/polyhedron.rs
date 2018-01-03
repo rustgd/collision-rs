@@ -388,35 +388,24 @@ where
     }
 }
 
-impl<'a, S> From<&'a ConvexPolyhedron<S>> for Aabb3<S>
+impl<S> ComputeBound<Aabb3<S>> for ConvexPolyhedron<S>
 where
     S: BaseFloat,
 {
-    fn from(polyhedra: &ConvexPolyhedron<S>) -> Aabb3<S> {
-        polyhedra.bound.clone()
-    }
-}
-
-impl<'a, S> From<&'a ConvexPolyhedron<S>> for Sphere<S>
-where
-    S: BaseFloat,
-{
-    fn from(polyhedra: &ConvexPolyhedron<S>) -> Self {
-        Self {
-            center: Point3::origin(),
-            radius: polyhedra.max_extent,
-        }
-    }
-}
-
-impl<S> HasAabb for ConvexPolyhedron<S>
-where
-    S: BaseFloat,
-{
-    type Aabb = Aabb3<S>;
-
-    fn get_bound(&self) -> Aabb3<S> {
+    fn compute_bound(&self) -> Aabb3<S> {
         self.bound.clone()
+    }
+}
+
+impl<S> ComputeBound<Sphere<S>> for ConvexPolyhedron<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> Sphere<S> {
+        Sphere {
+            center: Point3::origin(),
+            radius: self.max_extent,
+        }
     }
 }
 
@@ -648,7 +637,7 @@ mod tests {
         let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
         assert_eq!(
             Aabb3::new(Point3::new(0., 0., 0.), Point3::new(1., 1., 1.)),
-            polytope.get_bound()
+            polytope.compute_bound()
         );
     }
 

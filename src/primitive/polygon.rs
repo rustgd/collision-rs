@@ -43,22 +43,11 @@ where
     }
 }
 
-impl<'a, S> From<&'a ConvexPolygon<S>> for Aabb2<S>
+impl<S> ComputeBound<Aabb2<S>> for ConvexPolygon<S>
 where
     S: BaseFloat,
 {
-    fn from(polygon: &ConvexPolygon<S>) -> Self {
-        get_bound(polygon.vertices.iter())
-    }
-}
-
-impl<S> HasAabb for ConvexPolygon<S>
-where
-    S: BaseFloat,
-{
-    type Aabb = Aabb2<S>;
-
-    fn get_bound(&self) -> Aabb2<S> {
+    fn compute_bound(&self) -> Aabb2<S> {
         get_bound(self.vertices.iter())
     }
 }
@@ -272,7 +261,7 @@ mod tests {
         let polygon = ConvexPolygon::new(vertices);
         assert_eq!(
             Aabb2::new(Point2::new(-6., -8.), Point2::new(5., 7.)),
-            polygon.get_bound()
+            polygon.compute_bound()
         );
     }
 

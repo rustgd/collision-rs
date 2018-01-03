@@ -46,32 +46,16 @@ impl<S> From<ConvexPolygon<S>> for Primitive2<S> {
     }
 }
 
-impl<'a, S> From<&'a Primitive2<S>> for Aabb2<S>
+impl<S> ComputeBound<Aabb2<S>> for Primitive2<S>
 where
     S: BaseFloat,
 {
-    fn from(primitive: &Primitive2<S>) -> Self {
-        match *primitive {
-            Primitive2::Particle(_) => Aabb2::zero(),
-            Primitive2::Circle(ref circle) => circle.into(),
-            Primitive2::Rectangle(ref rectangle) => rectangle.into(),
-            Primitive2::ConvexPolygon(ref polygon) => polygon.into(),
-        }
-    }
-}
-
-impl<S> HasAabb for Primitive2<S>
-where
-    S: BaseFloat,
-{
-    type Aabb = Aabb2<S>;
-
-    fn get_bound(&self) -> Aabb2<S> {
+    fn compute_bound(&self) -> Aabb2<S> {
         match *self {
             Primitive2::Particle(_) => Aabb2::zero(),
-            Primitive2::Circle(ref circle) => circle.get_bound(),
-            Primitive2::Rectangle(ref rectangle) => rectangle.get_bound(),
-            Primitive2::ConvexPolygon(ref polygon) => polygon.get_bound(),
+            Primitive2::Circle(ref circle) => circle.compute_bound(),
+            Primitive2::Rectangle(ref rectangle) => rectangle.compute_bound(),
+            Primitive2::ConvexPolygon(ref polygon) => polygon.compute_bound(),
         }
     }
 }

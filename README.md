@@ -5,6 +5,7 @@
 [![Version](https://img.shields.io/crates/v/collision.svg)](https://crates.io/crates/collision)
 [![License](https://img.shields.io/crates/l/collision.svg)](https://github.com/kvark/collision-rs/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/crates/d/collision.svg)](https://crates.io/crates/collision)
+[![Join the chat](https://badges.gitter.im/collision-rs/Lobby.svg)](https://gitter.im/collision-rs/Lobby)
 
 This library is an extension of [cgmath](https://crates.io/crates/cgmath) that provides collision detection primitives,
 bounding volumes and collision detection algorithms.

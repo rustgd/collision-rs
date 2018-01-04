@@ -20,10 +20,8 @@ extern crate num;
 extern crate rand;
 
 #[cfg(feature = "eders")]
-extern crate serde;
-#[cfg(feature = "eders")]
 #[macro_use]
-extern crate serde_derive;
+extern crate serde;
 
 // Re-exports
 

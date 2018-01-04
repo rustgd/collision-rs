@@ -1,5 +1,17 @@
 ## Change Log
 
+### v0.13
+  - Fix: Exactly overlapping identical shapes caused degeneracy in GJK.
+  - Fix: Aabb Point containment overflowed for unsigned BaseNum.
+  - Added external access to faces in ConvexPolyhedron.
+  - Added new collision primitives:
+    * Cylinder (3D)
+    * Capsule (3D)
+  - Make it possible to be abstract over bounding volumes
+  - Removed the SupportFunction trait, incorporating into the Primitive trait
+  - Renamed the Bound trait to PlaneBound
+  - Added TreeValueWrapped, a utility type for use with the DBVT   
+
 ### v0.12 
   - New dynamic bounding volume tree for use with spatial querying etc
   - Added collision primitives:

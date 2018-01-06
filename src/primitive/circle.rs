@@ -31,10 +31,7 @@ where
     where
         T: Transform<Point2<S>>,
     {
-        let direction = transform
-            .inverse_transform()
-            .unwrap()
-            .transform_vector(*direction);
+        let direction = transform.inverse_transform_vector(*direction).unwrap();
         transform.transform_point(Point2::from_vec(direction.normalize_to(self.radius)))
     }
 }

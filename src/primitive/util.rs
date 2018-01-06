@@ -15,10 +15,7 @@ where
     T: Transform<P>,
     I: Iterator<Item = &'a P>,
 {
-    let direction = transform
-        .inverse_transform()
-        .unwrap()
-        .transform_vector(*direction);
+    let direction = transform.inverse_transform_vector(*direction).unwrap();
     let (p, _) = vertices.map(|v| (v, v.dot(direction))).fold(
         (P::origin(), P::Scalar::neg_infinity()),
         |(max_p, max_dot), (v, dot)| {

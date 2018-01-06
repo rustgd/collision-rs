@@ -1,5 +1,8 @@
 ## Change Log
 
+### v0.14
+  - Upgrade to cgmath 0.16
+
 ### v0.13
   - Fix: Exactly overlapping identical shapes caused degeneracy in GJK.
   - Fix: Aabb Point containment overflowed for unsigned BaseNum.

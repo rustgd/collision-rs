@@ -36,7 +36,7 @@ eders = [ "serde", "cgmath/serde" ]
 num = "0.1"
 rand = "0.3"
 approx = "0.1"
-cgmath = { version = "0.15" }
+cgmath = { version = "0.16" }
 serde = { version = "1.0", optional = true, features = ["derive"] }
 bit-set = "0.4"
 

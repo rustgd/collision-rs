@@ -48,10 +48,7 @@ where
     where
         T: Transform<Point3<S>>,
     {
-        let direction = transform
-            .inverse_transform()
-            .unwrap()
-            .transform_vector(*direction);
+        let direction = transform.inverse_transform_vector(*direction).unwrap();
 
         let mut result = Point3::origin();
         result.y = direction.y.signum() * self.half_height;

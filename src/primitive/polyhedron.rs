@@ -371,17 +371,11 @@ where
     {
         let p = match self.mode {
             PolyhedronMode::VertexOnly => self.brute_force_support_point(
-                transform
-                    .inverse_transform()
-                    .unwrap()
-                    .transform_vector(*direction),
+                transform.inverse_transform_vector(*direction).unwrap(),
             ),
 
             PolyhedronMode::HalfEdge => self.hill_climb_support_point(
-                transform
-                    .inverse_transform()
-                    .unwrap()
-                    .transform_vector(*direction),
+                transform.inverse_transform_vector(*direction).unwrap(),
             ),
         };
         transform.transform_point(p)

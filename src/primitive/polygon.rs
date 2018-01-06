@@ -120,10 +120,7 @@ where
     P::Scalar: BaseFloat,
     T: Transform<P>,
 {
-    let direction = transform
-        .inverse_transform()
-        .unwrap()
-        .transform_vector(*direction);
+    let direction = transform.inverse_transform_vector(*direction).unwrap();
 
     // figure out where to start, if the direction is negative for the first vertex,
     // go halfway around the polygon

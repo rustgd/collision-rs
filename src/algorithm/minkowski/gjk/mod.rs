@@ -558,21 +558,20 @@ where
             for &(ref right_primitive, ref right_local_transform) in right.iter() {
                 let right_start_transform = right_transform.start.concat(right_local_transform);
                 let right_end_transform = right_transform.end.concat(right_local_transform);
-                match self.intersection_time_of_impact(
+                if let Some(mut contact) = self.intersection_time_of_impact(
                     left_primitive,
                     &left_start_transform..&left_end_transform,
                     right_primitive,
                     &right_start_transform..&right_end_transform,
                 ) {
-                    None => return None,
-                    Some(mut contact) => match *strategy {
+                    match *strategy {
                         CollisionOnly => {
                             contact.strategy = CollisionOnly;
                             return Some(contact);
                         }
                         FullResolution => contacts.push(contact),
-                    },
-                };
+                    }
+                }
             }
         }
 

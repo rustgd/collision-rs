@@ -13,6 +13,8 @@ use primitive::util::triple_product;
 #[derive(Debug)]
 pub struct EPA2<S> {
     m: marker::PhantomData<S>,
+    tolerance: S,
+    max_iterations: u32,
 }
 
 impl<S> EPA for EPA2<S>
@@ -35,14 +37,12 @@ where
         TL: Transform<Self::Point>,
         TR: Transform<Self::Point>,
     {
-        let tolerance = NumCast::from(EPA_TOLERANCE).unwrap();
-
         let mut e = match closest_edge(&simplex) {
             None => return None,
             Some(e) => e,
         };
 
-        for _ in 0..MAX_ITERATIONS {
+        for _ in 0..self.max_iterations {
             let p = SupportPoint::from_minkowski(
                 left,
                 left_transform,
@@ -51,7 +51,7 @@ where
                 &e.normal,
             );
             let d = p.v.dot(e.normal);
-            if d - e.distance < tolerance {
+            if d - e.distance < self.tolerance {
                 break;
             } else {
                 simplex.insert(e.index, p);
@@ -68,8 +68,17 @@ where
     }
 
     fn new() -> Self {
+        Self::new_with_tolerance(NumCast::from(EPA_TOLERANCE).unwrap(), MAX_ITERATIONS)
+    }
+
+    fn new_with_tolerance(
+        tolerance: <Self::Point as EuclideanSpace>::Scalar,
+        max_iterations: u32,
+    ) -> Self {
         Self {
             m: marker::PhantomData,
+            tolerance,
+            max_iterations,
         }
     }
 }

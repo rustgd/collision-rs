@@ -23,7 +23,8 @@ pub struct Line<S, V, P> {
 }
 
 impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff = V>>
-    Line<S, V, P> {
+    Line<S, V, P>
+{
     /// Create a new directed line segment from `origin` to `dest`.
     pub fn new(origin: P, dest: P) -> Line<S, V, P> {
         Line {

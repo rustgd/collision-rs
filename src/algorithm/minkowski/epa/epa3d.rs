@@ -14,6 +14,8 @@ use primitive::util::barycentric_vector;
 #[derive(Debug)]
 pub struct EPA3<S> {
     m: marker::PhantomData<S>,
+    tolerance: S,
+    max_iterations: u32,
 }
 
 impl<S> EPA for EPA3<S>
@@ -39,7 +41,6 @@ where
         if simplex.len() < 4 {
             return None;
         }
-        let tolerance = NumCast::from(EPA_TOLERANCE).unwrap();
         let mut polytope = Polytope::new(&mut simplex);
         let mut i = 1;
         loop {
@@ -53,7 +54,7 @@ where
                     &face.normal,
                 );
                 let d = p.v.dot(face.normal);
-                if d - face.distance < tolerance || i >= MAX_ITERATIONS {
+                if d - face.distance < self.tolerance || i >= self.max_iterations {
                     return contact(&polytope, face);
                 }
                 p
@@ -64,8 +65,17 @@ where
     }
 
     fn new() -> Self {
+        Self::new_with_tolerance(NumCast::from(EPA_TOLERANCE).unwrap(), MAX_ITERATIONS)
+    }
+
+    fn new_with_tolerance(
+        tolerance: <Self::Point as EuclideanSpace>::Scalar,
+        max_iterations: u32,
+    ) -> Self {
         Self {
             m: marker::PhantomData,
+            tolerance,
+            max_iterations,
         }
     }
 }

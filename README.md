@@ -32,7 +32,7 @@ pull request with a fix.
 
 ## Contributing
 
-Use [CONTRIBUTING.md](https://github.com/kvark/collision-rs/blob/master/CONTRIBUTING.md) for futher information.
+Use [CONTRIBUTING.md](https://github.com/rustgd/collision-rs/blob/master/CONTRIBUTING.md) for futher information.
 
 Pull requests are most welcome, especially in the realm of performance
 enhancements and fixing any mistakes. Unit tests and benchmarks are also 

@@ -20,8 +20,8 @@ license = "Apache-2.0"
 description = "A collision extension to cgmath"
 
 documentation = "https://docs.rs/collision"
-homepage = "https://github.com/kvark/collision-rs"
-repository = "https://github.com/kvark/collision-rs"
+homepage = "https://github.com/rustgd/collision-rs"
+repository = "https://github.com/rustgd/collision-rs"
 readme = "README.md"
 
 keywords = ["gamedev", "cgmath", "collision"]

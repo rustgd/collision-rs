@@ -37,6 +37,16 @@ where
         }
     }
 
+    /// Get the dimensions of the `Cuboid`
+    pub fn dim(&self) -> &Vector3<S> {
+        &self.dim
+    }
+
+    /// Get the half dimensions of the `Cuboid`
+    pub fn half_dim(&self) -> &Vector3<S> {
+        &self.half_dim
+    }
+
     fn generate_corners(half_dim: &Vector3<S>) -> Vec<Point3<S>> {
         vec![
             Point3::new(half_dim.x, half_dim.y, half_dim.z),

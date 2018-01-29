@@ -38,6 +38,16 @@ where
         }
     }
 
+    /// Get the dimensions of the `Rectangle`
+    pub fn dim(&self) -> &Vector2<S> {
+        &self.dim
+    }
+
+    /// Get the half dimensions of the `Rectangle`
+    pub fn half_dim(&self) -> &Vector2<S> {
+        &self.half_dim
+    }
+
     fn generate_corners(half_dim: &Vector2<S>) -> Vec<Point2<S>> {
         vec![
             Point2::new(half_dim.x, half_dim.y),

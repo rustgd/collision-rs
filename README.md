@@ -1,9 +1,9 @@
 # collision-rs
 
-[![Build Status](https://travis-ci.org/kvark/collision-rs.svg?branch=master)](https://travis-ci.org/kvark/collision-rs)
+[![Build Status](https://travis-ci.org/rustgd/collision-rs.svg?branch=master)](https://travis-ci.org/rustgd/collision-rs)
 [![Documentation](https://docs.rs/collision/badge.svg)](https://docs.rs/collision)
 [![Version](https://img.shields.io/crates/v/collision.svg)](https://crates.io/crates/collision)
-[![License](https://img.shields.io/crates/l/collision.svg)](https://github.com/kvark/collision-rs/blob/master/LICENSE)
+[![License](https://img.shields.io/crates/l/collision.svg)](https://github.com/rustgd/collision-rs/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/crates/d/collision.svg)](https://crates.io/crates/collision)
 [![Join the chat](https://badges.gitter.im/collision-rs/Lobby.svg)](https://gitter.im/collision-rs/Lobby)
 

@@ -40,4 +40,10 @@ pub trait EPA {
 
     /// Create a new EPA instance
     fn new() -> Self;
+
+    /// Create a new EPA instance with the given tolerance
+    fn new_with_tolerance(
+        tolerance: <Self::Point as EuclideanSpace>::Scalar,
+        max_iterations: u32,
+    ) -> Self;
 }

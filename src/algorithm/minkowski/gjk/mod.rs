@@ -8,7 +8,7 @@ use std::ops::{Neg, Range};
 
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
-use num::{Float, NumCast};
+use num::NumCast;
 
 use self::simplex::{SimplexProcessor2, SimplexProcessor3};
 use {CollisionStrategy, Contact};
@@ -22,10 +22,10 @@ const GJK_DISTANCE_TOLERANCE: f32 = 0.000001;
 const GJK_CONTINUOUS_TOLERANCE: f32 = 0.000001;
 
 /// GJK algorithm for 2D, see [GJK](struct.GJK.html) for more information.
-pub type GJK2<S> = GJK<SimplexProcessor2<S>, EPA2<S>>;
+pub type GJK2<S> = GJK<SimplexProcessor2<S>, EPA2<S>, S>;
 
 /// GJK algorithm for 3D, see [GJK](struct.GJK.html) for more information.
-pub type GJK3<S> = GJK<SimplexProcessor3<S>, EPA3<S>>;
+pub type GJK3<S> = GJK<SimplexProcessor3<S>, EPA3<S>, S>;
 
 /// Gilbert-Johnson-Keerthi narrow phase collision detection algorithm.
 ///
@@ -39,15 +39,19 @@ pub type GJK3<S> = GJK<SimplexProcessor3<S>, EPA3<S>>;
 ///        [`EPA3`](struct.EPA3.html)
 ///
 #[derive(Debug)]
-pub struct GJK<SP, E> {
+pub struct GJK<SP, E, S> {
     simplex_processor: SP,
     epa: E,
+    distance_tolerance: S,
+    continuous_tolerance: S,
+    max_iterations: u32,
 }
 
-impl<SP, E> GJK<SP, E>
+impl<SP, E, S> GJK<SP, E, S>
 where
     SP: SimplexProcessor,
-    <SP::Point as EuclideanSpace>::Scalar: BaseFloat,
+    SP::Point: EuclideanSpace<Scalar = S>,
+    S: BaseFloat,
     E: EPA<Point = SP::Point>,
 {
     /// Create a new GJK algorithm implementation
@@ -55,6 +59,25 @@ where
         Self {
             simplex_processor: SP::new(),
             epa: E::new(),
+            distance_tolerance: NumCast::from(GJK_DISTANCE_TOLERANCE).unwrap(),
+            continuous_tolerance: NumCast::from(GJK_CONTINUOUS_TOLERANCE).unwrap(),
+            max_iterations: MAX_ITERATIONS,
+        }
+    }
+
+    /// Create a new GJK algorithm implementation with the given tolerance settings
+    pub fn new_with_settings(
+        distance_tolerance: S,
+        continuous_tolerance: S,
+        epa_tolerance: S,
+        max_iterations: u32,
+    ) -> Self {
+        Self {
+            simplex_processor: SP::new(),
+            epa: E::new_with_tolerance(epa_tolerance, max_iterations),
+            distance_tolerance,
+            continuous_tolerance,
+            max_iterations,
         }
     }
 
@@ -81,12 +104,11 @@ where
         right_transform: &TR,
     ) -> Option<Vec<SupportPoint<P>>>
     where
-        P: EuclideanSpace,
-        P::Scalar: BaseFloat,
+        P: EuclideanSpace<Scalar = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
         TL: Transform<P>,
         TR: Transform<P>,
     {
@@ -94,18 +116,18 @@ where
         let right_pos = right_transform.transform_point(P::origin());
         let mut d = right_pos - left_pos;
         if ulps_eq!(d, P::Diff::zero()) {
-            d = P::Diff::from_value(P::Scalar::one());
+            d = P::Diff::from_value(S::one());
         }
         let a = SupportPoint::from_minkowski(left, left_transform, right, right_transform, &d);
-        if a.v.dot(d) <= P::Scalar::zero() {
+        if a.v.dot(d) <= S::zero() {
             return None;
         }
         let mut simplex: Vec<SupportPoint<P>> = Vec::default();
         simplex.push(a);
         d = d.neg();
-        for _ in 0..MAX_ITERATIONS {
+        for _ in 0..self.max_iterations {
             let a = SupportPoint::from_minkowski(left, left_transform, right, right_transform, &d);
-            if a.v.dot(d) <= P::Scalar::zero() {
+            if a.v.dot(d) <= S::zero() {
                 return None;
             } else {
                 simplex.push(a);
@@ -143,16 +165,14 @@ where
         right_transform: Range<&TR>,
     ) -> Option<Contact<P>>
     where
-        P: EuclideanSpace,
-        P::Scalar: BaseFloat,
+        P: EuclideanSpace<Scalar = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
-        TL: Transform<P> + TranslationInterpolate<P::Scalar>,
-        TR: Transform<P> + TranslationInterpolate<P::Scalar>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
+        TL: Transform<P> + TranslationInterpolate<S>,
+        TR: Transform<P> + TranslationInterpolate<S>,
     {
-        let tolerance: P::Scalar = NumCast::from(GJK_CONTINUOUS_TOLERANCE).unwrap();
         // build the ray, A.velocity - B.velocity is the ray direction
         let left_lin_vel = left_transform.end.transform_point(P::origin())
             - left_transform.start.transform_point(P::origin());
@@ -161,7 +181,7 @@ where
         let r = left_lin_vel - right_lin_vel;
 
         // initialize time of impact
-        let mut lambda = P::Scalar::zero();
+        let mut lambda = S::zero();
         let mut normal = P::Diff::zero();
 
         // build the start transforms
@@ -182,9 +202,9 @@ where
             &-r,
         ));
         let mut d = simplex[0].v.clone();
-        for _ in 0..MAX_ITERATIONS {
+        for _ in 0..self.max_iterations {
             // d almost at origin means we have a hit
-            if d.magnitude2() <= tolerance {
+            if d.magnitude2() <= self.continuous_tolerance {
                 let mut contact = Contact::new_with_point(
                     CollisionStrategy::FullResolution,
                     normal.normalize(),
@@ -196,7 +216,7 @@ where
             }
 
             // time of impact > 1 means miss
-            if lambda > P::Scalar::one() {
+            if lambda > S::one() {
                 return None;
             }
 
@@ -209,9 +229,9 @@ where
             );
 
             let vp = d.dot(p.v);
-            if vp > P::Scalar::zero() {
+            if vp > S::zero() {
                 let vr = d.dot(r);
-                if vr >= -tolerance {
+                if vr >= -self.continuous_tolerance {
                     return None;
                 } else {
                     // we have a potential hit, move origin forwards along the ray
@@ -267,25 +287,23 @@ where
         left_transform: &TL,
         right: &PR,
         right_transform: &TR,
-    ) -> Option<P::Scalar>
+    ) -> Option<S>
     where
-        P: EuclideanSpace,
-        P::Scalar: BaseFloat,
+        P: EuclideanSpace<Scalar = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
         TL: Transform<P>,
         TR: Transform<P>,
     {
         let zero = P::Diff::zero();
-        let tolerance: P::Scalar = NumCast::from(GJK_DISTANCE_TOLERANCE).unwrap();
         let right_pos = right_transform.transform_point(P::origin());
         let left_pos = left_transform.transform_point(P::origin());
         let mut simplex = Vec::with_capacity(5);
         let mut d = right_pos - left_pos;
         if ulps_eq!(d, P::Diff::zero()) {
-            d = P::Diff::from_value(P::Scalar::one());
+            d = P::Diff::from_value(S::one());
         }
         for d in &[d, d.neg()] {
             simplex.push(SupportPoint::from_minkowski(
@@ -296,7 +314,7 @@ where
                 &d,
             ));
         }
-        for _ in 0..MAX_ITERATIONS {
+        for _ in 0..self.max_iterations {
             let d = self.simplex_processor
                 .get_closest_point_to_origin(&mut simplex);
             if ulps_eq!(d, zero) {
@@ -306,7 +324,7 @@ where
             let p = SupportPoint::from_minkowski(left, left_transform, right, right_transform, &d);
             let dp = p.v.dot(d);
             let d0 = simplex[0].v.dot(d);
-            if dp - d0 < tolerance {
+            if dp - d0 < self.distance_tolerance {
                 return Some(d.magnitude());
             }
             simplex.push(p);
@@ -326,7 +344,7 @@ where
         right_transform: &TR,
     ) -> Option<Contact<P>>
     where
-        P: EuclideanSpace,
+        P: EuclideanSpace<Scalar = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         TL: Transform<P>,
@@ -362,9 +380,8 @@ where
         right_transform: &TR,
     ) -> Option<Contact<P>>
     where
-        P: EuclideanSpace,
-        P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
+        P: EuclideanSpace<Scalar = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         TL: Transform<P>,
@@ -413,9 +430,8 @@ where
         right_transform: &TR,
     ) -> Option<Contact<P>>
     where
-        P: EuclideanSpace,
-        P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
+        P: EuclideanSpace<Scalar = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         TL: Transform<P>,
@@ -476,11 +492,10 @@ where
         left_transform: &TL,
         right: &[(PR, TR)],
         right_transform: &TR,
-    ) -> Option<P::Scalar>
+    ) -> Option<S>
     where
-        P: EuclideanSpace,
-        P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
+        P: EuclideanSpace<Scalar = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         TL: Transform<P>,
@@ -541,13 +556,12 @@ where
         right_transform: Range<&TR>,
     ) -> Option<Contact<P>>
     where
-        P: EuclideanSpace,
-        P::Scalar: BaseFloat,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = P::Scalar>,
+        P: EuclideanSpace<Scalar = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
-        TL: Transform<P> + TranslationInterpolate<P::Scalar>,
-        TR: Transform<P> + TranslationInterpolate<P::Scalar>,
+        TL: Transform<P> + TranslationInterpolate<S>,
+        TR: Transform<P> + TranslationInterpolate<S>,
         SP: SimplexProcessor<Point = P>,
     {
         use CollisionStrategy::*;

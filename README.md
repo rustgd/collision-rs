@@ -30,6 +30,15 @@ is not fully covered by the testsuite. If you encounter any mistakes or
 omissions please let us know by posting an issue, or even better: send us a
 pull request with a fix.
 
+## License
+
+Licensed under either of
+
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
+
 ## Contributing
 
 Use [CONTRIBUTING.md](https://github.com/rustgd/collision-rs/blob/master/CONTRIBUTING.md) for futher information.
@@ -37,3 +46,7 @@ Use [CONTRIBUTING.md](https://github.com/rustgd/collision-rs/blob/master/CONTRIB
 Pull requests are most welcome, especially in the realm of performance
 enhancements and fixing any mistakes. Unit tests and benchmarks are also 
 required, so help on that front would be most appreciated.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
+additional terms or conditions.

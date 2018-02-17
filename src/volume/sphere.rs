@@ -98,7 +98,7 @@ impl<S: BaseFloat> Discrete<Sphere<S>> for Sphere<S> {
         let distance = s1.center.distance2(s2.center);
         let radiuses = s1.radius + s2.radius;
 
-        distance <= radiuses
+        distance <= radiuses * radiuses
     }
 }
 

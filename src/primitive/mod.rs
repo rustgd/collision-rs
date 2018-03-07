@@ -19,6 +19,7 @@ mod sphere;
 mod cylinder;
 mod capsule;
 mod cuboid;
+mod line;
 mod polyhedron;
 mod particle;
 mod primitive2;

@@ -5,7 +5,7 @@ use cgmath::prelude::*;
 
 use {Aabb3, Ray3};
 use prelude::*;
-use primitive::{Capsule, ConvexPolyhedron, Cuboid, Cylinder, Particle3, Sphere};
+use primitive::{Capsule, ConvexPolyhedron, Cuboid, Cylinder, Particle3, RectangularPlane, Sphere};
 
 /// Wrapper enum for 3D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
@@ -17,6 +17,8 @@ where
 {
     /// Particle
     Particle(Particle3<S>),
+    /// Rectangular plane
+    RectangularPlane(RectangularPlane<S>),
     /// Sphere
     Sphere(Sphere<S>),
     /// Cuboid
@@ -35,6 +37,15 @@ where
 {
     fn from(particle: Particle3<S>) -> Primitive3<S> {
         Primitive3::Particle(particle)
+    }
+}
+
+impl<S> From<RectangularPlane<S>> for Primitive3<S>
+where
+    S: BaseFloat,
+{
+    fn from(plane: RectangularPlane<S>) -> Self {
+        Primitive3::RectangularPlane(plane)
     }
 }
 
@@ -90,6 +101,7 @@ where
     fn compute_bound(&self) -> Aabb3<S> {
         match *self {
             Primitive3::Particle(_) => Aabb3::zero(),
+            Primitive3::RectangularPlane(ref plane) => plane.compute_bound(),
             Primitive3::Cuboid(ref cuboid) => cuboid.compute_bound(),
             Primitive3::Sphere(ref sphere) => sphere.compute_bound(),
             Primitive3::Cylinder(ref cylinder) => cylinder.compute_bound(),
@@ -109,6 +121,7 @@ where
                 center: Point3::origin(),
                 radius: S::zero(),
             },
+            Primitive3::RectangularPlane(ref plane) => plane.compute_bound(),
             Primitive3::Cuboid(ref cuboid) => cuboid.compute_bound(),
             Primitive3::Sphere(ref sphere) => sphere.compute_bound(),
             Primitive3::Cylinder(ref cylinder) => cylinder.compute_bound(),
@@ -130,6 +143,7 @@ where
     {
         match *self {
             Primitive3::Particle(_) => transform.transform_point(Point3::origin()),
+            Primitive3::RectangularPlane(ref plane) => plane.support_point(direction, transform),
             Primitive3::Sphere(ref sphere) => sphere.support_point(direction, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.support_point(direction, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.support_point(direction, transform),
@@ -153,6 +167,7 @@ where
     {
         match *self {
             Primitive3::Particle(ref particle) => particle.intersects_transformed(ray, transform),
+            Primitive3::RectangularPlane(ref plane) => plane.intersects_transformed(ray, transform),
             Primitive3::Sphere(ref sphere) => sphere.intersects_transformed(ray, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.intersects_transformed(ray, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.intersects_transformed(ray, transform),
@@ -177,6 +192,9 @@ where
     {
         match *self {
             Primitive3::Particle(ref particle) => particle.intersection_transformed(ray, transform),
+            Primitive3::RectangularPlane(ref plane) => {
+                plane.intersection_transformed(ray, transform)
+            }
             Primitive3::Sphere(ref sphere) => sphere.intersection_transformed(ray, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.intersection_transformed(ray, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.intersection_transformed(ray, transform),

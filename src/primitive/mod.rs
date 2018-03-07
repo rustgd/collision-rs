@@ -10,20 +10,22 @@ pub use self::polyhedron::ConvexPolyhedron;
 pub use self::primitive2::Primitive2;
 pub use self::primitive3::Primitive3;
 pub use self::rectangle::Rectangle;
+pub use self::rectangular_plane::RectangularPlane;
 pub use self::sphere::Sphere;
 
 mod circle;
-mod rectangle;
-mod polygon;
-mod sphere;
 mod cylinder;
 mod capsule;
 mod cuboid;
 mod line;
-mod polyhedron;
 mod particle;
+mod polygon;
+mod polyhedron;
 mod primitive2;
 mod primitive3;
+mod rectangle;
+mod rectangular_plane;
+mod sphere;
 
 pub(crate) mod util;
 

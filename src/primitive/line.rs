@@ -1,14 +1,19 @@
-use cgmath::{Point2, Vector2, Transform, InnerSpace, BaseFloat};
+use cgmath::{BaseFloat, InnerSpace, Point2, Transform, Vector2};
 
 use Aabb2;
 use line::Line2;
-use traits::{Primitive, ComputeBound};
+use traits::{ComputeBound, Primitive};
 
-impl<S> Primitive for Line2<S> where S: BaseFloat, {
+impl<S> Primitive for Line2<S>
+where
+    S: BaseFloat,
+{
     type Point = Point2<S>;
 
-    fn support_point<T>(&self, direction: &Vector2<S>, transform: &T) -> Self::Point where
-        T: Transform<Self::Point> {
+    fn support_point<T>(&self, direction: &Vector2<S>, transform: &T) -> Self::Point
+    where
+        T: Transform<Self::Point>,
+    {
         let direction = transform.inverse_transform_vector(*direction).unwrap();
         let t = direction.dot((self.dest - self.origin));
         if t >= S::zero() {
@@ -19,7 +24,10 @@ impl<S> Primitive for Line2<S> where S: BaseFloat, {
     }
 }
 
-impl<S> ComputeBound<Aabb2<S>> for Line2<S> where S: BaseFloat {
+impl<S> ComputeBound<Aabb2<S>> for Line2<S>
+where
+    S: BaseFloat,
+{
     fn compute_bound(&self) -> Aabb2<S> {
         Aabb2::new(self.origin, self.dest)
     }
@@ -29,9 +37,9 @@ impl<S> ComputeBound<Aabb2<S>> for Line2<S> where S: BaseFloat {
 mod tests {
 
     use super::*;
-    use primitive::Rectangle;
-    use cgmath::{Decomposed, Basis2, Rotation2, Rad};
     use algorithm::minkowski::GJK2;
+    use cgmath::{Basis2, Decomposed, Rad, Rotation2};
+    use primitive::Rectangle;
 
     fn transform(x: f32, y: f32, angle: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {
         Decomposed {
@@ -48,6 +56,9 @@ mod tests {
         let transform_1 = transform(1., 0., 0.);
         let transform_2 = transform(1.1, 0., 0.);
         let gjk = GJK2::new();
-        assert!(gjk.intersect(&line, &transform_1, &rectangle, &transform_2).is_some());
+        assert!(
+            gjk.intersect(&line, &transform_1, &rectangle, &transform_2)
+                .is_some()
+        );
     }
 }

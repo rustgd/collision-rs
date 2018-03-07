@@ -16,7 +16,7 @@ pub struct Rectangle<S> {
     /// Dimensions of the rectangle
     dim: Vector2<S>,
     half_dim: Vector2<S>,
-    corners: Vec<Point2<S>>,
+    corners: [Point2<S>; 4],
 }
 
 impl<S> Rectangle<S>
@@ -48,8 +48,8 @@ where
         &self.half_dim
     }
 
-    fn generate_corners(half_dim: &Vector2<S>) -> Vec<Point2<S>> {
-        vec![
+    fn generate_corners(half_dim: &Vector2<S>) -> [Point2<S>; 4] {
+        [
             Point2::new(half_dim.x, half_dim.y),
             Point2::new(-half_dim.x, half_dim.y),
             Point2::new(-half_dim.x, -half_dim.y),

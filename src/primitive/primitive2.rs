@@ -3,7 +3,7 @@
 use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
-use {Aabb2, Ray2, Line2};
+use {Aabb2, Line2, Ray2};
 use prelude::*;
 use primitive::{Circle, ConvexPolygon, Particle2, Rectangle};
 

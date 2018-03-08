@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
 
-use super::{DynamicBoundingVolumeTree, TreeValue, Visitor};
+use super::{ContinuousVisitor, DynamicBoundingVolumeTree, TreeValue, Visitor};
 use Ray;
 use prelude::*;
 
@@ -111,4 +111,34 @@ where
         }
     }
     saved
+}
+
+/// Query the given tree for all values that intersects the given ray.
+///
+/// ### Parameters:
+///
+/// - `tree`: DBVT to query.
+/// - `ray`: Ray to find intersections for.
+///
+/// ### Returns
+///
+/// Returns all values that intersected the ray, and also at which point the intersections occurred.
+pub fn query_ray<'a, S, T: 'a, P>(
+    tree: &'a DynamicBoundingVolumeTree<T>,
+    ray: Ray<S, P, P::Diff>,
+) -> Vec<(&'a T, P)>
+where
+    S: BaseFloat,
+    T: TreeValue,
+    P: EuclideanSpace<Scalar = S>,
+    P::Diff: VectorSpace<Scalar = S> + InnerSpace,
+    T::Bound: Clone
+        + Contains<T::Bound>
+        + SurfaceArea<Scalar = S>
+        + Union<T::Bound, Output = T::Bound>
+        + Continuous<Ray<S, P, P::Diff>, Result = P>
+        + Discrete<Ray<S, P, P::Diff>>,
+{
+    let mut visitor = ContinuousVisitor::<_, T>::new(&ray);
+    tree.query(&mut visitor)
 }

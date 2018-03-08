@@ -42,6 +42,20 @@ pub type Line2<S> = Line<S, Vector2<S>, Point2<S>>;
 /// 3D directed line segment
 pub type Line3<S> = Line<S, Vector3<S>, Point3<S>>;
 
+impl<S: BaseFloat> Discrete<Ray2<S>> for Line2<S> {
+    fn intersects(&self, ray: &Ray2<S>) -> bool {
+        ray.intersection(self).is_some()
+    }
+}
+
+impl<S: BaseFloat> Continuous<Ray2<S>> for Line2<S> {
+    type Result = Point2<S>;
+
+    fn intersection(&self, ray: &Ray2<S>) -> Option<Self::Result> {
+        ray.intersection(self)
+    }
+}
+
 /// Determines if an intersection between a ray and a line segment is found.
 impl<S: BaseFloat> Continuous<Line2<S>> for Ray2<S> {
     type Result = Point2<S>;

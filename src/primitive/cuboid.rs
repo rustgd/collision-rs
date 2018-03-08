@@ -15,7 +15,7 @@ pub struct Cuboid<S> {
     /// Dimensions of the box
     dim: Vector3<S>,
     half_dim: Vector3<S>,
-    corners: Vec<Point3<S>>,
+    corners: [Point3<S>; 8],
 }
 
 impl<S> Cuboid<S>
@@ -47,8 +47,8 @@ where
         &self.half_dim
     }
 
-    fn generate_corners(half_dim: &Vector3<S>) -> Vec<Point3<S>> {
-        vec![
+    fn generate_corners(half_dim: &Vector3<S>) -> [Point3<S>; 8] {
+        [
             Point3::new(half_dim.x, half_dim.y, half_dim.z),
             Point3::new(-half_dim.x, half_dim.y, half_dim.z),
             Point3::new(-half_dim.x, -half_dim.y, half_dim.z),

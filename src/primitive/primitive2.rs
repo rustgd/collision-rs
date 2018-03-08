@@ -3,7 +3,7 @@
 use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
-use {Aabb2, Ray2};
+use {Aabb2, Line2, Ray2};
 use prelude::*;
 use primitive::{Circle, ConvexPolygon, Particle2, Rectangle};
 
@@ -14,6 +14,8 @@ use primitive::{Circle, ConvexPolygon, Particle2, Rectangle};
 pub enum Primitive2<S> {
     /// Particle
     Particle(Particle2<S>),
+    /// Line
+    Line(Line2<S>),
     /// Circle
     Circle(Circle<S>),
     /// Rectangle
@@ -25,6 +27,12 @@ pub enum Primitive2<S> {
 impl<S> From<Particle2<S>> for Primitive2<S> {
     fn from(particle: Particle2<S>) -> Primitive2<S> {
         Primitive2::Particle(particle)
+    }
+}
+
+impl<S> From<Line2<S>> for Primitive2<S> {
+    fn from(line: Line2<S>) -> Primitive2<S> {
+        Primitive2::Line(line)
     }
 }
 
@@ -53,6 +61,7 @@ where
     fn compute_bound(&self) -> Aabb2<S> {
         match *self {
             Primitive2::Particle(_) => Aabb2::zero(),
+            Primitive2::Line(ref line) => line.compute_bound(),
             Primitive2::Circle(ref circle) => circle.compute_bound(),
             Primitive2::Rectangle(ref rectangle) => rectangle.compute_bound(),
             Primitive2::ConvexPolygon(ref polygon) => polygon.compute_bound(),
@@ -72,6 +81,7 @@ where
     {
         match *self {
             Primitive2::Particle(_) => transform.transform_point(Point2::origin()),
+            Primitive2::Line(ref line) => line.support_point(direction, transform),
             Primitive2::Circle(ref circle) => circle.support_point(direction, transform),
             Primitive2::Rectangle(ref rectangle) => rectangle.support_point(direction, transform),
             Primitive2::ConvexPolygon(ref polygon) => polygon.support_point(direction, transform),
@@ -91,6 +101,7 @@ where
     {
         match *self {
             Primitive2::Particle(ref particle) => particle.intersects_transformed(ray, transform),
+            Primitive2::Line(ref line) => line.intersects_transformed(ray, transform),
             Primitive2::Circle(ref circle) => circle.intersects_transformed(ray, transform),
             Primitive2::Rectangle(ref rectangle) => {
                 rectangle.intersects_transformed(ray, transform)
@@ -115,6 +126,7 @@ where
     {
         match *self {
             Primitive2::Particle(ref particle) => particle.intersection_transformed(ray, transform),
+            Primitive2::Line(ref line) => line.intersection_transformed(ray, transform),
             Primitive2::Circle(ref circle) => circle.intersection_transformed(ray, transform),
             Primitive2::Rectangle(ref rectangle) => {
                 rectangle.intersection_transformed(ray, transform)

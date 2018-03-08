@@ -1,5 +1,13 @@
 ## Change Log
 
+### v0.15
+  - Add Quad primitive for 3D
+  - Add Line primitive for 2D
+  - Fix: Sphere discrete intersection test compared squared radii with non-squared combined radii
+  - Expose tolerance settings on GJK/EPA
+  - Fix: Expose dimensions of Rectangle/Cuboid
+  - Fix: Complex time of impact would ignore later primitive pairs if one pair did not collide
+
 ### v0.14
   - Upgrade to cgmath 0.16
 

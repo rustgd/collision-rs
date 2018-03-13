@@ -4,7 +4,7 @@
   - Add Quad primitive for 3D
   - Add Line primitive for 2D
   - Fix: Sphere discrete intersection test compared squared radii with non-squared combined radii
-  - Expose tolerance settings on GJK/EPA
+  - Expose tolerance settings on GJK/EPA (BREAKING CHANGE: Changed generic type parameters on GJK)
   - Fix: Expose dimensions of Rectangle/Cuboid
   - Fix: Complex time of impact would ignore later primitive pairs if one pair did not collide
 

@@ -395,10 +395,9 @@ where
     ///
     pub fn reindex_values(&mut self) {
         for i in 0..self.values.len() {
-            match self.nodes[self.values[i].0] {
-                Node::Leaf(ref mut leaf) => leaf.value = i,
-                _ => (),
-            };
+            if let Node::Leaf(ref mut leaf) = self.nodes[self.values[i].0] {
+                leaf.value = i;
+            }
         }
     }
 
@@ -484,27 +483,23 @@ where
             // depth search, use last added as next test subject
             stack_pointer -= 1;
             let node_index = stack[stack_pointer];
-            let ref node = self.nodes[node_index];
+            let node = &self.nodes[node_index];
 
             match *node {
                 Node::Leaf(ref leaf) => {
                     // if we encounter a leaf, do a real bound intersection test, and add to return
                     // values if there's an intersection
-                    match visitor.accept(&self.values[leaf.value].1.bound(), true) {
-                        Some(result) => values.push((leaf.value, result)),
-                        _ => (),
+                    if let Some(result) = visitor.accept(self.values[leaf.value].1.bound(), true) {
+                        values.push((leaf.value, result));
                     }
                 }
 
                 // if we encounter a branch, do intersection test, and push the children if the
                 // branch intersected
-                Node::Branch(ref branch) => match visitor.accept(&branch.bound, false) {
-                    Some(_) => {
-                        stack[stack_pointer] = branch.left;
-                        stack[stack_pointer + 1] = branch.right;
-                        stack_pointer += 2;
-                    }
-                    _ => (),
+                Node::Branch(ref branch) => if visitor.accept(&branch.bound, false).is_some() {
+                    stack[stack_pointer] = branch.left;
+                    stack[stack_pointer + 1] = branch.right;
+                    stack_pointer += 2;
                 },
                 Node::Nil => (),
             }
@@ -527,12 +522,9 @@ where
     /// - `new_value`: the new value to write in that node
     ///
     pub fn update_node(&mut self, node_index: usize, new_value: T) {
-        match self.nodes[node_index] {
-            Node::Leaf(ref mut leaf) => {
-                self.values[leaf.value].1 = new_value;
-            }
-            _ => (),
-        };
+        if let Node::Leaf(ref mut leaf) = self.nodes[node_index] {
+            self.values[leaf.value].1 = new_value;
+        }
         self.flag_updated(node_index);
     }
 
@@ -562,11 +554,11 @@ where
     pub fn update(&mut self) {
         let nodes = self.updated_list
             .iter()
-            .filter_map(|index| {
-                if let Node::Leaf(ref l) = self.nodes[*index] {
+            .filter_map(|&index| {
+                if let Node::Leaf(ref l) = self.nodes[index] {
                     if !l.bound.contains(self.values[l.value].1.bound()) {
                         Some((
-                            index.clone(),
+                            index,
                             l.parent,
                             self.values[l.value].1.get_bound_with_margin(),
                         ))
@@ -580,12 +572,9 @@ where
             .collect::<Vec<(usize, usize, T::Bound)>>();
 
         for (node_index, parent_index, fat_bound) in nodes {
-            match self.nodes[node_index] {
-                Node::Leaf(ref mut leaf) => {
-                    leaf.bound = fat_bound;
-                }
-                _ => (),
-            };
+            if let Node::Leaf(ref mut leaf) = self.nodes[node_index] {
+                leaf.bound = fat_bound;
+            }
             self.mark_for_refit(parent_index, 2);
         }
 
@@ -771,9 +760,8 @@ where
         // we only need to update the node for the value that we swapped into the old values place
         if value_index < self.values.len() {
             // should only fail if we just removed the last value
-            match self.nodes[self.values[value_index].0] {
-                Node::Leaf(ref mut leaf) => leaf.value = value_index,
-                _ => (),
+            if let Node::Leaf(ref mut leaf) = self.nodes[self.values[value_index].0] {
+                leaf.value = value_index;
             }
         }
 
@@ -813,15 +801,12 @@ where
             } else {
                 // else we have a remaining branch, and need to update either left or right to point
                 // to the sibling, based on where the old branch node was
-                match self.nodes[parent_parent_index] {
-                    Node::Branch(ref mut b) => {
-                        if b.left == parent_index {
-                            b.left = sibling_index;
-                        } else {
-                            b.right = sibling_index;
-                        }
+                if let Node::Branch(ref mut b) = self.nodes[parent_parent_index] {
+                    if b.left == parent_index {
+                        b.left = sibling_index;
+                    } else {
+                        b.right = sibling_index;
                     }
-                    _ => (),
                 }
 
                 // mark parents parent for recalculation
@@ -843,7 +828,7 @@ where
     /// refit list.
     ///
     pub fn do_refit(&mut self) {
-        while self.refit_nodes.len() > 0 {
+        while !self.refit_nodes.is_empty() {
             let (_, node_index) = self.refit_nodes.remove(0);
             self.refit_node(node_index);
         }
@@ -898,13 +883,10 @@ where
     /// for refitting.
     ///
     fn refit_node(&mut self, node_index: usize) {
-        match self.recalculate_node(node_index) {
-            Some((parent_index, height)) => {
-                if parent_index != 0 {
-                    self.mark_for_refit(parent_index, height + 1);
-                }
+        if let Some((parent_index, height)) = self.recalculate_node(node_index) {
+            if parent_index != 0 {
+                self.mark_for_refit(parent_index, height + 1);
             }
-            _ => (),
         }
 
         // Only do rotations occasionally, as they are fairly expensive, and shouldn't be overused.
@@ -932,7 +914,7 @@ where
                 };
             (
                 1 + max(left_height, right_height),
-                left_bound.union(&right_bound),
+                left_bound.union(right_bound),
                 parent_index,
             )
         };
@@ -1149,7 +1131,7 @@ fn swap<B>(
 /// Calculate the best rotation for a given grandparent node in the tree
 #[inline]
 fn get_best_rotation<B>(
-    nodes: &Vec<Node<B>>,
+    nodes: &[Node<B>],
     left_index: usize,
     right_index: usize,
     node_surface_area: <B as SurfaceArea>::Scalar,
@@ -1185,7 +1167,7 @@ where
         }
 
         // check for left child swapped with right right grandchild
-        let l_rr_sa = sa(rr_bound, &l_bound, &rl_bound);
+        let l_rr_sa = sa(rr_bound, l_bound, rl_bound);
         if l_rr_sa < min_sa {
             rot = Rotation::LeftRightRight;
             min_sa = l_rr_sa;
@@ -1201,14 +1183,14 @@ where
             };
 
             // check for left left grandchild swapped with right left grandchild
-            let ll_rl_sa = sa(&rl_bound.union(&lr_bound), ll_bound, rr_bound);
+            let ll_rl_sa = sa(&rl_bound.union(lr_bound), ll_bound, rr_bound);
             if ll_rl_sa < min_sa {
                 rot = Rotation::LeftLeftRightLeft;
                 min_sa = ll_rl_sa;
             }
 
             // check for left left grandchild swapped with right right grandchild
-            let ll_rr_sa = sa(&rr_bound.union(&lr_bound), rl_bound, ll_bound);
+            let ll_rr_sa = sa(&rr_bound.union(lr_bound), rl_bound, ll_bound);
             if ll_rr_sa < min_sa {
                 rot = Rotation::LeftLeftRightRight;
                 min_sa = ll_rr_sa;
@@ -1252,7 +1234,7 @@ fn sa<B>(a: &B, b: &B, c: &B) -> <B as SurfaceArea>::Scalar
 where
     B: Union<B, Output = B> + SurfaceArea,
 {
-    a.union(&b.union(&c)).surface_area()
+    a.union(&b.union(c)).surface_area()
 }
 
 #[inline]

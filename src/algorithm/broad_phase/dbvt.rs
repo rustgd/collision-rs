@@ -47,19 +47,14 @@ impl DbvtBroadPhase {
                 for (hit_value_index, _) in
                     tree.query_for_indices(&mut DiscreteVisitor::<T::Bound, T>::new(shape.bound()))
                 {
-                    let insert = match shape_value_index.cmp(&hit_value_index) {
-                        Ordering::Equal => None,
-                        Ordering::Less => Some((shape_value_index, hit_value_index)),
-                        Ordering::Greater => Some((hit_value_index, shape_value_index)),
-                    }.and_then(|pair| {
-                        match potentials.binary_search(&pair) {
-                            Err(pos) => Some((pos, pair)),
-                            Ok(_) => None,
-                        }
-                    });
-                    match insert {
-                        Some((pos, pair)) => potentials.insert(pos, pair),
-                        None => (),
+                    let pair = match shape_value_index.cmp(&hit_value_index) {
+                        Ordering::Equal => continue,
+                        Ordering::Less => (shape_value_index, hit_value_index),
+                        Ordering::Greater => (hit_value_index, shape_value_index),
+                    };
+
+                    if let Err(pos) = potentials.binary_search(&pair) {
+                        potentials.insert(pos, pair);
                     }
                 }
             }

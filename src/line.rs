@@ -28,8 +28,8 @@ impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff 
     /// Create a new directed line segment from `origin` to `dest`.
     pub fn new(origin: P, dest: P) -> Line<S, V, P> {
         Line {
-            origin: origin,
-            dest: dest,
+            origin,
+            dest,
             phantom_v: PhantomData,
             phantom_s: PhantomData,
         }

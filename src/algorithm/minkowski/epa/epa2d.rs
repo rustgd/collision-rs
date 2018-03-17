@@ -37,7 +37,7 @@ where
         TL: Transform<Self::Point>,
         TR: Transform<Self::Point>,
     {
-        let mut e = match closest_edge(&simplex) {
+        let mut e = match closest_edge(simplex) {
             None => return None,
             Some(e) => e,
         };
@@ -56,14 +56,14 @@ where
             } else {
                 simplex.insert(e.index, p);
             }
-            e = closest_edge(&simplex).unwrap();
+            e = closest_edge(simplex).unwrap();
         }
 
         Some(Contact::new_with_point(
             CollisionStrategy::FullResolution,
             e.normal,
             e.distance,
-            point(&simplex, &e),
+            point(simplex, &e),
         ))
     }
 
@@ -101,9 +101,9 @@ where
     let ab = b.v - a.v;
     let t = oa.dot(ab) / ab.magnitude2();
     if t < S::zero() {
-        a.sup_a.clone()
+        a.sup_a
     } else if t > S::one() {
-        b.sup_a.clone()
+        b.sup_a
     } else {
         a.sup_a + (b.sup_a - a.sup_a) * t
     }

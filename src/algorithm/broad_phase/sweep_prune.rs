@@ -94,7 +94,7 @@ where
         });
 
         self.variance.clear();
-        self.variance.add_bound(&shapes[0].bound());
+        self.variance.add_bound(shapes[0].bound());
 
         let mut active = vec![0];
         // Remember that the index here will be the index of the iterator, which starts at index 1
@@ -111,7 +111,7 @@ where
             // all shapes in the active list are potential hits, do a real bound intersection test
             // for those, and add to pairs if the bounds intersect.
             for active_index in &active {
-                if shapes[*active_index].bound().intersects(&shape.bound()) {
+                if shapes[*active_index].bound().intersects(shape.bound()) {
                     pairs.push((*active_index, shape_index));
                 }
             }
@@ -120,7 +120,7 @@ where
             active.push(shape_index);
 
             // update variance
-            self.variance.add_bound(&shape.bound());
+            self.variance.add_bound(shape.bound());
         }
 
         // compute sweep axis for the next iteration

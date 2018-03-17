@@ -61,7 +61,7 @@ where
             if result.is_zero() {
                 result = Zero::zero(); // cancel out any inconsistencies
             } else {
-                result = result * self.radius;
+                result *= self.radius;
             }
         }
         if negative {

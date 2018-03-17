@@ -15,7 +15,7 @@ where
         T: Transform<Self::Point>,
     {
         let direction = transform.inverse_transform_vector(*direction).unwrap();
-        let t = direction.dot((self.dest - self.origin));
+        let t = direction.dot(self.dest - self.origin);
         if t >= S::zero() {
             transform.transform_point(self.dest)
         } else {

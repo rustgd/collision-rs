@@ -24,7 +24,6 @@ pub trait Discrete<RHS> {
 ///
 pub trait Contains<RHS> {
     /// Containment test
-    #[inline]
     fn contains(&self, _: &RHS) -> bool;
 }
 

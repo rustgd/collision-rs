@@ -69,12 +69,12 @@ where
                 self.vertices[i].x - self.vertices[j].x,
             );
             // check if edge normal points toward the ray origin
-            if ray.direction.dot(normal) < S::zero() {
+            if ray.direction.dot(normal) < S::zero()
                 // check line ray intersection
-                match ray.intersection(&Line2::new(self.vertices[i], self.vertices[j])) {
-                    Some(_) => return true,
-                    _ => (),
-                }
+                && ray.intersection(&Line2::new(self.vertices[i], self.vertices[j]))
+                    .is_some()
+            {
+                return true;
             }
         }
 
@@ -103,9 +103,10 @@ where
             // check if edge normal points toward the ray origin
             if ray.direction.dot(normal) < S::zero() {
                 // check line ray intersection
-                match ray.intersection(&Line2::new(self.vertices[i], self.vertices[j])) {
-                    Some(point) => return Some(point),
-                    _ => (),
+                if let point @ Some(_) =
+                    ray.intersection(&Line2::new(self.vertices[i], self.vertices[j]))
+                {
+                    return point;
                 }
             }
         }
@@ -114,7 +115,7 @@ where
     }
 }
 
-fn support_point<P, T>(vertices: &Vec<P>, direction: &P::Diff, transform: &T) -> P
+fn support_point<P, T>(vertices: &[P], direction: &P::Diff, transform: &T) -> P
 where
     P: EuclideanSpace,
     P::Scalar: BaseFloat,
@@ -177,7 +178,7 @@ where
 }
 
 #[inline]
-fn dot_index<P>(vertices: &Vec<P>, index: i32, direction: &P::Diff) -> P::Scalar
+fn dot_index<P>(vertices: &[P], index: i32, direction: &P::Diff) -> P::Scalar
 where
     P: EuclideanSpace,
     P::Scalar: BaseFloat,

@@ -124,7 +124,6 @@ pub trait Aabb: Sized {
     }
 
     /// Add a margin of the given width around the AABB, returning a new AABB.
-    #[inline]
     fn add_margin(&self, margin: Self::Diff) -> Self;
 
     /// Multiply every point in the AABB by a scalar, returning a new AABB.

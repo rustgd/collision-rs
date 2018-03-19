@@ -82,8 +82,8 @@ where
             mode: PolyhedronMode::VertexOnly,
             vertices: vertices
                 .iter()
-                .map(|v| Vertex {
-                    position: v.clone(),
+                .map(|&v| Vertex {
+                    position: v,
                     edge: 0,
                     ready: true,
                 })
@@ -126,8 +126,8 @@ where
         vertices: Vec<Point3<S>>,
         faces: Vec<(usize, usize, usize)>,
     ) -> Self {
-        let (vertices, map) = dedup_vertices(vertices);
-        Self::new_with_faces(vertices, dedup_faces(faces, map))
+        let (vertices, map) = dedup_vertices(&vertices);
+        Self::new_with_faces(vertices, dedup_faces(&faces, &map))
     }
 
     /// Return an iterator that will yield tuples of the 3 vertices of each face
@@ -148,7 +148,7 @@ where
                 (Point3::origin(), S::neg_infinity()),
                 |(max_p, max_dot), (v, dot)| {
                     if dot > max_dot {
-                        (v.clone(), dot)
+                        (v, dot)
                     } else {
                         (max_p, max_dot)
                     }
@@ -187,7 +187,7 @@ where
             }
         }
 
-        self.vertices[best_index].position.clone()
+        self.vertices[best_index].position
     }
 }
 
@@ -222,30 +222,30 @@ where
     }
 }
 
-fn dedup_vertices<S>(vertices: Vec<Point3<S>>) -> (Vec<Point3<S>>, HashMap<usize, usize>)
+fn dedup_vertices<S>(vertices: &[Point3<S>]) -> (Vec<Point3<S>>, HashMap<usize, usize>)
 where
     S: BaseFloat,
 {
     let mut vs = Vec::with_capacity(vertices.len() / 2);
     let mut dup = HashMap::default();
-    for i in 0..vertices.len() {
+    for (i, &vertex) in vertices.iter().enumerate() {
         let mut found = false;
-        for j in 0..vs.len() {
-            if vs[j] == vertices[i] {
+        for (j, &v) in vs.iter().enumerate() {
+            if v == vertex {
                 dup.insert(i, j);
                 found = true;
             }
         }
         if !found {
-            vs.push(vertices[i]);
+            vs.push(vertex);
         }
     }
     (vs, dup)
 }
 
 fn dedup_faces(
-    faces: Vec<(usize, usize, usize)>,
-    duplicates: HashMap<usize, usize>,
+    faces: &[(usize, usize, usize)],
+    duplicates: &HashMap<usize, usize>,
 ) -> Vec<(usize, usize, usize)> {
     faces
         .iter()
@@ -256,21 +256,21 @@ fn dedup_faces(
                 *duplicates.get(&c).unwrap_or(&c),
             )
         })
-        .collect::<Vec<_>>()
+        .collect()
 }
 
 /// Create half edge data structure from vertices and faces
 fn build_half_edges<S>(
-    vertices: &Vec<Point3<S>>,
-    in_faces: &Vec<(usize, usize, usize)>,
+    vertices: &[Point3<S>],
+    in_faces: &[(usize, usize, usize)],
 ) -> (Vec<Vertex<S>>, Vec<Edge>, Vec<Face<S>>)
 where
     S: BaseFloat,
 {
     let mut vertices: Vec<Vertex<S>> = vertices
         .iter()
-        .map(|v| Vertex {
-            position: v.clone(),
+        .map(|&v| Vertex {
+            position: v,
             edge: 0,
             ready: false,
         })
@@ -298,7 +298,7 @@ where
             let v1 = face_vertices[j];
 
             let (edge_v0_v1_index, edge_v1_v0_index) = if let Some(edge) = edge_map.get(&(v0, v1)) {
-                (edge.clone(), edges[*edge].twin_edge)
+                (*edge, edges[*edge].twin_edge)
             } else {
                 let edge_v0_v1_index = edges.len();
                 let edge_v1_v0_index = edges.len() + 1;
@@ -387,7 +387,7 @@ where
     S: BaseFloat,
 {
     fn compute_bound(&self) -> Aabb3<S> {
-        self.bound.clone()
+        self.bound
     }
 }
 
@@ -494,7 +494,7 @@ where
             None => {
                 let mut next = face_index + 1;
                 while next < polytope.faces.len() && checked.contains(next) {
-                    next = next + 1;
+                    next += 1;
                 }
                 if next == polytope.faces.len() {
                     None
@@ -525,7 +525,7 @@ where
                     [face_edge.next_edge, face_edge.previous_edge, face.edge]
                 };
 
-                for edge_index in edges.iter() {
+                for edge_index in &edges {
                     let twin_edge = polytope.edges[*edge_index].twin_edge;
                     if !checked.contains(polytope.edges[twin_edge].left_face) {
                         return Some(polytope.edges[twin_edge].left_face);

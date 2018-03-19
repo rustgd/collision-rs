@@ -201,7 +201,7 @@ where
             &right_curr_transform,
             &-r,
         ));
-        let mut d = simplex[0].v.clone();
+        let mut d = simplex[0].v;
         for _ in 0..self.max_iterations {
             // d almost at origin means we have a hit
             if d.magnitude2() <= self.continuous_tolerance {
@@ -235,7 +235,7 @@ where
                     return None;
                 } else {
                     // we have a potential hit, move origin forwards along the ray
-                    lambda = lambda - vp / vr;
+                    lambda -= vp / vr;
 
                     // interpolate translation of shapes along the ray
                     left_curr_transform = left_transform
@@ -244,7 +244,7 @@ where
                     right_curr_transform = right_transform
                         .start
                         .translation_interpolate(right_transform.end, lambda);
-                    normal = d.clone();
+                    normal = d;
                 }
             }
             simplex.push(p);
@@ -311,7 +311,7 @@ where
                 left_transform,
                 right,
                 right_transform,
-                &d,
+                d,
             ));
         }
         for _ in 0..self.max_iterations {

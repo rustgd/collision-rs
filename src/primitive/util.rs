@@ -16,11 +16,11 @@ where
     I: Iterator<Item = &'a P>,
 {
     let direction = transform.inverse_transform_vector(*direction).unwrap();
-    let (p, _) = vertices.map(|v| (v, v.dot(direction))).fold(
+    let (p, _) = vertices.map(|&v| (v, v.dot(direction))).fold(
         (P::origin(), P::Scalar::neg_infinity()),
         |(max_p, max_dot), (v, dot)| {
             if dot > max_dot {
-                (v.clone(), dot)
+                (v, dot)
             } else {
                 (max_p, max_dot)
             }
@@ -105,9 +105,9 @@ where
     let v = *point - *start;
     let d = v.dot(line_dir);
     if d < V::Scalar::zero() {
-        start.clone()
+        *start
     } else if (d * d) > line.magnitude2() {
-        end.clone()
+        *end
     } else {
         *start + line_dir * d
     }

@@ -107,7 +107,7 @@ where
         let t = offset.dot(ray.direction);
         if t < tmin {
             tmin = t;
-            saved = Some((value, point.clone()));
+            saved = Some((value, point));
         }
     }
     saved

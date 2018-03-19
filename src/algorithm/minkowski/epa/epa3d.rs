@@ -87,7 +87,7 @@ where
 {
     Some(Contact::new_with_point(
         CollisionStrategy::FullResolution,
-        face.normal.clone(), // negate ?
+        face.normal, // negate ?
         face.distance,
         point(polytope, face),
     ))
@@ -169,7 +169,7 @@ where
         // add new faces
         let new_faces = edges
             .into_iter()
-            .map(|(a, b)| Face::new_impl(&self.vertices, n, a, b))
+            .map(|(a, b)| Face::new_impl(self.vertices, n, a, b))
             .collect::<Vec<_>>();
         self.faces.extend(new_faces);
     }

@@ -33,7 +33,7 @@ where
     fn with_margin(&self, add: Vector3<S>) -> Self {
         let max = add.x.max(add.y).max(add.z);
         Sphere {
-            center: self.center.clone(),
+            center: self.center,
             radius: self.radius + max,
         }
     }
@@ -84,10 +84,7 @@ impl<S: BaseFloat> Discrete<Ray3<S>> for Sphere<S> {
             return false;
         }
         let d2 = l.dot(l) - tca * tca;
-        if d2 > s.radius * s.radius {
-            return false;
-        }
-        return true;
+        d2 <= s.radius * s.radius
     }
 }
 
@@ -120,7 +117,7 @@ impl<S: BaseFloat> Contains<Aabb3<S>> for Sphere<S> {
     #[inline]
     fn contains(&self, aabb: &Aabb3<S>) -> bool {
         let radius_sq = self.radius * self.radius;
-        for c in aabb.to_corners().iter() {
+        for c in &aabb.to_corners() {
             if c.distance2(self.center) > radius_sq {
                 return false;
             }
@@ -156,10 +153,10 @@ impl<S: BaseFloat> Union for Sphere<S> {
 
     fn union(&self, other: &Sphere<S>) -> Sphere<S> {
         if self.contains(other) {
-            return self.clone();
+            return *self;
         }
         if other.contains(self) {
-            return other.clone();
+            return *other;
         }
         let two = S::one() + S::one();
         let center_diff = other.center - self.center;
@@ -177,7 +174,7 @@ impl<S: BaseFloat> Union<Aabb3<S>> for Sphere<S> {
 
     fn union(&self, aabb: &Aabb3<S>) -> Sphere<S> {
         if self.contains(aabb) {
-            return self.clone();
+            return *self;
         }
         let aabb_radius = aabb.max().distance(aabb.center());
         if aabb.contains(self) {

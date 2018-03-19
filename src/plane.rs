@@ -35,7 +35,7 @@ impl<S: BaseFloat> Plane<S> {
     /// plane will be perpendicular to `n`, and `d` units offset from the
     /// origin.
     pub fn new(n: Vector3<S>, d: S) -> Plane<S> {
-        Plane { n: n, d: d }
+        Plane { n, d }
     }
 
     /// # Arguments
@@ -167,7 +167,7 @@ impl<S: BaseFloat> Discrete<Ray3<S>> for Plane<S> {
     fn intersects(&self, r: &Ray3<S>) -> bool {
         let p = self;
         let t = -(p.d + r.origin.dot(p.n)) / r.direction.dot(p.n);
-        return t >= Zero::zero();
+        t >= Zero::zero()
     }
 }
 
@@ -192,7 +192,7 @@ impl<S: BaseFloat> Discrete<Plane<S>> for Plane<S> {
         let p1 = self;
         let d = p1.n.cross(p2.n);
         let denom = d.dot(d);
-        return !ulps_eq!(denom, &S::zero());
+        ulps_ne!(denom, &S::zero())
     }
 }
 
@@ -217,6 +217,6 @@ impl<S: BaseFloat> Discrete<(Plane<S>, Plane<S>)> for Plane<S> {
         let (p1, p2, p3) = (self, planes.0, planes.1);
         let u = p2.n.cross(p3.n);
         let denom = p1.n.dot(u);
-        return !ulps_eq!(denom.abs(), &S::zero());
+        ulps_ne!(denom.abs(), &S::zero())
     }
 }

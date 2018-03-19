@@ -38,7 +38,7 @@ impl TreeValue for Value {
     }
 
     fn get_bound_with_margin(&self) -> Aabb2<f32> {
-        self.fat_aabb.clone()
+        self.fat_aabb
     }
 }
 
@@ -142,7 +142,7 @@ fn benchmark_ray_closest_query(b: &mut Bencher) {
     let mut i = 0;
 
     b.iter(|| {
-        query_ray_closest(&tree, rays[i % 1000].clone());
+        query_ray_closest(&tree, rays[i % 1000]);
         i += 1;
     });
 }

@@ -205,7 +205,7 @@ impl<S: BaseFloat> Discrete<Aabb2<S>> for Ray2<S> {
 
 impl<S: BaseFloat> Discrete<Ray2<S>> for Aabb2<S> {
     fn intersects(&self, ray: &Ray2<S>) -> bool {
-        ray.intersects(&self)
+        ray.intersects(self)
     }
 }
 

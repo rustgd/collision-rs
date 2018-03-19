@@ -36,12 +36,12 @@ impl<S: BaseFloat> Frustum<S> {
         far: Plane<S>,
     ) -> Frustum<S> {
         Frustum {
-            left: left,
-            right: right,
-            bottom: bottom,
-            top: top,
-            near: near,
-            far: far,
+            left,
+            right,
+            bottom,
+            top,
+            near,
+            far,
         }
     }
 

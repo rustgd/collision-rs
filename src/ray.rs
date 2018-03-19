@@ -31,8 +31,8 @@ where
     /// `direction`.
     pub fn new(origin: P, direction: V) -> Ray<S, P, V> {
         Ray {
-            origin: origin,
-            direction: direction,
+            origin,
+            direction,
             phantom_s: PhantomData,
         }
     }
@@ -64,7 +64,7 @@ where
     type Result = P;
     fn intersection(&self, ray: &Ray<S, P, P::Diff>) -> Option<P> {
         if self.intersects(ray) {
-            Some(self.clone())
+            Some(*self)
         } else {
             None
         }
@@ -78,7 +78,7 @@ where
     P::Diff: InnerSpace<Scalar = S>,
 {
     fn intersects(&self, ray: &Ray<S, P, P::Diff>) -> bool {
-        let p = self.clone();
+        let p = *self;
         let l = p - ray.origin;
         let tca = l.dot(ray.direction);
         tca > S::zero()

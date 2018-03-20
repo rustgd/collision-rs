@@ -207,9 +207,7 @@ fn check_side<S>(
         // origin above triangle, set v = surface normal towards origin
     }
 
-    if above {
-        *v = *abc;
-    } else if abc.dot(*ao) > S::zero() {
+    if above || abc.dot(*ao) > S::zero() {
         // [c, b, a]
         *v = *abc;
     // origin below triangle, rewind simplex and set v = surface normal towards origin
@@ -225,7 +223,6 @@ mod tests {
     use std::ops::Neg;
 
     use cgmath::{Point3, Vector3};
-    use smallvec::SmallVec;
 
     use super::*;
     use algorithm::minkowski::SupportPoint;

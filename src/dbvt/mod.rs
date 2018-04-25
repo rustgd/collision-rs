@@ -250,6 +250,23 @@ where
     refit_nodes: Vec<(u32, usize)>,
 }
 
+impl<T> Default for DynamicBoundingVolumeTree<T>
+where
+    T: TreeValue,
+{
+    fn default() -> Self {
+        DynamicBoundingVolumeTree {
+            // we add Nil to first position so only the root node can have parent = 0
+            nodes: vec![Node::Nil],
+            values: Vec::default(),
+            free_list: Vec::default(),
+            updated_list: Vec::default(),
+            root_index: 0,
+            refit_nodes: Vec::default(),
+        }
+    }
+}
+
 impl<T> fmt::Debug for DynamicBoundingVolumeTree<T>
 where
     T: TreeValue,
@@ -322,15 +339,7 @@ where
     /// [3]: ../trait.SurfaceArea.html
     ///
     pub fn new() -> Self {
-        Self {
-            // we add Nil to first position so only the root node can have parent = 0
-            nodes: vec![Node::Nil],
-            values: Vec::default(),
-            free_list: Vec::default(),
-            updated_list: Vec::default(),
-            root_index: 0,
-            refit_nodes: Vec::default(),
-        }
+        Default::default()
     }
 
     /// Return the number of nodes in the tree.

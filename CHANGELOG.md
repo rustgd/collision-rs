@@ -1,5 +1,8 @@
 ## Change Log
 
+### v0.15.1
+  - Add Default implementation for DynamicBoundingVolumeTree
+
 ### v0.15
   - Add Quad primitive for 3D
   - Add Line primitive for 2D

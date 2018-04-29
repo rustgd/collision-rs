@@ -1,5 +1,8 @@
 ## Change Log
 
+### v0.16
+  - Update dependencies
+
 ### v0.15.1
   - Add Default implementation for DynamicBoundingVolumeTree
 

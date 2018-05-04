@@ -106,6 +106,85 @@ where
     }
 }
 
+/// Square primitive.
+///
+/// Have a cached set of corner points to speed up computation.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+pub struct Square<S> {
+    rectangle: Rectangle<S>,
+}
+
+impl<S> Square<S>
+where
+    S: BaseFloat,
+{
+    /// Create a new square primitive from dimension
+    pub fn new(dim: S) -> Self {
+        Square {
+            rectangle: Rectangle::new(dim, dim),
+        }
+    }
+
+    /// Get the dimensions of the `Square`
+    pub fn dim(&self) -> S {
+        self.rectangle.dim.x
+    }
+
+    /// Get the half dimensions of the `Square`
+    pub fn half_dim(&self) -> S {
+        self.rectangle.half_dim.x
+    }
+}
+
+impl<S> Primitive for Square<S>
+where
+    S: BaseFloat,
+{
+    type Point = Point2<S>;
+
+    fn support_point<T>(&self, direction: &Vector2<S>, transform: &T) -> Point2<S>
+    where
+        T: Transform<Point2<S>>,
+    {
+        get_max_point(self.rectangle.corners.iter(), direction, transform)
+    }
+}
+
+impl<S> ComputeBound<Aabb2<S>> for Square<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> Aabb2<S> {
+        Aabb2::new(
+            Point2::from_vec(-self.rectangle.half_dim),
+            Point2::from_vec(self.rectangle.half_dim),
+        )
+    }
+}
+
+impl<S> Discrete<Ray2<S>> for Square<S>
+where
+    S: BaseFloat,
+{
+    /// Ray must be in object space of the rectangle
+    fn intersects(&self, ray: &Ray2<S>) -> bool {
+        self.compute_bound().intersects(ray)
+    }
+}
+
+impl<S> Continuous<Ray2<S>> for Square<S>
+where
+    S: BaseFloat,
+{
+    type Result = Point2<S>;
+
+    /// Ray must be in object space of the rectangle
+    fn intersection(&self, ray: &Ray2<S>) -> Option<Point2<S>> {
+        self.compute_bound().intersection(ray)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};

@@ -11,14 +11,14 @@ use primitive::util::barycentric_point;
 use volume::Sphere;
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 enum PolyhedronMode {
     VertexOnly,
     HalfEdge,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 struct Vertex<S> {
     position: Point3<S>,
     edge: usize,
@@ -26,7 +26,7 @@ struct Vertex<S> {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 struct Edge {
     target_vertex: usize,
     left_face: usize,
@@ -37,7 +37,7 @@ struct Edge {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 struct Face<S>
 where
     S: BaseFloat,
@@ -59,7 +59,7 @@ where
 ///
 ///
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ConvexPolyhedron<S>
 where
     S: BaseFloat,

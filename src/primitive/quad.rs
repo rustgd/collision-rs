@@ -11,7 +11,7 @@ use primitive::util::get_max_point;
 ///
 /// Have a cached set of corner points to speed up computation.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Quad<S> {
     /// Dimensions of the rectangle
     dim: Vector2<S>,

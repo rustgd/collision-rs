@@ -8,7 +8,7 @@ use prelude::*;
 
 /// Bounding sphere.
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Sphere<S: BaseFloat> {
     /// Center point of the sphere in world space
     pub center: Point3<S>,

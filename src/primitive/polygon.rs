@@ -12,7 +12,7 @@ use primitive::util::{get_bound, get_max_point};
 /// Can contain any number of vertices, but a high number of vertices will
 /// affect performance of course. Vertices need to be in CCW order.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ConvexPolygon<S> {
     /// Vertices of the convex polygon.
     pub vertices: Vec<Point2<S>>,

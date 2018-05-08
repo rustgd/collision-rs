@@ -9,7 +9,7 @@ use volume::Sphere;
 /// Cylinder primitive
 /// Cylinder body is aligned with the Y axis, with local origin in the center of the cylinders.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Cylinder<S> {
     half_height: S,
     radius: S,

@@ -10,7 +10,7 @@ use primitive::{Circle, ConvexPolygon, Particle2, Rectangle, Square};
 /// Wrapper enum for 2D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Primitive2<S> {
     /// Particle
     Particle(Particle2<S>),

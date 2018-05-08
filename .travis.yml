@@ -25,10 +25,10 @@ branches:
 # the main build
 script:
   - |
-      travis-cargo build &&
-      travis-cargo test &&
-      travis-cargo --only nightly bench &&
-      travis-cargo --only stable doc
+      travis-cargo build -- --all-features &&
+      travis-cargo test -- --all-features &&
+      travis-cargo --only nightly bench -- --all-features &&
+      travis-cargo --only stable doc -- --all-features
 
 env:
   global:

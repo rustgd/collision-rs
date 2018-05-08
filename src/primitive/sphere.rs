@@ -6,7 +6,7 @@ use prelude::*;
 
 /// Sphere primitive
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Sphere<S> {
     /// Radius of the sphere
     pub radius: S,

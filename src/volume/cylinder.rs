@@ -5,7 +5,7 @@ use cgmath::Vector3;
 
 /// Bounding cylinder
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Cylinder<S> {
     /// Center point
     pub center: Point3<S>,

@@ -8,7 +8,7 @@ use prelude::*;
 
 /// Circle primitive
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Circle<S> {
     /// Radius of the circle
     pub radius: S,

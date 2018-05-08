@@ -17,7 +17,7 @@ use prelude::*;
 /// These intersection tests can be used with any primitive that has `Ray` intersection tests
 /// implemented.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Particle<P> {
     m: marker::PhantomData<P>,
 }

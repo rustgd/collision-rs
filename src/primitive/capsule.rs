@@ -9,7 +9,7 @@ use volume::Sphere;
 /// Capsule primitive
 /// Capsule body is aligned with the Y axis, with local origin in the center of the capsule.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Capsule<S> {
     half_height: S,
     radius: S,

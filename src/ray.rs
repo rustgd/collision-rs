@@ -12,7 +12,7 @@ use traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransformed};
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Ray<S, P, V> {
     /// Ray origin
     pub origin: P,

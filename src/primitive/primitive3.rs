@@ -10,7 +10,7 @@ use primitive::{Capsule, ConvexPolyhedron, Cube, Cuboid, Cylinder, Particle3, Qu
 /// Wrapper enum for 3D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Primitive3<S>
 where
     S: BaseFloat,

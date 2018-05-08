@@ -10,7 +10,7 @@ use volume::Sphere;
 ///
 /// Have a cached set of corner points to speed up computation.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Cuboid<S> {
     /// Dimensions of the box
     dim: Vector3<S>,

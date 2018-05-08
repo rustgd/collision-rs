@@ -110,7 +110,7 @@ where
 ///
 /// Have a cached set of corner points to speed up computation.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Square<S> {
     rectangle: Rectangle<S>,
 }

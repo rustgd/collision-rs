@@ -5,7 +5,7 @@ use cgmath::prelude::*;
 
 use {Aabb2, Line2, Ray2};
 use prelude::*;
-use primitive::{Circle, ConvexPolygon, Particle2, Rectangle};
+use primitive::{Circle, ConvexPolygon, Particle2, Rectangle, Square};
 
 /// Wrapper enum for 2D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
@@ -20,6 +20,8 @@ pub enum Primitive2<S> {
     Circle(Circle<S>),
     /// Rectangle
     Rectangle(Rectangle<S>),
+    /// Square
+    Square(Square<S>),
     /// Convex polygon with any number of vertices.
     ConvexPolygon(ConvexPolygon<S>),
 }
@@ -48,6 +50,12 @@ impl<S> From<Rectangle<S>> for Primitive2<S> {
     }
 }
 
+impl<S> From<Square<S>> for Primitive2<S> {
+    fn from(rectangle: Square<S>) -> Primitive2<S> {
+        Primitive2::Square(rectangle)
+    }
+}
+
 impl<S> From<ConvexPolygon<S>> for Primitive2<S> {
     fn from(polygon: ConvexPolygon<S>) -> Primitive2<S> {
         Primitive2::ConvexPolygon(polygon)
@@ -64,6 +72,7 @@ where
             Primitive2::Line(ref line) => line.compute_bound(),
             Primitive2::Circle(ref circle) => circle.compute_bound(),
             Primitive2::Rectangle(ref rectangle) => rectangle.compute_bound(),
+            Primitive2::Square(ref square) => square.compute_bound(),
             Primitive2::ConvexPolygon(ref polygon) => polygon.compute_bound(),
         }
     }
@@ -84,6 +93,7 @@ where
             Primitive2::Line(ref line) => line.support_point(direction, transform),
             Primitive2::Circle(ref circle) => circle.support_point(direction, transform),
             Primitive2::Rectangle(ref rectangle) => rectangle.support_point(direction, transform),
+            Primitive2::Square(ref square) => square.support_point(direction, transform),
             Primitive2::ConvexPolygon(ref polygon) => polygon.support_point(direction, transform),
         }
     }
@@ -106,6 +116,7 @@ where
             Primitive2::Rectangle(ref rectangle) => {
                 rectangle.intersects_transformed(ray, transform)
             }
+            Primitive2::Square(ref square) => square.intersects_transformed(ray, transform),
             Primitive2::ConvexPolygon(ref polygon) => {
                 polygon.intersects_transformed(ray, transform)
             }
@@ -131,6 +142,7 @@ where
             Primitive2::Rectangle(ref rectangle) => {
                 rectangle.intersection_transformed(ray, transform)
             }
+            Primitive2::Square(ref square) => square.intersection_transformed(ray, transform),
             Primitive2::ConvexPolygon(ref polygon) => {
                 polygon.intersection_transformed(ray, transform)
             }

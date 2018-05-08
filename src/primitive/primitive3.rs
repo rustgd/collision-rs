@@ -5,7 +5,7 @@ use cgmath::prelude::*;
 
 use {Aabb3, Ray3};
 use prelude::*;
-use primitive::{Capsule, ConvexPolyhedron, Cuboid, Cylinder, Particle3, Quad, Sphere};
+use primitive::{Capsule, ConvexPolyhedron, Cube, Cuboid, Cylinder, Particle3, Quad, Sphere};
 
 /// Wrapper enum for 3D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
@@ -23,6 +23,8 @@ where
     Sphere(Sphere<S>),
     /// Cuboid
     Cuboid(Cuboid<S>),
+    /// Cube
+    Cube(Cube<S>),
     /// Cylinder
     Cylinder(Cylinder<S>),
     /// Capsule
@@ -55,6 +57,15 @@ where
 {
     fn from(sphere: Sphere<S>) -> Primitive3<S> {
         Primitive3::Sphere(sphere)
+    }
+}
+
+impl<S> From<Cube<S>> for Primitive3<S>
+where
+    S: BaseFloat,
+{
+    fn from(cuboid: Cube<S>) -> Primitive3<S> {
+        Primitive3::Cube(cuboid)
     }
 }
 
@@ -103,6 +114,7 @@ where
             Primitive3::Particle(_) => Aabb3::zero(),
             Primitive3::Quad(ref quad) => quad.compute_bound(),
             Primitive3::Cuboid(ref cuboid) => cuboid.compute_bound(),
+            Primitive3::Cube(ref cuboid) => cuboid.compute_bound(),
             Primitive3::Sphere(ref sphere) => sphere.compute_bound(),
             Primitive3::Cylinder(ref cylinder) => cylinder.compute_bound(),
             Primitive3::Capsule(ref capsule) => capsule.compute_bound(),
@@ -123,6 +135,7 @@ where
             },
             Primitive3::Quad(ref quad) => quad.compute_bound(),
             Primitive3::Cuboid(ref cuboid) => cuboid.compute_bound(),
+            Primitive3::Cube(ref cuboid) => cuboid.compute_bound(),
             Primitive3::Sphere(ref sphere) => sphere.compute_bound(),
             Primitive3::Cylinder(ref cylinder) => cylinder.compute_bound(),
             Primitive3::Capsule(ref capsule) => capsule.compute_bound(),
@@ -146,6 +159,7 @@ where
             Primitive3::Quad(ref quad) => quad.support_point(direction, transform),
             Primitive3::Sphere(ref sphere) => sphere.support_point(direction, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.support_point(direction, transform),
+            Primitive3::Cube(ref cuboid) => cuboid.support_point(direction, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.support_point(direction, transform),
             Primitive3::Capsule(ref capsule) => capsule.support_point(direction, transform),
             Primitive3::ConvexPolyhedron(ref polyhedron) => {
@@ -170,6 +184,7 @@ where
             Primitive3::Quad(ref quad) => quad.intersects_transformed(ray, transform),
             Primitive3::Sphere(ref sphere) => sphere.intersects_transformed(ray, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.intersects_transformed(ray, transform),
+            Primitive3::Cube(ref cuboid) => cuboid.intersects_transformed(ray, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.intersects_transformed(ray, transform),
             Primitive3::Capsule(ref capsule) => capsule.intersects_transformed(ray, transform),
             Primitive3::ConvexPolyhedron(ref polyhedron) => {
@@ -195,6 +210,7 @@ where
             Primitive3::Quad(ref quad) => quad.intersection_transformed(ray, transform),
             Primitive3::Sphere(ref sphere) => sphere.intersection_transformed(ray, transform),
             Primitive3::Cuboid(ref cuboid) => cuboid.intersection_transformed(ray, transform),
+            Primitive3::Cube(ref cuboid) => cuboid.intersection_transformed(ray, transform),
             Primitive3::Cylinder(ref cylinder) => cylinder.intersection_transformed(ray, transform),
             Primitive3::Capsule(ref capsule) => capsule.intersection_transformed(ray, transform),
             Primitive3::ConvexPolyhedron(ref polyhedron) => {

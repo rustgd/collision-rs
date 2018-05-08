@@ -22,12 +22,12 @@ impl<S> Cuboid<S>
 where
     S: BaseFloat,
 {
-    /// Create a new rectangle primitive from component dimensions
+    /// Create a new cuboid primitive from component dimensions
     pub fn new(dim_x: S, dim_y: S, dim_z: S) -> Self {
         Self::new_impl(Vector3::new(dim_x, dim_y, dim_z))
     }
 
-    /// Create a new rectangle primitive from a vector of component dimensions
+    /// Create a new cuboid primitive from a vector of component dimensions
     pub fn new_impl(dim: Vector3<S>) -> Self {
         let half_dim = dim / (S::one() + S::one());
         Self {
@@ -123,6 +123,89 @@ where
             Point3::from_vec(-self.half_dim),
             Point3::from_vec(self.half_dim),
         ).intersection(ray)
+    }
+}
+
+/// Cuboid primitive.
+///
+/// Have a cached set of corner points to speed up computation.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "eders", derive(Serialize, Deserialize))]
+pub struct Cube<S> {
+    cuboid: Cuboid<S>,
+}
+
+impl<S> Cube<S>
+where
+    S: BaseFloat,
+{
+    /// Create a new cube primitive
+    pub fn new(dim: S) -> Self {
+        Cube {
+            cuboid: Cuboid::new(dim, dim, dim),
+        }
+    }
+
+    /// Get the dimension of the cube
+    pub fn dim(&self) -> S {
+        self.cuboid.dim.x
+    }
+
+    /// Get the half dimension of the cube
+    pub fn half_dim(&self) -> S {
+        self.cuboid.half_dim.x
+    }
+}
+
+impl<S> Primitive for Cube<S>
+where
+    S: BaseFloat,
+{
+    type Point = Point3<S>;
+
+    fn support_point<T>(&self, direction: &Vector3<S>, transform: &T) -> Point3<S>
+    where
+        T: Transform<Point3<S>>,
+    {
+        self.cuboid.support_point(direction, transform)
+    }
+}
+
+impl<S> ComputeBound<Aabb3<S>> for Cube<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> Aabb3<S> {
+        self.cuboid.compute_bound()
+    }
+}
+
+impl<S> ComputeBound<Sphere<S>> for Cube<S>
+where
+    S: BaseFloat,
+{
+    fn compute_bound(&self) -> Sphere<S> {
+        self.cuboid.compute_bound()
+    }
+}
+
+impl<S> Discrete<Ray3<S>> for Cube<S>
+where
+    S: BaseFloat,
+{
+    fn intersects(&self, ray: &Ray3<S>) -> bool {
+        self.cuboid.intersects(ray)
+    }
+}
+
+impl<S> Continuous<Ray3<S>> for Cube<S>
+where
+    S: BaseFloat,
+{
+    type Result = Point3<S>;
+
+    fn intersection(&self, ray: &Ray3<S>) -> Option<Point3<S>> {
+        self.cuboid.intersection(ray)
     }
 }
 

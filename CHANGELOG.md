@@ -1,5 +1,9 @@
 ## Change Log
 
+### v0.17
+  - Add primitives for Cube and Square, with an extra invariant that all sides need to be equal.
+  - Rename feature `eders` to `serde`
+
 ### v0.16
   - Update dependencies
 

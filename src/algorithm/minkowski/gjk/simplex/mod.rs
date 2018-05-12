@@ -5,8 +5,11 @@ mod simplex2d;
 mod simplex3d;
 
 use cgmath::prelude::*;
+use smallvec::SmallVec;
 
 use algorithm::minkowski::SupportPoint;
+
+pub type Simplex<P> = SmallVec<[SupportPoint<P>; 5]>;
 
 /// Defined a simplex processor for use in GJK.
 pub trait SimplexProcessor {
@@ -19,7 +22,7 @@ pub trait SimplexProcessor {
     /// Used by the GJK intersection test
     fn reduce_to_closest_feature(
         &self,
-        simplex: &mut Vec<SupportPoint<Self::Point>>,
+        simplex: &mut Simplex<Self::Point>,
         d: &mut <Self::Point as EuclideanSpace>::Diff,
     ) -> bool;
 
@@ -30,7 +33,7 @@ pub trait SimplexProcessor {
     /// This is primarily used by the GJK distance computation.
     fn get_closest_point_to_origin(
         &self,
-        simplex: &mut Vec<SupportPoint<Self::Point>>,
+        simplex: &mut Simplex<Self::Point>,
     ) -> <Self::Point as EuclideanSpace>::Diff;
 
     /// Create a new simplex processor

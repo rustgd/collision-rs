@@ -10,7 +10,7 @@ use cgmath::BaseFloat;
 use cgmath::prelude::*;
 use num::NumCast;
 
-use self::simplex::{SimplexProcessor2, SimplexProcessor3};
+use self::simplex::{Simplex, SimplexProcessor2, SimplexProcessor3};
 use {CollisionStrategy, Contact};
 use algorithm::minkowski::{EPA2, EPA3, SupportPoint, EPA};
 use prelude::*;
@@ -102,7 +102,7 @@ where
         left_transform: &TL,
         right: &PR,
         right_transform: &TR,
-    ) -> Option<Vec<SupportPoint<P>>>
+    ) -> Option<Simplex<P>>
     where
         P: EuclideanSpace<Scalar = S>,
         PL: Primitive<Point = P>,
@@ -122,7 +122,7 @@ where
         if a.v.dot(d) <= S::zero() {
             return None;
         }
-        let mut simplex: Vec<SupportPoint<P>> = Vec::default();
+        let mut simplex = Simplex::new();
         simplex.push(a);
         d = d.neg();
         for _ in 0..self.max_iterations {
@@ -186,7 +186,7 @@ where
         let mut ray_origin = P::origin();
 
         // build simplex and get an initial support point to bootstrap the algorithm
-        let mut simplex = Vec::with_capacity(5);
+        let mut simplex = Simplex::new();
         let p = SupportPoint::from_minkowski(
             left,
             left_transform.start,
@@ -231,7 +231,8 @@ where
             }
             // we construct the simplex around the current ray origin (if we can)
             simplex.push(p - ray_origin);
-            v = self.simplex_processor.get_closest_point_to_origin(&mut simplex);
+            v = self.simplex_processor
+                .get_closest_point_to_origin(&mut simplex);
         }
         if v.magnitude2() <= self.continuous_tolerance {
             let transform = right_transform
@@ -240,7 +241,7 @@ where
             let mut contact = Contact::new_with_point(
                 CollisionStrategy::FullResolution,
                 -normal.normalize(), // our convention is normal points from B towards A
-                v.magnitude(), // will always be very close to zero
+                v.magnitude(),       // will always be very close to zero
                 transform.transform_point(ray_origin),
             );
             contact.time_of_impact = lambda;
@@ -282,7 +283,7 @@ where
         let zero = P::Diff::zero();
         let right_pos = right_transform.transform_point(P::origin());
         let left_pos = left_transform.transform_point(P::origin());
-        let mut simplex = Vec::with_capacity(5);
+        let mut simplex = Simplex::new();
         let mut d = right_pos - left_pos;
         if ulps_eq!(d, P::Diff::zero()) {
             d = P::Diff::from_value(S::one());
@@ -372,10 +373,10 @@ where
     {
         use CollisionStrategy::*;
         self.intersect(left, left_transform, right, right_transform)
-            .and_then(|mut simplex| match *strategy {
+            .and_then(|simplex| match *strategy {
                 CollisionOnly => Some(Contact::new(CollisionOnly)),
                 FullResolution => self.get_contact_manifold(
-                    &mut simplex,
+                    &mut simplex.into_vec(),
                     left,
                     left_transform,
                     right,

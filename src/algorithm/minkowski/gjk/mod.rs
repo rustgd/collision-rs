@@ -9,6 +9,7 @@ use std::ops::{Neg, Range};
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
 use num::NumCast;
+use smallvec::SmallVec;
 
 use self::simplex::{SimplexProcessor2, SimplexProcessor3};
 use {CollisionStrategy, Contact};
@@ -122,7 +123,7 @@ where
         if a.v.dot(d) <= S::zero() {
             return None;
         }
-        let mut simplex: Vec<SupportPoint<P>> = Vec::default();
+        let mut simplex = SmallVec::new();
         simplex.push(a);
         d = d.neg();
         for _ in 0..self.max_iterations {
@@ -134,7 +135,7 @@ where
                 if self.simplex_processor
                     .reduce_to_closest_feature(&mut simplex, &mut d)
                 {
-                    return Some(simplex);
+                    return Some(simplex.into_vec());
                 }
             }
         }
@@ -186,7 +187,7 @@ where
         let mut ray_origin = P::origin();
 
         // build simplex and get an initial support point to bootstrap the algorithm
-        let mut simplex = Vec::with_capacity(5);
+        let mut simplex = SmallVec::new();
         let p = SupportPoint::from_minkowski(
             left,
             left_transform.start,
@@ -231,7 +232,8 @@ where
             }
             // we construct the simplex around the current ray origin (if we can)
             simplex.push(p - ray_origin);
-            v = self.simplex_processor.get_closest_point_to_origin(&mut simplex);
+            v = self.simplex_processor
+                .get_closest_point_to_origin(&mut simplex);
         }
         if v.magnitude2() <= self.continuous_tolerance {
             let transform = right_transform
@@ -240,7 +242,7 @@ where
             let mut contact = Contact::new_with_point(
                 CollisionStrategy::FullResolution,
                 -normal.normalize(), // our convention is normal points from B towards A
-                v.magnitude(), // will always be very close to zero
+                v.magnitude(),       // will always be very close to zero
                 transform.transform_point(ray_origin),
             );
             contact.time_of_impact = lambda;
@@ -282,7 +284,7 @@ where
         let zero = P::Diff::zero();
         let right_pos = right_transform.transform_point(P::origin());
         let left_pos = left_transform.transform_point(P::origin());
-        let mut simplex = Vec::with_capacity(5);
+        let mut simplex = SmallVec::new();
         let mut d = right_pos - left_pos;
         if ulps_eq!(d, P::Diff::zero()) {
             d = P::Diff::from_value(S::one());

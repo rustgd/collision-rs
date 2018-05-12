@@ -4,6 +4,7 @@ use std::ops::Neg;
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 use num::cast;
+use smallvec::SmallVec;
 
 use super::SimplexProcessor;
 use algorithm::minkowski::SupportPoint;
@@ -23,7 +24,7 @@ where
 
     fn reduce_to_closest_feature(
         &self,
-        simplex: &mut Vec<SupportPoint<Point3<S>>>,
+        simplex: &mut SmallVec<[SupportPoint<Point3<S>>; 5]>,
         v: &mut Vector3<S>,
     ) -> bool {
         // 4 points, full tetrahedron, origin could be inside
@@ -102,7 +103,7 @@ where
     /// Make simplex only retain the closest feature to the origin.
     fn get_closest_point_to_origin(
         &self,
-        simplex: &mut Vec<SupportPoint<Point3<S>>>,
+        simplex: &mut SmallVec<[SupportPoint<Point3<S>>; 5]>,
     ) -> Vector3<S> {
         let mut d = Vector3::zero();
 
@@ -185,7 +186,7 @@ fn check_side<S>(
     ab: &Vector3<S>,
     ac: &Vector3<S>,
     ao: &Vector3<S>,
-    simplex: &mut Vec<SupportPoint<Point3<S>>>,
+    simplex: &mut SmallVec<[SupportPoint<Point3<S>>; 5]>,
     v: &mut Vector3<S>,
     above: bool,
     ignore_ab: bool,
@@ -235,7 +236,7 @@ mod tests {
 
     #[test]
     fn test_check_side_outside_ab() {
-        let mut simplex = vec![sup(8., -10., 0.), sup(-1., -10., 0.), sup(3., 5., 0.)];
+        let mut simplex = smallvec![sup(8., -10., 0.), sup(-1., -10., 0.), sup(3., 5., 0.)];
         let v = test_check_side(&mut simplex, false, false);
         assert_eq!(2, simplex.len());
         assert_eq!(Vector3::new(-1., -10., 0.), simplex[0].v); // B should be last in the simplex
@@ -246,7 +247,7 @@ mod tests {
 
     #[test]
     fn test_check_side_outside_ac() {
-        let mut simplex = vec![sup(2., -10., 0.), sup(-7., -10., 0.), sup(-3., 5., 0.)];
+        let mut simplex = smallvec![sup(2., -10., 0.), sup(-7., -10., 0.), sup(-3., 5., 0.)];
         let v = test_check_side(&mut simplex, false, false);
         assert_eq!(2, simplex.len());
         assert_eq!(Vector3::new(2., -10., 0.), simplex[0].v); // C should be last in the simplex
@@ -257,7 +258,7 @@ mod tests {
 
     #[test]
     fn test_check_side_above() {
-        let mut simplex = vec![sup(5., -10., -1.), sup(-4., -10., -1.), sup(0., 5., -1.)];
+        let mut simplex = smallvec![sup(5., -10., -1.), sup(-4., -10., -1.), sup(0., 5., -1.)];
         let v = test_check_side(&mut simplex, false, false);
         assert_eq!(3, simplex.len());
         assert_eq!(Vector3::new(5., -10., -1.), simplex[0].v); // C should be last in the simplex
@@ -268,7 +269,7 @@ mod tests {
 
     #[test]
     fn test_check_side_below() {
-        let mut simplex = vec![sup(5., -10., 1.), sup(-4., -10., 1.), sup(0., 5., 1.)];
+        let mut simplex = smallvec![sup(5., -10., 1.), sup(-4., -10., 1.), sup(0., 5., 1.)];
         let v = test_check_side(&mut simplex, false, false);
         assert_eq!(3, simplex.len());
         assert_eq!(Vector3::new(-4., -10., 1.), simplex[0].v); // B should be last in the simplex
@@ -279,7 +280,7 @@ mod tests {
 
     #[test]
     fn test_check_origin_empty() {
-        let mut simplex = vec![];
+        let mut simplex = smallvec![];
         let (hit, v) = test_check_origin(&mut simplex);
         assert!(!hit);
         assert!(simplex.is_empty());
@@ -288,7 +289,7 @@ mod tests {
 
     #[test]
     fn test_check_origin_point() {
-        let mut simplex = vec![sup(8., -10., 0.)];
+        let mut simplex = smallvec![sup(8., -10., 0.)];
         let (hit, v) = test_check_origin(&mut simplex);
         assert!(!hit);
         assert_eq!(1, simplex.len());
@@ -297,7 +298,7 @@ mod tests {
 
     #[test]
     fn test_check_origin_line() {
-        let mut simplex = vec![sup(8., -10., 0.), sup(-1., -10., 0.)];
+        let mut simplex = smallvec![sup(8., -10., 0.), sup(-1., -10., 0.)];
         let (hit, v) = test_check_origin(&mut simplex);
         assert!(!hit);
         assert_eq!(2, simplex.len());
@@ -306,7 +307,7 @@ mod tests {
 
     #[test]
     fn test_check_origin_triangle() {
-        let mut simplex = vec![sup(5., -10., -1.), sup(-4., -10., -1.), sup(0., 5., -1.)];
+        let mut simplex = smallvec![sup(5., -10., -1.), sup(-4., -10., -1.), sup(0., 5., -1.)];
         let (hit, v) = test_check_origin(&mut simplex);
         assert!(!hit);
         assert_eq!(3, simplex.len());
@@ -315,11 +316,11 @@ mod tests {
 
     #[test]
     fn test_check_origin_tetrahedron_outside_abc() {
-        let mut simplex = vec![
+        let mut simplex = smallvec![
             sup(8., -10., -1.),
             sup(-1., -10., -1.),
             sup(3., 5., -1.),
-            sup(3., -3., 5.),
+            sup(3., -3., 5.)
         ];
         let (hit, v) = test_check_origin(&mut simplex);
         assert!(!hit);
@@ -330,11 +331,11 @@ mod tests {
 
     #[test]
     fn test_check_origin_tetrahedron_outside_acd() {
-        let mut simplex = vec![
+        let mut simplex = smallvec![
             sup(8., 0.1, -1.),
             sup(-1., 0.1, -1.),
             sup(3., 15., -1.),
-            sup(3., 7., 5.),
+            sup(3., 7., 5.)
         ];
         let (hit, v) = test_check_origin(&mut simplex);
         assert!(!hit);
@@ -347,11 +348,11 @@ mod tests {
 
     #[test]
     fn test_check_origin_tetrahedron_outside_adb() {
-        let mut simplex = vec![
+        let mut simplex = smallvec![
             sup(2., -10., -1.),
             sup(-7., -10., -1.),
             sup(-3., 5., -1.),
-            sup(-3., -3., 5.),
+            sup(-3., -3., 5.)
         ];
         let (hit, v) = test_check_origin(&mut simplex);
         assert!(!hit);
@@ -364,25 +365,27 @@ mod tests {
 
     #[test]
     fn test_check_origin_tetrahedron_inside() {
-        let mut simplex = vec![
+        let mut simplex = smallvec![
             sup(3., -3., -1.),
             sup(-3., -3., -1.),
             sup(0., 3., -1.),
-            sup(0., 0., 5.),
+            sup(0., 0., 5.)
         ];
         let (hit, _) = test_check_origin(&mut simplex);
         assert!(hit);
         assert_eq!(4, simplex.len());
     }
 
-    fn test_check_origin(simplex: &mut Vec<SupportPoint<Point3<f32>>>) -> (bool, Vector3<f32>) {
+    fn test_check_origin(
+        simplex: &mut SmallVec<[SupportPoint<Point3<f32>>; 5]>,
+    ) -> (bool, Vector3<f32>) {
         let mut v = Vector3::zero();
         let b = SimplexProcessor3::new().reduce_to_closest_feature(simplex, &mut v);
         (b, v)
     }
 
     fn test_check_side(
-        simplex: &mut Vec<SupportPoint<Point3<f32>>>,
+        simplex: &mut SmallVec<[SupportPoint<Point3<f32>>; 5]>,
         above: bool,
         ignore: bool,
     ) -> Vector3<f32> {

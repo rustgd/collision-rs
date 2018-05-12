@@ -22,6 +22,8 @@ extern crate rand;
 #[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde;
+#[cfg_attr(test, macro_use)]
+extern crate smallvec;
 
 // Re-exports
 

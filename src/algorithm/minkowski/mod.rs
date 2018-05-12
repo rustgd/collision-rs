@@ -3,7 +3,7 @@
 pub use self::epa::{EPA2, EPA3, EPA};
 pub use self::gjk::{GJK2, GJK3, SimplexProcessor, GJK};
 
-use std::ops::Neg;
+use std::ops::{Neg, Sub};
 
 use cgmath::prelude::*;
 use prelude::*;
@@ -56,6 +56,21 @@ where
             v: l - r,
             sup_a: l,
             sup_b: r,
+        }
+    }
+}
+
+impl<P> Sub<P> for SupportPoint<P>
+where
+    P: EuclideanSpace,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: P) -> Self {
+        SupportPoint {
+            v: self.v - rhs.to_vec(),
+            sup_a: self.sup_a,
+            sup_b: self.sup_b,
         }
     }
 }

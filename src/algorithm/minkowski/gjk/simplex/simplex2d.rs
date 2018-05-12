@@ -84,7 +84,11 @@ where
         }
 
         // compute closest point to origin on the simplex (which is now an edge)
-        get_closest_point_on_edge(&simplex[1].v, &simplex[0].v, &Vector2::zero())
+        if simplex.len() == 1 {
+            simplex[0].v
+        } else {
+            get_closest_point_on_edge(&simplex[1].v, &simplex[0].v, &Vector2::zero())
+        }
     }
 
     fn new() -> Self {

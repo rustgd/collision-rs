@@ -114,7 +114,9 @@ where
             return d;
         }
 
-        if simplex.len() == 2 {
+        if simplex.len() == 1 {
+            simplex[0].v
+        } else if simplex.len() == 2 {
             get_closest_point_on_edge(&simplex[1].v, &simplex[0].v, &Vector3::zero())
         } else {
             get_closest_point_on_face(&simplex[2].v, &simplex[1].v, &simplex[0].v, &d)

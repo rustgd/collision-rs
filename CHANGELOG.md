@@ -1,5 +1,10 @@
 ## Change Log
 
+### v0.18
+  - Update GJK intersection tests to use `smallvec` for the `Simplex`, since it will never grow larger than 4 entries.
+    Small breaking change in the signature for the `GJK::intersect` function.
+  - Reimplement GJK time of impact tests, so they actually work for all scenarios.
+
 ### v0.17
   - Add primitives for Cube and Square, with an extra invariant that all sides need to be equal.
   - Rename feature `eders` to `serde`

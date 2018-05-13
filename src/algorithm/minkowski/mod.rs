@@ -12,7 +12,7 @@ mod epa;
 mod gjk;
 
 /// Minkowski Sum/Difference support point
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct SupportPoint<P>
 where
     P: EuclideanSpace,

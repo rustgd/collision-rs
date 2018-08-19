@@ -26,8 +26,10 @@ pub type SweepAndPrune3<S, B> = SweepAndPrune<Variance3<S, B>>;
 ///
 /// # Type parameters:
 ///
-/// - `V`: Variance type used for computing what axis to use on the next iteration. Should be either
-///        `Variance2` or `Variance3`.
+/// - `V`: Variance type used for computing what axis to use on the next iteration.
+///        [SweepAndPrune2](type.SweepAndPrune2.html) and [SweepAndPrune3](type.SweepAndPrune3.html)
+///        provide a variance type for you, so they should be used if you do not have a custom type
+///        implementing [Variance](trait.Variance.html).
 pub struct SweepAndPrune<V> {
     sweep_axis: usize,
     variance: V,

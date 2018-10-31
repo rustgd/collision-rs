@@ -97,7 +97,7 @@ where
                 .iter()
                 .map(|p| p.to_vec().magnitude())
                 .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-                .unwrap_or(S::zero()),
+                .unwrap_or_else(S::zero),
         }
     }
 
@@ -113,7 +113,7 @@ where
                 .iter()
                 .map(|p| p.position.to_vec().magnitude())
                 .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-                .unwrap_or(S::zero()),
+                .unwrap_or_else(S::zero),
             vertices,
             edges,
             faces,

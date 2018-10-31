@@ -47,7 +47,7 @@ impl<S: BaseFloat> Plane<S> {
     pub fn from_abcd(a: S, b: S, c: S, d: S) -> Plane<S> {
         Plane {
             n: Vector3::new(a, b, c),
-            d: d,
+            d,
         }
     }
 
@@ -91,7 +91,7 @@ impl<S: BaseFloat> Plane<S> {
     /// Construct a plane from a point and a normal vector.
     /// The plane will contain the point `p` and be perpendicular to `n`.
     pub fn from_point_normal(p: Point3<S>, n: Vector3<S>) -> Plane<S> {
-        Plane { n: n, d: p.dot(n) }
+        Plane { n, d: p.dot(n) }
     }
 
     /// Normalize a plane.

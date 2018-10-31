@@ -97,7 +97,6 @@ where
 #[cfg(test)]
 mod tests {
     use cgmath::Vector2;
-    use smallvec::SmallVec;
 
     use super::*;
     use algorithm::minkowski::SupportPoint;

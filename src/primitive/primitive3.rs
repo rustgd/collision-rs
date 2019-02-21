@@ -3,9 +3,9 @@
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
-use {Aabb3, Ray3};
-use prelude::*;
-use primitive::{Capsule, ConvexPolyhedron, Cube, Cuboid, Cylinder, Particle3, Quad, Sphere};
+use crate::{Aabb3, Ray3};
+use crate::prelude::*;
+use crate::primitive::{Capsule, ConvexPolyhedron, Cube, Cuboid, Cylinder, Particle3, Quad, Sphere};
 
 /// Wrapper enum for 3D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
@@ -123,13 +123,13 @@ where
     }
 }
 
-impl<S> ComputeBound<::volume::Sphere<S>> for Primitive3<S>
+impl<S> ComputeBound<crate::volume::Sphere<S>> for Primitive3<S>
 where
     S: BaseFloat,
 {
-    fn compute_bound(&self) -> ::volume::Sphere<S> {
+    fn compute_bound(&self) -> crate::volume::Sphere<S> {
         match *self {
-            Primitive3::Particle(_) => ::volume::Sphere {
+            Primitive3::Particle(_) => crate::volume::Sphere {
                 center: Point3::origin(),
                 radius: S::zero(),
             },

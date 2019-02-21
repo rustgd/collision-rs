@@ -18,6 +18,7 @@ authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
 ]
 license = "Apache-2.0"
 description = "A collision extension to cgmath"
+edition = "2018"
 
 documentation = "https://docs.rs/collision"
 homepage = "https://github.com/rustgd/collision-rs"

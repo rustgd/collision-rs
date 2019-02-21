@@ -5,10 +5,10 @@ use bit_set::BitSet;
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
-use {Aabb3, Plane, Ray3};
-use prelude::*;
-use primitive::util::barycentric_point;
-use volume::Sphere;
+use crate::{Aabb3, Plane, Ray3};
+use crate::prelude::*;
+use crate::primitive::util::barycentric_point;
+use crate::volume::Sphere;
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -579,8 +579,8 @@ mod tests {
     use cgmath::prelude::*;
 
     use super::ConvexPolyhedron;
-    use {Aabb3, Ray3};
-    use prelude::*;
+    use crate::{Aabb3, Ray3};
+    use crate::prelude::*;
 
     #[test]
     fn test_polytope_half_edge() {

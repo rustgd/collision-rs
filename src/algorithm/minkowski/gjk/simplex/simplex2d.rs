@@ -5,7 +5,7 @@ use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
 use super::{Simplex, SimplexProcessor};
-use primitive::util::{get_closest_point_on_edge, triple_product};
+use crate::primitive::util::{get_closest_point_on_edge, triple_product};
 
 /// Simplex processor implementation for 2D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -99,7 +99,7 @@ mod tests {
     use cgmath::Vector2;
 
     use super::*;
-    use algorithm::minkowski::SupportPoint;
+    use crate::algorithm::minkowski::SupportPoint;
 
     #[test]
     fn test_check_origin_empty() {

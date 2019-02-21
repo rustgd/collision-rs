@@ -3,7 +3,7 @@
 
 use std::ops::Neg;
 
-use {Aabb, Ray3};
+use crate::{Aabb, Ray3};
 use cgmath::{BaseFloat, BaseNum, Vector2};
 use cgmath::prelude::*;
 use num::Float;
@@ -141,7 +141,7 @@ mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;
-    use Aabb2;
+    use crate::Aabb2;
 
     #[test]
     fn test_get_bound() {

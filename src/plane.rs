@@ -3,8 +3,8 @@ use std::fmt;
 use cgmath::{ApproxEq, BaseFloat, Point3, Vector3, Vector4};
 use cgmath::prelude::*;
 
-use Ray3;
-use prelude::*;
+use crate::Ray3;
+use crate::prelude::*;
 
 /// A 3-dimensional plane formed from the equation: `A*x + B*y + C*z - D = 0`.
 ///

@@ -6,7 +6,7 @@ pub use self::gjk::{GJK2, GJK3, SimplexProcessor, GJK};
 use std::ops::{Neg, Sub};
 
 use cgmath::prelude::*;
-use prelude::*;
+use crate::prelude::*;
 
 mod epa;
 mod gjk;
@@ -80,7 +80,7 @@ mod tests {
     use cgmath::{Basis2, Decomposed, Rad, Rotation2, Vector2};
 
     use super::SupportPoint;
-    use primitive::*;
+    use crate::primitive::*;
 
     fn transform(x: f32, y: f32, angle: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {
         Decomposed {

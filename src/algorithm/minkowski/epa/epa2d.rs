@@ -5,9 +5,9 @@ use cgmath::prelude::*;
 use num::NumCast;
 
 use super::*;
-use {CollisionStrategy, Contact};
-use prelude::*;
-use primitive::util::triple_product;
+use crate::{CollisionStrategy, Contact};
+use crate::prelude::*;
+use crate::primitive::util::triple_product;
 
 /// EPA algorithm implementation for 2D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -159,8 +159,8 @@ mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;
-    use algorithm::minkowski::SupportPoint;
-    use primitive::*;
+    use crate::algorithm::minkowski::SupportPoint;
+    use crate::primitive::*;
 
     #[test]
     fn test_closest_edge_0() {

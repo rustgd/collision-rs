@@ -3,9 +3,9 @@
 use cgmath::{BaseFloat, Point3, Vector2, Vector3};
 use cgmath::prelude::*;
 
-use {Aabb3, Ray3, Sphere};
-use prelude::*;
-use primitive::util::get_max_point;
+use crate::{Aabb3, Ray3, Sphere};
+use crate::prelude::*;
+use crate::primitive::util::get_max_point;
 
 /// Rectangular plane primitive. Will lie on the xy plane when not transformed.
 ///
@@ -124,9 +124,9 @@ where
 mod tests {
 
     use super::*;
-    use algorithm::minkowski::GJK3;
+    use crate::algorithm::minkowski::GJK3;
     use cgmath::{Decomposed, Quaternion};
-    use primitive::Cuboid;
+    use crate::primitive::Cuboid;
 
     fn transform(x: f32, y: f32, z: f32) -> Decomposed<Vector3<f32>, Quaternion<f32>> {
         Decomposed {

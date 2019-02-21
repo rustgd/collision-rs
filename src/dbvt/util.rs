@@ -8,8 +8,8 @@ use cgmath::BaseFloat;
 use cgmath::prelude::*;
 
 use super::{ContinuousVisitor, DynamicBoundingVolumeTree, TreeValue, Visitor};
-use Ray;
-use prelude::*;
+use crate::Ray;
+use crate::prelude::*;
 
 struct RayClosestVisitor<S, P, T>
 where

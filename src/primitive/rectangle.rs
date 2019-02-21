@@ -3,9 +3,9 @@
 use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
-use {Aabb2, Ray2};
-use prelude::*;
-use primitive::util::get_max_point;
+use crate::{Aabb2, Ray2};
+use crate::prelude::*;
+use crate::primitive::util::get_max_point;
 
 /// Rectangle primitive.
 ///

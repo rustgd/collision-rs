@@ -7,8 +7,8 @@ use cgmath::{BaseFloat, BaseNum, Point2, Vector2};
 use cgmath::prelude::*;
 
 use super::{max, min};
-use {Line2, Ray2};
-use prelude::*;
+use crate::{Line2, Ray2};
+use crate::prelude::*;
 
 /// A two-dimensional AABB, aka a rectangle.
 #[derive(Copy, Clone, PartialEq)]

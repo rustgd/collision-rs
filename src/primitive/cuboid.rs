@@ -1,10 +1,10 @@
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
-use {Aabb3, Ray3};
-use prelude::*;
-use primitive::util::get_max_point;
-use volume::Sphere;
+use crate::{Aabb3, Ray3};
+use crate::prelude::*;
+use crate::primitive::util::get_max_point;
+use crate::volume::Sphere;
 
 /// Cuboid primitive.
 ///

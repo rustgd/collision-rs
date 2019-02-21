@@ -6,9 +6,9 @@ use num::NumCast;
 
 use super::*;
 use super::SupportPoint;
-use {CollisionStrategy, Contact};
-use prelude::*;
-use primitive::util::barycentric_vector;
+use crate::{CollisionStrategy, Contact};
+use crate::prelude::*;
+use crate::primitive::util::barycentric_vector;
 
 /// EPA algorithm implementation for 3D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -223,7 +223,7 @@ mod tests {
     use cgmath::{Decomposed, Quaternion, Rad, Vector3};
 
     use super::*;
-    use primitive::*;
+    use crate::primitive::*;
 
     #[test]
     fn test_remove_or_add_edge_added() {

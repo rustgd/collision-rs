@@ -98,7 +98,7 @@ use num::NumCast;
 use rand;
 use rand::Rng;
 
-use prelude::*;
+use crate::prelude::*;
 
 mod wrapped;
 mod visitor;

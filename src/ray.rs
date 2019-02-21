@@ -7,7 +7,7 @@ use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 use cgmath::prelude::*;
 
-use traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransformed};
+use crate::traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransformed};
 
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.

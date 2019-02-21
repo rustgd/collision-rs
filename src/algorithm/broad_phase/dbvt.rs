@@ -3,8 +3,8 @@
 
 use std::cmp::Ordering;
 
-use dbvt::{DiscreteVisitor, DynamicBoundingVolumeTree, TreeValue};
-use prelude::*;
+use crate::dbvt::{DiscreteVisitor, DynamicBoundingVolumeTree, TreeValue};
+use crate::prelude::*;
 
 /// [`Dynamic Bounding Volume Tree`](../../dbvt/struct.DynamicBoundingVolumeTree.html) accelerated
 /// broad phase collision detection algorithm

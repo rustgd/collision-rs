@@ -11,9 +11,9 @@ use cgmath::prelude::*;
 use num::NumCast;
 
 use self::simplex::{Simplex, SimplexProcessor2, SimplexProcessor3};
-use {CollisionStrategy, Contact};
-use algorithm::minkowski::{EPA2, EPA3, SupportPoint, EPA};
-use prelude::*;
+use crate::{CollisionStrategy, Contact};
+use crate::algorithm::minkowski::{EPA2, EPA3, SupportPoint, EPA};
+use crate::prelude::*;
 
 mod simplex;
 
@@ -589,7 +589,7 @@ mod tests {
                  Vector2, Vector3};
 
     use super::*;
-    use primitive::*;
+    use crate::primitive::*;
 
     fn transform(x: f32, y: f32, angle: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {
         Decomposed {

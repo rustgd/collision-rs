@@ -7,7 +7,7 @@ mod simplex3d;
 use cgmath::prelude::*;
 use smallvec::SmallVec;
 
-use algorithm::minkowski::SupportPoint;
+use crate::algorithm::minkowski::SupportPoint;
 
 pub type Simplex<P> = SmallVec<[SupportPoint<P>; 5]>;
 

@@ -13,7 +13,7 @@ use std::cmp::{Ordering, PartialOrd};
 use cgmath::{BaseNum, Point2, Point3};
 use cgmath::prelude::*;
 
-use traits::Bound;
+use crate::traits::Bound;
 
 mod aabb2;
 mod aabb3;

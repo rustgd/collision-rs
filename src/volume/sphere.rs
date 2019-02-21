@@ -3,8 +3,8 @@
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
-use {Aabb3, Line3, Plane, Ray3};
-use prelude::*;
+use crate::{Aabb3, Line3, Plane, Ray3};
+use crate::prelude::*;
 
 /// Bounding sphere.
 #[derive(Copy, Clone, PartialEq, Debug)]

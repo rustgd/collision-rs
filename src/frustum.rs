@@ -1,7 +1,7 @@
 //! View frustum for visibility determination
 
-use Plane;
-use bound::*;
+use crate::Plane;
+use crate::bound::*;
 use cgmath::{Matrix, Matrix4};
 use cgmath::{Ortho, Perspective, PerspectiveFov};
 use cgmath::BaseFloat;

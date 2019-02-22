@@ -185,6 +185,7 @@ where
 #[cfg(test)]
 mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
+    use approx::assert_ulps_eq;
 
     use super::*;
 

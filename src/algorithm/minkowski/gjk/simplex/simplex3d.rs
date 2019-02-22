@@ -3,7 +3,8 @@ use std::ops::Neg;
 
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
-use num::cast;
+use cgmath::num_traits::cast;
+use approx::ulps_eq;
 
 use super::{Simplex, SimplexProcessor};
 use crate::primitive::util::{barycentric_vector, get_closest_point_on_edge};
@@ -223,6 +224,7 @@ mod tests {
     use std::ops::Neg;
 
     use cgmath::{Point3, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
     use crate::algorithm::minkowski::SupportPoint;

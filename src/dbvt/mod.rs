@@ -94,7 +94,7 @@ pub use self::wrapped::TreeValueWrapped;
 use std::cmp::max;
 use std::fmt;
 
-use num::NumCast;
+use cgmath::num_traits::NumCast;
 use rand;
 use rand::Rng;
 

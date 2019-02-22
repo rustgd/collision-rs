@@ -163,6 +163,7 @@ where
 mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
     use cgmath::prelude::*;
+    use approx::assert_ulps_eq;
 
     use super::*;
     use crate::primitive::Circle;

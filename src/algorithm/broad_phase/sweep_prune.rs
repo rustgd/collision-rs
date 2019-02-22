@@ -2,7 +2,7 @@ pub use self::variance::Variance;
 
 use std::cmp::Ordering;
 
-use num::NumCast;
+use cgmath::num_traits::NumCast;
 
 use self::variance::{Variance2, Variance3};
 use crate::prelude::*;

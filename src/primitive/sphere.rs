@@ -102,6 +102,7 @@ mod tests {
     use std;
 
     use cgmath::{Decomposed, Point3, Quaternion, Rad, Rotation3, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
 

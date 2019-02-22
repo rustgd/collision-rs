@@ -2,7 +2,8 @@ use std::marker;
 
 use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
-use num::NumCast;
+use cgmath::num_traits::NumCast;
+use approx::assert_ulps_ne;
 
 use super::*;
 use crate::{CollisionStrategy, Contact};
@@ -157,6 +158,7 @@ where
 #[cfg(test)]
 mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
+    use approx::assert_ulps_eq;
 
     use super::*;
     use crate::algorithm::minkowski::SupportPoint;

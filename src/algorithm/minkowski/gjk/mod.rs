@@ -8,12 +8,13 @@ use std::ops::{Neg, Range};
 
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
-use num::NumCast;
+use cgmath::num_traits::NumCast;
 
 use self::simplex::{Simplex, SimplexProcessor2, SimplexProcessor3};
 use crate::{CollisionStrategy, Contact};
 use crate::algorithm::minkowski::{EPA2, EPA3, SupportPoint, EPA};
 use crate::prelude::*;
+use approx::ulps_eq;
 
 mod simplex;
 
@@ -587,6 +588,7 @@ where
 mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Point3, Quaternion, Rad, Rotation2, Rotation3,
                  Vector2, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
     use crate::primitive::*;

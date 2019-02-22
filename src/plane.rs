@@ -1,7 +1,9 @@
 use std::fmt;
 
-use cgmath::{ApproxEq, BaseFloat, Point3, Vector3, Vector4};
+use cgmath::{BaseFloat, Point3, Vector3, Vector4};
+use cgmath::{AbsDiffEq, RelativeEq, UlpsEq};
 use cgmath::prelude::*;
+use approx::{ulps_eq, ulps_ne};
 
 use crate::Ray3;
 use crate::prelude::*;
@@ -105,9 +107,10 @@ impl<S: BaseFloat> Plane<S> {
     }
 }
 
-impl<S> ApproxEq for Plane<S>
-where
-    S: BaseFloat,
+impl<S: AbsDiffEq> AbsDiffEq for Plane<S>
+    where
+        S::Epsilon: Copy,
+        S: BaseFloat,
 {
     type Epsilon = S::Epsilon;
 
@@ -117,19 +120,36 @@ where
     }
 
     #[inline]
+    fn abs_diff_eq(&self, other: &Self, epsilon: S::Epsilon) -> bool {
+        Vector3::abs_diff_eq(&self.n, &other.n, epsilon)
+            && S::abs_diff_eq(&self.d, &other.d, epsilon)
+    }
+}
+
+impl<S: RelativeEq> RelativeEq for Plane<S>
+    where
+        S::Epsilon: Copy,
+        S: BaseFloat,
+{
+    #[inline]
     fn default_max_relative() -> S::Epsilon {
         S::default_max_relative()
-    }
-
-    #[inline]
-    fn default_max_ulps() -> u32 {
-        S::default_max_ulps()
     }
 
     #[inline]
     fn relative_eq(&self, other: &Self, epsilon: S::Epsilon, max_relative: S::Epsilon) -> bool {
         Vector3::relative_eq(&self.n, &other.n, epsilon, max_relative)
             && S::relative_eq(&self.d, &other.d, epsilon, max_relative)
+    }
+}
+impl<S: UlpsEq> UlpsEq for Plane<S>
+    where
+        S::Epsilon: Copy,
+        S: BaseFloat,
+{
+    #[inline]
+    fn default_max_ulps() -> u32 {
+        S::default_max_ulps()
     }
 
     #[inline]

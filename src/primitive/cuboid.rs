@@ -213,6 +213,7 @@ where
 mod tests {
 
     use cgmath::{Decomposed, Point3, Quaternion, Rad, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
     use Ray3;

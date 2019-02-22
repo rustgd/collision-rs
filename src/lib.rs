@@ -11,12 +11,9 @@ unused_qualifications)]
 //! bounding volumes (AABB, OBB, Sphere etc), collision primitives and algorithms used for
 //! collision detection, distance computation etc.
 //!
-#[macro_use]
-extern crate approx;
 
 extern crate bit_set;
 extern crate cgmath;
-extern crate num;
 extern crate rand;
 
 #[cfg(feature = "serde")]

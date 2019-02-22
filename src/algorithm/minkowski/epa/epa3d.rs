@@ -2,7 +2,7 @@ use std::marker;
 
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
-use num::NumCast;
+use cgmath::num_traits::NumCast;
 
 use super::*;
 use super::SupportPoint;
@@ -221,6 +221,7 @@ fn remove_or_add_edge(edges: &mut Vec<(usize, usize)>, edge: (usize, usize)) {
 #[cfg(test)]
 mod tests {
     use cgmath::{Decomposed, Quaternion, Rad, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
     use crate::primitive::*;

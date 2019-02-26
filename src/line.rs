@@ -7,8 +7,8 @@ use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 use cgmath::prelude::*;
 
-use Ray2;
-use prelude::*;
+use crate::Ray2;
+use crate::prelude::*;
 
 /// A generic directed line segment from `origin` to `dest`.
 #[derive(Copy, Clone, PartialEq, Debug)]

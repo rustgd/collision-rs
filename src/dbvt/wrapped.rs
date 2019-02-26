@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use cgmath::{EuclideanSpace, Zero};
 
 use super::TreeValue;
-use {Bound, HasBound};
+use crate::{Bound, HasBound};
 
 /// Value together with bounding volume, for use with DBVT.
 #[derive(Debug, Clone)]

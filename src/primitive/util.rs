@@ -3,10 +3,10 @@
 
 use std::ops::Neg;
 
-use {Aabb, Ray3};
+use crate::{Aabb, Ray3};
 use cgmath::{BaseFloat, BaseNum, Vector2};
 use cgmath::prelude::*;
-use num::Float;
+use cgmath::num_traits::Float;
 
 pub(crate) fn get_max_point<'a, P: 'a, T, I>(vertices: I, direction: &P::Diff, transform: &T) -> P
 where
@@ -139,9 +139,10 @@ mod tests {
     use std;
 
     use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
+    use approx::assert_ulps_eq;
 
     use super::*;
-    use Aabb2;
+    use crate::Aabb2;
 
     #[test]
     fn test_get_bound() {

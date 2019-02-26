@@ -1,8 +1,8 @@
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
-use {Aabb3, Ray3};
-use prelude::*;
+use crate::{Aabb3, Ray3};
+use crate::prelude::*;
 
 /// Sphere primitive
 #[derive(Debug, Clone, PartialEq)]
@@ -46,12 +46,12 @@ where
     }
 }
 
-impl<S> ComputeBound<::volume::Sphere<S>> for Sphere<S>
+impl<S> ComputeBound<crate::volume::Sphere<S>> for Sphere<S>
 where
     S: BaseFloat,
 {
-    fn compute_bound(&self) -> ::volume::Sphere<S> {
-        ::volume::Sphere {
+    fn compute_bound(&self) -> crate::volume::Sphere<S> {
+        crate::volume::Sphere {
             center: Point3::origin(),
             radius: self.radius,
         }
@@ -102,6 +102,7 @@ mod tests {
     use std;
 
     use cgmath::{Decomposed, Point3, Quaternion, Rad, Rotation3, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
 

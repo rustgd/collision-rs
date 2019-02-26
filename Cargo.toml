@@ -1,7 +1,7 @@
 [package]
 
 name = "collision"
-version = "0.19.0"
+version = "0.20.0"
 authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
         "Brian Heylin",
         "Colin Sherratt",
@@ -14,10 +14,12 @@ authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
         "Simon Rönnberg",
         "Pierre Krieger",
         "Tomasz Stachowiak",
-        "Zeke Foppa"
+        "Zeke Foppa",
+        "Thomas O'Dell"
 ]
 license = "Apache-2.0"
 description = "A collision extension to cgmath"
+edition = "2018"
 
 documentation = "https://docs.rs/collision"
 homepage = "https://github.com/rustgd/collision-rs"
@@ -30,16 +32,15 @@ keywords = ["gamedev", "cgmath", "collision"]
 name = "collision"
 
 [dependencies]
-num = "0.2"
-rand = "0.4"
-approx = "0.1"
-cgmath = "0.16"
+rand = "0.6"
+approx = "0.3" # Only for the macros; for all other instances use the re-exported cgmath ones.
+cgmath = "0.17"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 bit-set = "0.5"
 smallvec = "0.6.1"
 
 [target.'cfg(feature="serde")'.dependencies]
-cgmath = { version = "0.16", features = ["serde"] }
+cgmath = { version = "0.17", features = ["serde"] }
 num = { version = "0.2", features = ["serde"] }
 
 [dev-dependencies]

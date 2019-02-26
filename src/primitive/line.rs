@@ -1,8 +1,8 @@
 use cgmath::{BaseFloat, InnerSpace, Point2, Transform, Vector2};
 
-use Aabb2;
-use line::Line2;
-use traits::{ComputeBound, Primitive};
+use crate::Aabb2;
+use crate::line::Line2;
+use crate::traits::{ComputeBound, Primitive};
 
 impl<S> Primitive for Line2<S>
 where
@@ -37,9 +37,9 @@ where
 mod tests {
 
     use super::*;
-    use algorithm::minkowski::GJK2;
+    use crate::algorithm::minkowski::GJK2;
     use cgmath::{Basis2, Decomposed, Rad, Rotation2};
-    use primitive::Rectangle;
+    use crate::primitive::Rectangle;
 
     fn transform(x: f32, y: f32, angle: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {
         Decomposed {

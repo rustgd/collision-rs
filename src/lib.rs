@@ -1,7 +1,7 @@
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
 #![deny(missing_docs, trivial_casts, unsafe_code, unstable_features, unused_import_braces,
-        unused_qualifications)]
+unused_qualifications)]
 
 //! Companion library to cgmath, dealing with collision detection centric data structures and
 //! algorithms.
@@ -11,12 +11,9 @@
 //! bounding volumes (AABB, OBB, Sphere etc), collision primitives and algorithms used for
 //! collision detection, distance computation etc.
 //!
-#[macro_use]
-extern crate approx;
 
 extern crate bit_set;
 extern crate cgmath;
-extern crate num;
 extern crate rand;
 
 #[cfg(feature = "serde")]
@@ -24,6 +21,8 @@ extern crate rand;
 extern crate serde;
 #[cfg_attr(test, macro_use)]
 extern crate smallvec;
+
+
 
 // Re-exports
 

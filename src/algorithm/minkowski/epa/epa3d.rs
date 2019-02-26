@@ -2,13 +2,13 @@ use std::marker;
 
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
-use num::NumCast;
+use cgmath::num_traits::NumCast;
 
 use super::*;
 use super::SupportPoint;
-use {CollisionStrategy, Contact};
-use prelude::*;
-use primitive::util::barycentric_vector;
+use crate::{CollisionStrategy, Contact};
+use crate::prelude::*;
+use crate::primitive::util::barycentric_vector;
 
 /// EPA algorithm implementation for 3D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -221,9 +221,10 @@ fn remove_or_add_edge(edges: &mut Vec<(usize, usize)>, edge: (usize, usize)) {
 #[cfg(test)]
 mod tests {
     use cgmath::{Decomposed, Quaternion, Rad, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
-    use primitive::*;
+    use crate::primitive::*;
 
     #[test]
     fn test_remove_or_add_edge_added() {

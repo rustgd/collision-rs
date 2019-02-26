@@ -1,4 +1,4 @@
-use prelude::*;
+use crate::prelude::*;
 
 /// Broad phase collision detection brute force implementation.
 ///
@@ -44,7 +44,7 @@ mod tests {
     use cgmath::Point2;
 
     use super::*;
-    use Aabb2;
+    use crate::Aabb2;
 
     #[derive(Debug, Clone, PartialEq)]
     pub struct BroadCollisionInfo2 {

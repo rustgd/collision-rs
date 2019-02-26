@@ -3,9 +3,9 @@
 use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
 
-use {Aabb2, Line2, Ray2};
-use prelude::*;
-use primitive::{Circle, ConvexPolygon, Particle2, Rectangle, Square};
+use crate::{Aabb2, Line2, Ray2};
+use crate::prelude::*;
+use crate::primitive::{Circle, ConvexPolygon, Particle2, Rectangle, Square};
 
 /// Wrapper enum for 2D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.

@@ -5,8 +5,8 @@ use cgmath::BaseFloat;
 use cgmath::Matrix4;
 use std::{cmp, fmt};
 
-use frustum::Frustum;
-use plane::Plane;
+use crate::frustum::Frustum;
+use crate::plane::Plane;
 
 /// Spatial relation between two objects.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialOrd, PartialEq)]
@@ -23,7 +23,7 @@ pub enum Relation {
 /// Generic 3D bound.
 pub trait PlaneBound<S: BaseFloat>: fmt::Debug {
     /// Classify the spatial relation with a plane.
-    fn relate_plane(&self, Plane<S>) -> Relation;
+    fn relate_plane(&self, plane: Plane<S>) -> Relation;
     /// Classify the relation with a projection matrix.
     fn relate_clip_space(&self, projection: Matrix4<S>) -> Relation {
         let frustum = match Frustum::from_matrix4(projection) {

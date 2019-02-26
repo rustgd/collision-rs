@@ -6,8 +6,8 @@ use std::ops::Range;
 use cgmath::{BaseFloat, Point2, Point3};
 use cgmath::prelude::*;
 
-use Ray;
-use prelude::*;
+use crate::Ray;
+use crate::prelude::*;
 
 /// Represents a particle in space.
 ///
@@ -163,9 +163,10 @@ where
 mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
     use cgmath::prelude::*;
+    use approx::assert_ulps_eq;
 
     use super::*;
-    use primitive::Circle;
+    use crate::primitive::Circle;
 
     #[test]
     fn test_discrete() {

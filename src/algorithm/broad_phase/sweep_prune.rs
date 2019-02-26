@@ -2,10 +2,10 @@ pub use self::variance::Variance;
 
 use std::cmp::Ordering;
 
-use num::NumCast;
+use cgmath::num_traits::NumCast;
 
 use self::variance::{Variance2, Variance3};
-use prelude::*;
+use crate::prelude::*;
 
 /// Broad phase sweep and prune algorithm for 2D, see
 /// [SweepAndPrune](struct.SweepAndPrune.html) for more information.
@@ -137,7 +137,7 @@ where
 mod variance {
     use std::marker;
 
-    use Bound;
+    use crate::Bound;
     use cgmath::{BaseFloat, Point2, Point3, Vector2, Vector3};
     use cgmath::prelude::*;
 
@@ -281,7 +281,7 @@ mod tests {
     use cgmath::Point2;
 
     use super::*;
-    use Aabb2;
+    use crate::Aabb2;
 
     #[derive(Debug, Clone, PartialEq)]
     pub struct BroadCollisionInfo2 {

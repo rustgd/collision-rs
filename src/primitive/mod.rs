@@ -31,7 +31,7 @@ pub(crate) mod util;
 
 use cgmath::{EuclideanSpace, Transform};
 
-use prelude::*;
+use crate::prelude::*;
 
 impl<B, P> HasBound for (P, B)
 where

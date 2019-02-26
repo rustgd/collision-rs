@@ -1,10 +1,10 @@
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
 
-use {Aabb3, Ray3};
-use prelude::*;
-use primitive::util::cylinder_ray_quadratic_solve;
-use volume::Sphere;
+use crate::{Aabb3, Ray3};
+use crate::prelude::*;
+use crate::primitive::util::cylinder_ray_quadratic_solve;
+use crate::volume::Sphere;
 
 /// Capsule primitive
 /// Capsule body is aligned with the Y axis, with local origin in the center of the capsule.
@@ -202,6 +202,7 @@ mod tests {
     use std;
 
     use cgmath::{Decomposed, Quaternion, Rad, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
 

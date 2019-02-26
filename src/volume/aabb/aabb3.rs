@@ -7,8 +7,8 @@ use cgmath::{BaseFloat, BaseNum, Point3, Vector3};
 use cgmath::prelude::*;
 
 use super::{max, min};
-use {Line3, Plane, Ray3, Sphere};
-use prelude::*;
+use crate::{Line3, Plane, Ray3, Sphere};
+use crate::prelude::*;
 
 /// A three-dimensional AABB, aka a rectangular prism.
 #[derive(Copy, Clone, PartialEq)]

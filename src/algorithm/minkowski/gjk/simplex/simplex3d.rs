@@ -3,10 +3,11 @@ use std::ops::Neg;
 
 use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
-use num::cast;
+use cgmath::num_traits::cast;
+use approx::ulps_eq;
 
 use super::{Simplex, SimplexProcessor};
-use primitive::util::{barycentric_vector, get_closest_point_on_edge};
+use crate::primitive::util::{barycentric_vector, get_closest_point_on_edge};
 
 /// Simplex processor implementation for 3D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -136,7 +137,7 @@ fn get_closest_point_on_face<S>(
 where
     S: BaseFloat,
 {
-    use {Continuous, Plane, Ray3};
+    use crate::{Continuous, Plane, Ray3};
     let ap = Point3::from_vec(*a);
     let bp = Point3::from_vec(*b);
     let cp = Point3::from_vec(*c);
@@ -223,9 +224,10 @@ mod tests {
     use std::ops::Neg;
 
     use cgmath::{Point3, Vector3};
+    use approx::assert_ulps_eq;
 
     use super::*;
-    use algorithm::minkowski::SupportPoint;
+    use crate::algorithm::minkowski::SupportPoint;
 
     #[test]
     fn test_check_side_outside_ab() {

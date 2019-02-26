@@ -2,12 +2,13 @@ use std::marker;
 
 use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
-use num::NumCast;
+use cgmath::num_traits::NumCast;
+use approx::assert_ulps_ne;
 
 use super::*;
-use {CollisionStrategy, Contact};
-use prelude::*;
-use primitive::util::triple_product;
+use crate::{CollisionStrategy, Contact};
+use crate::prelude::*;
+use crate::primitive::util::triple_product;
 
 /// EPA algorithm implementation for 2D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -157,10 +158,11 @@ where
 #[cfg(test)]
 mod tests {
     use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
+    use approx::assert_ulps_eq;
 
     use super::*;
-    use algorithm::minkowski::SupportPoint;
-    use primitive::*;
+    use crate::algorithm::minkowski::SupportPoint;
+    use crate::primitive::*;
 
     #[test]
     fn test_closest_edge_0() {

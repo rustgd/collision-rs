@@ -8,7 +8,6 @@
   - Updated version of num library to 0.2
   - Minor refactoring of code based on clippy comments (no change to api)
   - Updated documentation for Variance type in SweepAndPrune.
-  -
 
 ### v0.18
   - Update GJK intersection tests to use `smallvec` for the `Simplex`, since it will never grow larger than 4 entries.

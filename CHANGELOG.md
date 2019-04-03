@@ -1,5 +1,14 @@
 ## Change Log
 
+### v0.20
+  - No actual API change, but updated to Rust2018 and synced with cgmath 0.17
+  - Uses latest versions of rand and approx for compatibility with other libraries
+
+### v0.19
+  - Updated version of num library to 0.2
+  - Minor refactoring of code based on clippy comments (no change to api)
+  - Updated documentation for Variance type in SweepAndPrune.
+
 ### v0.18
   - Update GJK intersection tests to use `smallvec` for the `Simplex`, since it will never grow larger than 4 entries.
     Small breaking change in the signature for the `GJK::intersect` function.

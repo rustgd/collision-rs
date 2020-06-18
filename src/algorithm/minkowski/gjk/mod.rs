@@ -9,6 +9,7 @@ use std::ops::{Neg, Range};
 use cgmath::BaseFloat;
 use cgmath::prelude::*;
 use cgmath::num_traits::NumCast;
+use cgmath::UlpsEq;
 
 use self::simplex::{Simplex, SimplexProcessor2, SimplexProcessor3};
 use crate::{CollisionStrategy, Contact};
@@ -109,7 +110,7 @@ where
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S> + UlpsEq,
         TL: Transform<P>,
         TR: Transform<P>,
     {
@@ -277,7 +278,7 @@ where
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         SP: SimplexProcessor<Point = P>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S> + UlpsEq,
         TL: Transform<P>,
         TR: Transform<P>,
     {
@@ -365,7 +366,7 @@ where
     ) -> Option<Contact<P>>
     where
         P: EuclideanSpace<Scalar = S>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S> + UlpsEq,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         TL: Transform<P>,
@@ -415,7 +416,7 @@ where
     ) -> Option<Contact<P>>
     where
         P: EuclideanSpace<Scalar = S>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S> + UlpsEq,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         TL: Transform<P>,
@@ -479,7 +480,7 @@ where
     ) -> Option<S>
     where
         P: EuclideanSpace<Scalar = S>,
-        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S>,
+        P::Diff: Neg<Output = P::Diff> + InnerSpace + Zero + Array<Element = S> + UlpsEq,
         PL: Primitive<Point = P>,
         PR: Primitive<Point = P>,
         TL: Transform<P>,

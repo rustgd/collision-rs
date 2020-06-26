@@ -1,12 +1,12 @@
 //! Algorithms using the Minkowski Sum/Difference
 
-pub use self::epa::{EPA2, EPA3, EPA};
-pub use self::gjk::{GJK2, GJK3, SimplexProcessor, GJK};
+pub use self::epa::{EPA, EPA2, EPA3};
+pub use self::gjk::{SimplexProcessor, GJK, GJK2, GJK3};
 
 use std::ops::{Neg, Sub};
 
-use cgmath::prelude::*;
 use crate::prelude::*;
+use cgmath::prelude::*;
 
 mod epa;
 mod gjk;
@@ -105,7 +105,8 @@ mod tests {
                 &right,
                 &right_transform,
                 &direction,
-            ).v
+            )
+            .v
         );
     }
 }

@@ -3,12 +3,12 @@
 
 use std::fmt;
 
-use cgmath::{BaseFloat, BaseNum, Point3, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, BaseNum, Point3, Vector3};
 
 use super::{max, min};
-use crate::{Line3, Plane, Ray3, Sphere};
 use crate::prelude::*;
+use crate::{Line3, Plane, Ray3, Sphere};
 
 /// A three-dimensional AABB, aka a rectangular prism.
 #[derive(Copy, Clone, PartialEq)]
@@ -105,8 +105,12 @@ impl<S: BaseNum> fmt::Debug for Aabb3<S> {
 impl<S: BaseNum> Contains<Point3<S>> for Aabb3<S> {
     #[inline]
     fn contains(&self, p: &Point3<S>) -> bool {
-        self.min.x <= p.x && p.x < self.max.x && self.min.y <= p.y && p.y < self.max.y
-            && self.min.z <= p.z && p.z < self.max.z
+        self.min.x <= p.x
+            && p.x < self.max.x
+            && self.min.y <= p.y
+            && p.y < self.max.y
+            && self.min.z <= p.z
+            && p.z < self.max.z
     }
 }
 
@@ -116,8 +120,11 @@ impl<S: BaseNum> Contains<Aabb3<S>> for Aabb3<S> {
         let other_min = other.min();
         let other_max = other.max();
 
-        other_min.x >= self.min.x && other_min.y >= self.min.y && other_min.z >= self.min.z
-            && other_max.x <= self.max.x && other_max.y <= self.max.y
+        other_min.x >= self.min.x
+            && other_min.y >= self.min.y
+            && other_min.z >= self.min.z
+            && other_max.x <= self.max.x
+            && other_max.y <= self.max.y
             && other_max.z <= self.max.z
     }
 }
@@ -158,7 +165,8 @@ impl<S: BaseFloat> Union<Sphere<S>> for Aabb3<S> {
             sphere.center.x - sphere.radius,
             sphere.center.y - sphere.radius,
             sphere.center.z - sphere.radius,
-        )).grow(sphere.center + Vector3::from_value(sphere.radius))
+        ))
+        .grow(sphere.center + Vector3::from_value(sphere.radius))
     }
 }
 

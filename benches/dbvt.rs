@@ -5,11 +5,11 @@ extern crate collision;
 extern crate rand;
 extern crate test;
 
-use cgmath::{Point2, Vector2};
 use cgmath::prelude::*;
-use collision::{Aabb2, Ray2};
+use cgmath::{Point2, Vector2};
 use collision::dbvt::*;
 use collision::prelude::*;
+use collision::{Aabb2, Ray2};
 use rand::Rng;
 use test::Bencher;
 
@@ -100,7 +100,8 @@ fn benchmark_query(b: &mut Bencher) {
         })
         .collect();
 
-    let mut visitors: Vec<DiscreteVisitor<Ray2<f32>, Value>> = rays.iter()
+    let mut visitors: Vec<DiscreteVisitor<Ray2<f32>, Value>> = rays
+        .iter()
         .map(|ray| DiscreteVisitor::<Ray2<f32>, Value>::new(ray))
         .collect();
 

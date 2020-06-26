@@ -1,9 +1,9 @@
 extern crate cgmath;
 extern crate collision;
 
+use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
-use cgmath::InnerSpace;
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Contains, Continuous, Discrete, SurfaceArea, Union};
 use collision::{Line2, Line3, Ray2, Ray3, Sphere};
@@ -224,7 +224,8 @@ fn test_corners() {
     let corners = Aabb3::new(
         Point3::new(-20isize, 30isize, 5isize),
         Point3::new(10isize, -10isize, -5isize),
-    ).to_corners();
+    )
+    .to_corners();
     assert!(corners.contains(&Point3::new(-20isize, 30isize, -5isize)));
     assert!(corners.contains(&Point3::new(10isize, 30isize, 5isize)));
     assert!(corners.contains(&Point3::new(10isize, -10isize, 5isize)));

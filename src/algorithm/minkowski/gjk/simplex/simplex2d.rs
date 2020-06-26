@@ -1,9 +1,9 @@
 use std::marker;
 use std::ops::Neg;
 
-use cgmath::{BaseFloat, Point2, Vector2};
-use cgmath::prelude::*;
 use approx::ulps_eq;
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
 use super::{Simplex, SimplexProcessor};
 use crate::primitive::util::{get_closest_point_on_edge, triple_product};
@@ -58,7 +58,18 @@ where
             let ab = b - a;
 
             *d = triple_product(&ab, &ao, &ab);
-            if ulps_eq!(*d, Vector2::zero()) {
+            // Product can be dangerously close to 0 and fail
+            // the ulps_eq! check if the origin is on the
+            // line segment connecting a and b
+            //
+            // The maximum error is determined to be around
+            // 2 * ab.magnitude() * ao.magnitude() * ab.magnitude() * S::EPSILON
+            // at least for normal floating-point numbers
+            //
+            // We approximate ao.magnitude() as 1.5 * <max coord of ao>
+            let error =
+                S::from(3.0).unwrap() * ab.magnitude2() * ao.x.abs().max(ao.y.abs()) * S::epsilon();
+            if d.x.abs() < error && d.y.abs() < error {
                 *d = Vector2::new(-ab.y, ab.x);
             }
         }

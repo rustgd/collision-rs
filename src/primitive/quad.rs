@@ -1,11 +1,11 @@
 //! Rectangular plane primitive
 
-use cgmath::{BaseFloat, Point3, Vector2, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector2, Vector3};
 
-use crate::{Aabb3, Ray3, Sphere};
 use crate::prelude::*;
 use crate::primitive::util::get_max_point;
+use crate::{Aabb3, Ray3, Sphere};
 
 /// Rectangular plane primitive. Will lie on the xy plane when not transformed.
 ///
@@ -125,8 +125,8 @@ mod tests {
 
     use super::*;
     use crate::algorithm::minkowski::GJK3;
-    use cgmath::{Decomposed, Quaternion};
     use crate::primitive::Cuboid;
+    use cgmath::{Decomposed, Quaternion};
 
     fn transform(x: f32, y: f32, z: f32) -> Decomposed<Vector3<f32>, Quaternion<f32>> {
         Decomposed {
@@ -143,9 +143,8 @@ mod tests {
         let transform_1 = transform(0., 0., 1.);
         let transform_2 = transform(0., 0., 1.1);
         let gjk = GJK3::new();
-        assert!(
-            gjk.intersect(&quad, &transform_1, &cuboid, &transform_2)
-                .is_some()
-        );
+        assert!(gjk
+            .intersect(&quad, &transform_1, &cuboid, &transform_2)
+            .is_some());
     }
 }

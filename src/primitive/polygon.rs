@@ -1,11 +1,11 @@
 //! Convex polygon primitive
 
-use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
-use crate::{Aabb2, Line2, Ray2};
 use crate::prelude::*;
 use crate::primitive::util::{get_bound, get_max_point};
+use crate::{Aabb2, Line2, Ray2};
 
 /// Convex polygon primitive.
 ///
@@ -190,13 +190,14 @@ where
         vertices[vertices.len() - 1]
     } else {
         vertices[index_u]
-    }.dot(*direction)
+    }
+    .dot(*direction)
 }
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
     use approx::assert_ulps_eq;
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
 
     use super::*;
     use {Aabb2, Ray2};

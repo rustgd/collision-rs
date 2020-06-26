@@ -5,5 +5,5 @@ pub use self::dbvt::DbvtBroadPhase;
 pub use self::sweep_prune::{SweepAndPrune, SweepAndPrune2, SweepAndPrune3, Variance};
 
 mod brute_force;
-mod sweep_prune;
 mod dbvt;
+mod sweep_prune;

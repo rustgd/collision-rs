@@ -1,11 +1,13 @@
 //! Wrapper enum for 3D primitives
 
-use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
-use crate::{Aabb3, Ray3};
 use crate::prelude::*;
-use crate::primitive::{Capsule, ConvexPolyhedron, Cube, Cuboid, Cylinder, Particle3, Quad, Sphere};
+use crate::primitive::{
+    Capsule, ConvexPolyhedron, Cube, Cuboid, Cylinder, Particle3, Quad, Sphere,
+};
+use crate::{Aabb3, Ray3};
 
 /// Wrapper enum for 3D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.

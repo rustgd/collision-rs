@@ -1,5 +1,5 @@
-use cgmath::BaseNum;
 use cgmath::prelude::*;
+use cgmath::BaseNum;
 
 /// An intersection test with a result.
 ///
@@ -175,8 +175,8 @@ pub trait TranslationInterpolate<S> {
 
 mod interpolate {
     use super::{Interpolate, TranslationInterpolate};
-    use cgmath::{BaseFloat, Basis2, Basis3, Decomposed, Quaternion, Rad};
     use cgmath::prelude::*;
+    use cgmath::{BaseFloat, Basis2, Basis3, Decomposed, Quaternion, Rad};
 
     impl<S> Interpolate<S> for Quaternion<S>
     where

@@ -1,4 +1,4 @@
-use cgmath::{BaseFloat, InnerSpace, Point2, Transform, Vector2};
+use cgmath::{vec2, BaseFloat, EuclideanSpace, InnerSpace, Point2, Transform, Vector2, Zero};
 
 use crate::line::Line2;
 use crate::traits::{ComputeBound, Primitive};
@@ -20,6 +20,19 @@ where
             transform.transform_point(self.dest)
         } else {
             transform.transform_point(self.origin)
+        }
+    }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        let mut perp = (self.dest - self.origin).normalize();
+        perp = vec2(-perp.y, perp.x);
+        if normal.dot(perp) >= Zero::zero() {
+            perp
+        } else {
+            -perp
         }
     }
 }
@@ -47,6 +60,19 @@ mod tests {
             rot: Rotation2::from_angle(Rad(angle)),
             scale: 1.,
         }
+    }
+
+    #[test]
+    fn test_line_closest_valid_normal() {
+        let line = Line2::new(Point2::new(1., 1.), Point2::new(1., 2.));
+        assert_eq!(
+            vec2(-1., 0.),
+            line.closest_valid_normal_local(&vec2(-0.5, 0.75f64.sqrt()))
+        );
+        assert_eq!(
+            vec2(1., 0.),
+            line.closest_valid_normal_local(&vec2(0.5, 0.75f64.sqrt()))
+        );
     }
 
     #[test]

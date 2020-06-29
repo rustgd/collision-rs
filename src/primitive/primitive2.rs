@@ -97,6 +97,23 @@ where
             Primitive2::ConvexPolygon(ref polygon) => polygon.support_point(direction, transform),
         }
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        match *self {
+            Primitive2::Particle(_) => panic!(concat!(
+                "Particles don't have valid normals. ",
+                "Please don't use GJKLeft2 where the left collider is a particle"
+            )),
+            Primitive2::Line(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::Circle(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::Rectangle(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::Square(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::ConvexPolygon(ref shape) => shape.closest_valid_normal_local(normal),
+        }
+    }
 }
 
 impl<S> DiscreteTransformed<Ray2<S>> for Primitive2<S>

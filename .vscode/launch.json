@@ -1,0 +1,217 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'collision'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "collision",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'serde'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=serde",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "serde",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'point'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=point",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "point",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'bound'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=bound",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "bound",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'dbvt'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=dbvt",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "dbvt",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'plane'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=plane",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "plane",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'frustum'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=frustum",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "frustum",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'sphere'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=sphere",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "sphere",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'aabb'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=aabb",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "aabb",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug benchmark 'dbvt'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bench=dbvt",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "dbvt",
+                    "kind": "bench"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug benchmark 'polyhedron'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bench=polyhedron",
+                    "--package=collision"
+                ],
+                "filter": {
+                    "name": "polyhedron",
+                    "kind": "bench"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

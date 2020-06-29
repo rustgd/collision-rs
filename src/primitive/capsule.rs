@@ -54,6 +54,13 @@ where
         result.y = direction.y.signum() * self.half_height;
         transform.transform_point(result + direction.normalize_to(self.radius))
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        unimplemented!("closest_valid_normal_local is only implemented for 2D primitives for now")
+    }
 }
 
 impl<S> ComputeBound<Aabb3<S>> for Capsule<S>

@@ -62,4 +62,11 @@ where
     {
         self.0.support_point(direction, transform)
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        self.0.closest_valid_normal_local(normal)
+    }
 }

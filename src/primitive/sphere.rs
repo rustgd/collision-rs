@@ -32,6 +32,13 @@ where
         let direction = transform.inverse_transform_vector(*direction).unwrap();
         transform.transform_point(Point3::from_vec(direction.normalize_to(self.radius)))
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        unimplemented!("closest_valid_normal_local is only implemented for 2D primitives for now")
+    }
 }
 
 impl<S> ComputeBound<Aabb3<S>> for Sphere<S>

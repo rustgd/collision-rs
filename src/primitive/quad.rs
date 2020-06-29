@@ -70,6 +70,13 @@ where
     {
         get_max_point(self.corners.iter(), direction, transform)
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        unimplemented!("closest_valid_normal_local is only implemented for 2D primitives for now")
+    }
 }
 
 impl<S> ComputeBound<Aabb3<S>> for Quad<S>

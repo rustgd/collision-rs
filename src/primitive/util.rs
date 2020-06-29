@@ -37,6 +37,17 @@ where
     vertices.fold(A::zero(), |bound, p| bound.grow(*p))
 }
 
+/// Gets normal of counterclockwise vector by rotating it 90 degrees.
+/// The result is the same length as the vector.
+#[allow(dead_code)]
+#[inline]
+pub(crate) fn vector_normal<S>(a: &Vector2<S>) -> Vector2<S>
+where
+    S: BaseNum,
+{
+    Vector2::new(a.y, S::zero() - a.x)
+}
+
 #[allow(dead_code)]
 #[inline]
 pub(crate) fn triple_product<S>(a: &Vector2<S>, b: &Vector2<S>, c: &Vector2<S>) -> Vector2<S>

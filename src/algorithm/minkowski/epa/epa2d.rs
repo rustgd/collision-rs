@@ -1,21 +1,68 @@
 use std::marker;
 
 use approx::assert_ulps_ne;
+use approx::ulps_ne;
 use cgmath::num_traits::NumCast;
 use cgmath::prelude::*;
 use cgmath::{BaseFloat, Point2, Vector2};
 
 use super::*;
 use crate::prelude::*;
-use crate::primitive::util::triple_product;
+use crate::primitive::util::vector_normal;
 use crate::{CollisionStrategy, Contact};
 
 /// EPA algorithm implementation for 2D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
 pub struct EPA2<S> {
-    m: marker::PhantomData<S>,
     tolerance: S,
     max_iterations: u32,
+}
+
+impl<S> EPA2<S>
+where
+    S: BaseFloat,
+{
+    fn closest_edge<SL, SR, TL, TR, F>(
+        &self,
+        simplex: &mut Vec<SupportPoint<Point2<S>>>,
+        left: &SL,
+        left_transform: &TL,
+        right: &SR,
+        right_transform: &TR,
+        closest_edge_fn: F,
+    ) -> Option<Edge<S>>
+    where
+        SL: Primitive<Point = <Self as EPA>::Point>,
+        SR: Primitive<Point = <Self as EPA>::Point>,
+        TL: Transform<<Self as EPA>::Point>,
+        TR: Transform<<Self as EPA>::Point>,
+        F: Fn(&[SupportPoint<Point2<S>>]) -> Option<Edge<S>>,
+    {
+        let e = closest_edge_fn(simplex);
+        let mut e = match e {
+            None => return None,
+            Some(e) => e,
+        };
+
+        for _ in 0..self.max_iterations {
+            let p = SupportPoint::from_minkowski(
+                left,
+                left_transform,
+                right,
+                right_transform,
+                &e.normal,
+            );
+            let d = p.v.dot(e.normal);
+            if d - e.distance < self.tolerance {
+                break;
+            } else {
+                simplex.insert(e.index, p);
+            }
+            e = closest_edge_fn(simplex)?;
+        }
+
+        Some(e)
+    }
 }
 
 impl<S> EPA for EPA2<S>
@@ -38,26 +85,95 @@ where
         TL: Transform<Self::Point>,
         TR: Transform<Self::Point>,
     {
-        let mut e = match closest_edge(simplex) {
-            None => return None,
-            Some(e) => e,
-        };
+        let e = self.closest_edge(
+            simplex,
+            left,
+            left_transform,
+            right,
+            right_transform,
+            closest_edge,
+        )?;
+        Some(Contact::new_with_point(
+            CollisionStrategy::FullResolution,
+            e.normal,
+            e.distance,
+            point(simplex, &e),
+        ))
+    }
 
-        for _ in 0..self.max_iterations {
-            let p = SupportPoint::from_minkowski(
+    fn new() -> Self {
+        Self::new_with_tolerance(NumCast::from(EPA_TOLERANCE).unwrap(), MAX_ITERATIONS)
+    }
+
+    fn new_with_tolerance(
+        tolerance: <Self::Point as EuclideanSpace>::Scalar,
+        max_iterations: u32,
+    ) -> Self {
+        Self {
+            tolerance,
+            max_iterations,
+        }
+    }
+}
+
+/// Alternate EPA algorithm implementation for 2D. Only to be used in [`GJK`](struct.GJK.html).
+/// The difference is that the normal returned is guaranteed to be a normal
+/// that exists on the left collider.
+#[derive(Debug)]
+pub struct EPALeft2<S>(EPA2<S>);
+
+impl<S> EPA for EPALeft2<S>
+where
+    S: BaseFloat,
+{
+    type Point = Point2<S>;
+
+    fn process<SL, SR, TL, TR>(
+        &self,
+        simplex: &mut Vec<SupportPoint<Point2<S>>>,
+        left: &SL,
+        left_transform: &TL,
+        right: &SR,
+        right_transform: &TR,
+    ) -> Option<Contact<Point2<S>>>
+    where
+        SL: Primitive<Point = Self::Point>,
+        SR: Primitive<Point = Self::Point>,
+        TL: Transform<Self::Point>,
+        TR: Transform<Self::Point>,
+    {
+        let mut e = self.0.closest_edge(
+            simplex,
+            left,
+            left_transform,
+            right,
+            right_transform,
+            closest_edge,
+        )?;
+        let n = left.closest_valid_normal_local(
+            &left_transform
+                .inverse_transform_vector(e.normal)
+                .unwrap_or(e.normal)
+                .normalize(),
+        );
+
+        if ulps_ne!(e.normal, n) {
+            e = self.0.closest_edge(
+                simplex,
                 left,
                 left_transform,
                 right,
                 right_transform,
-                &e.normal,
-            );
-            let d = p.v.dot(e.normal);
-            if d - e.distance < self.tolerance {
-                break;
-            } else {
-                simplex.insert(e.index, p);
-            }
-            e = closest_edge(simplex).unwrap();
+                |s| closest_edge_along_direction(s, n),
+            )?;
+
+            return Some(Contact::new_with_point(
+                CollisionStrategy::FullResolution,
+                n,
+                e.distance / n.dot(e.normal),
+                // TODO: Fix collision point
+                point(simplex, &e),
+            ));
         }
 
         Some(Contact::new_with_point(
@@ -76,11 +192,7 @@ where
         tolerance: <Self::Point as EuclideanSpace>::Scalar,
         max_iterations: u32,
     ) -> Self {
-        Self {
-            m: marker::PhantomData,
-            tolerance,
-            max_iterations,
-        }
+        Self(EPA2::new_with_tolerance(tolerance, max_iterations))
     }
 }
 
@@ -143,8 +255,7 @@ where
             let a = simplex[i].v;
             let b = simplex[j].v;
             let e = b - a;
-            let oa = a;
-            let n = triple_product(&e, &oa, &e).normalize();
+            let n = vector_normal(&e).normalize();
             let d = n.dot(a);
             if d < edge.distance {
                 edge = Edge::new(n, d, j);
@@ -152,6 +263,45 @@ where
         }
         assert_ulps_ne!(S::infinity(), edge.distance);
         Some(edge)
+    }
+}
+
+// Assumes direction is normalized
+fn closest_edge_along_direction<S>(
+    simplex: &[SupportPoint<Point2<S>>],
+    direction: Vector2<S>,
+) -> Option<Edge<S>>
+where
+    S: BaseFloat,
+{
+    if simplex.len() < 3 {
+        None
+    } else {
+        let mut edge = Edge::new(Vector2::zero(), S::infinity(), 0);
+        let mut distance = S::infinity();
+
+        for i in 0..simplex.len() {
+            let j = if i + 1 == simplex.len() { 0 } else { i + 1 };
+            let a = simplex[i].v;
+            let b = simplex[j].v;
+            let e = b - a;
+            let n = vector_normal(&e).normalize();
+            let cos = direction.dot(n);
+            if cos <= S::zero() {
+                continue; // Edge is in the opposite direction
+            }
+            let d = n.dot(a);
+            let dist = d / cos;
+            if dist < distance {
+                edge = Edge::new(n, d, j);
+                distance = dist;
+            }
+        }
+        if ulps_ne!(S::infinity(), distance) {
+            Some(edge)
+        } else {
+            None
+        }
     }
 }
 

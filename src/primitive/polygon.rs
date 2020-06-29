@@ -1,7 +1,8 @@
 //! Convex polygon primitive
 
 use cgmath::prelude::*;
-use cgmath::{BaseFloat, Point2, Vector2};
+use cgmath::{vec2, BaseFloat, Point2, Vector2};
+use std::cmp::Ordering;
 
 use crate::prelude::*;
 use crate::primitive::util::{get_bound, get_max_point};
@@ -11,6 +12,8 @@ use crate::{Aabb2, Line2, Ray2};
 ///
 /// Can contain any number of vertices, but a high number of vertices will
 /// affect performance of course. Vertices need to be in CCW order.
+/// If using `GJKLeft2`, two vertices should not be in the same place,
+/// and all the vertices should be vertices of the resulting convex polygon.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ConvexPolygon<S> {
@@ -20,6 +23,8 @@ pub struct ConvexPolygon<S> {
 
 impl<S> ConvexPolygon<S> {
     /// Create a new convex polygon from the given vertices. Vertices need to be in CCW order.
+    /// If using `GJKLeft2`, two vertices should not be in the same place.
+    /// and all the vertices should be vertices of the resulting convex polygon.
     pub fn new(vertices: Vec<Point2<S>>) -> Self {
         Self { vertices }
     }
@@ -40,6 +45,27 @@ where
         } else {
             support_point(&self.vertices, direction, transform)
         }
+    }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        let v0_iter = self.vertices.iter();
+        let v1_iter = self.vertices.iter().chain(self.vertices.iter()).skip(1);
+        let edge_normals = v0_iter
+            .zip(v1_iter)
+            .map(|(v0, v1)| v1 - v0)
+            .map(|v| vec2(v.y, -v.x).normalize());
+
+        // There better be at least 2 vertices in this convex polygon!
+        edge_normals
+            .max_by(|u, v| {
+                u.dot(*normal)
+                    .partial_cmp(&v.dot(*normal))
+                    .unwrap_or(Ordering::Equal)
+            })
+            .unwrap()
     }
 }
 
@@ -262,6 +288,25 @@ mod tests {
         assert_eq!(
             Aabb2::new(Point2::new(-6., -8.), Point2::new(5., 7.)),
             polygon.compute_bound()
+        );
+    }
+
+    #[test]
+    fn test_closest_valid_normal() {
+        let vertices = vec![
+            Point2::new(0., 0.),
+            Point2::new(-1., 1.),
+            Point2::new(-1., -1.),
+            Point2::new(1., -1.),
+        ];
+        let polygon = ConvexPolygon::new(vertices);
+        assert_ulps_eq!(
+            vec2(0.5f64.sqrt(), 0.5f64.sqrt()),
+            polygon.closest_valid_normal_local(&vec2(0.75f64.sqrt(), 0.5))
+        );
+        assert_eq!(
+            vec2(-1., 0.),
+            polygon.closest_valid_normal_local(&vec2(-1., 0.))
         );
     }
 

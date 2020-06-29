@@ -112,6 +112,22 @@ pub trait Primitive {
     ) -> Self::Point
     where
         T: Transform<Self::Point>;
+
+    /// Get the closest valid normal on the shape to a given normal, in local space.
+    /// A normal is valid if there exists a tangent to a differentiable point on the
+    /// shape that the normal is perpendicular to, pointing outside the shape.
+    ///
+    /// ## Parameters
+    ///
+    /// - `normal`: The normal to use. This is assumed to be normalized.
+    ///
+    /// ## Returns
+    ///
+    /// Returns the closest valid normal to the given normal.
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff;
 }
 
 /// Discrete intersection test on transformed primitive

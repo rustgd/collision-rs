@@ -34,6 +34,13 @@ where
         let direction = transform.inverse_transform_vector(*direction).unwrap();
         transform.transform_point(Point2::from_vec(direction.normalize_to(self.radius)))
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        *normal
+    }
 }
 
 impl<S> ComputeBound<Aabb2<S>> for Circle<S>
@@ -94,7 +101,7 @@ mod tests {
     use crate::prelude::*;
     use crate::Ray2;
     use approx::assert_ulps_eq;
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
+    use cgmath::{vec2, Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;
 
@@ -127,6 +134,13 @@ mod tests {
     fn test_circle_bound() {
         let circle = Circle::new(10.);
         assert_eq!(bound(-10., -10., 10., 10.), circle.compute_bound())
+    }
+
+    #[test]
+    fn test_circle_closest_valid_normal() {
+        let circle = Circle::new(1.);
+        let vector = vec2(0.5f64.sqrt(), -0.5f64.sqrt());
+        assert_eq!(vector, circle.closest_valid_normal_local(&vector));
     }
 
     #[test]

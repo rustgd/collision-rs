@@ -2,11 +2,11 @@ extern crate cgmath;
 extern crate collision;
 extern crate rand;
 
-use cgmath::{Deg, PerspectiveFov, Point2, Point3, Vector2, Vector3};
 use cgmath::prelude::*;
-use collision::{Aabb2, Aabb3, Frustum, Projection, Ray2, Relation};
+use cgmath::{Deg, PerspectiveFov, Point2, Point3, Vector2, Vector3};
 use collision::dbvt::*;
 use collision::prelude::*;
+use collision::{Aabb2, Aabb3, Frustum, Projection, Ray2, Relation};
 use rand::Rng;
 
 #[derive(Debug, Clone)]
@@ -122,7 +122,7 @@ fn test_add_20() {
     let mut tree = DynamicBoundingVolumeTree::<Value2>::new();
     let mut rng = rand::thread_rng();
     for i in 0..20 {
-        let offset = rng.gen_range(-10., 10.);
+        let offset = rng.gen_range(-10f32..10f32);
         tree.insert(Value2::new(
             i,
             aabb2(offset + 0.1, offset + 0.1, offset + 0.3, offset + 0.3),

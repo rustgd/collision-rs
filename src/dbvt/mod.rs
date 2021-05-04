@@ -900,7 +900,7 @@ where
 
         // Only do rotations occasionally, as they are fairly expensive, and shouldn't be overused.
         // For most scenarios, the majority of shapes will not have moved, so this is fine.
-        if rand::thread_rng().gen_range(0, 100) < PERFORM_ROTATION_PERCENTAGE {
+        if rand::thread_rng().gen_range(0..100) < PERFORM_ROTATION_PERCENTAGE {
             self.rotate(node_index);
         }
     }

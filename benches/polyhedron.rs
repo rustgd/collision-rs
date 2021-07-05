@@ -82,9 +82,9 @@ fn dirs(n: usize) -> Vec<Vector3<f32>> {
     (0..n)
         .map(|_| {
             Vector3::new(
-                rng.gen_range(-1., 1.),
-                rng.gen_range(-1., 1.),
-                rng.gen_range(-1., 1.),
+                rng.gen_range(-1.0..1.0),
+                rng.gen_range(-1.0..1.0),
+                rng.gen_range(-1.0..1.0),
             )
         })
         .collect::<Vec<_>>()

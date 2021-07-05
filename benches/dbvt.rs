@@ -48,7 +48,7 @@ fn benchmark_insert(b: &mut Bencher) {
     let mut tree = DynamicBoundingVolumeTree::<Value>::new();
     let mut i = 0;
     b.iter(|| {
-        let offset = rng.gen_range(0., 100.);
+        let offset = rng.gen_range(0.0..100.0);
         tree.insert(Value::new(
             i,
             aabb2(offset + 2., offset + 2., offset + 4., offset + 4.),
@@ -63,7 +63,7 @@ fn benchmark_do_refit(b: &mut Bencher) {
     let mut tree = DynamicBoundingVolumeTree::<Value>::new();
     let mut i = 0;
     b.iter(|| {
-        let offset = rng.gen_range(0., 100.);
+        let offset = rng.gen_range(0.0..100.0);
         tree.insert(Value::new(
             i,
             aabb2(offset + 2., offset + 2., offset + 4., offset + 4.),
@@ -80,8 +80,8 @@ fn benchmark_query(b: &mut Bencher) {
     for i in 0..100000 {
         let neg_y = if rng.gen::<bool>() { -1. } else { 1. };
         let neg_x = if rng.gen::<bool>() { -1. } else { 1. };
-        let offset_x = neg_x * rng.gen_range(9000., 10000.);
-        let offset_y = neg_y * rng.gen_range(9000., 10000.);
+        let offset_x = neg_x * rng.gen_range(9000.0..10000.0);
+        let offset_y = neg_y * rng.gen_range(9000.0..10000.0);
         tree.insert(Value::new(
             i,
             aabb2(offset_x + 2., offset_y + 2., offset_x + 4., offset_y + 4.),
@@ -92,10 +92,10 @@ fn benchmark_query(b: &mut Bencher) {
     let rays: Vec<Ray2<f32>> = (0..1000)
         .map(|_| {
             let p = Point2::new(
-                rng.gen_range(-10000., 10000.),
-                rng.gen_range(-10000., 10000.),
+                rng.gen_range(-10000.0..10000.0),
+                rng.gen_range(-10000.0..10000.0),
             );
-            let d = Vector2::new(rng.gen_range(-1., 1.), rng.gen_range(-1., 1.)).normalize();
+            let d = Vector2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize();
             Ray2::new(p, d)
         })
         .collect();
@@ -119,8 +119,8 @@ fn benchmark_ray_closest_query(b: &mut Bencher) {
     for i in 0..100000 {
         let neg_y = if rng.gen::<bool>() { -1. } else { 1. };
         let neg_x = if rng.gen::<bool>() { -1. } else { 1. };
-        let offset_x = neg_x * rng.gen_range(9000., 10000.);
-        let offset_y = neg_y * rng.gen_range(9000., 10000.);
+        let offset_x = neg_x * rng.gen_range(9000.0..10000.0);
+        let offset_y = neg_y * rng.gen_range(9000.0..10000.0);
         tree.insert(Value::new(
             i,
             aabb2(offset_x + 2., offset_y + 2., offset_x + 4., offset_y + 4.),
@@ -131,10 +131,10 @@ fn benchmark_ray_closest_query(b: &mut Bencher) {
     let rays: Vec<Ray2<f32>> = (0..1000)
         .map(|_| {
             let p = Point2::new(
-                rng.gen_range(-10000., 10000.),
-                rng.gen_range(-10000., 10000.),
+                rng.gen_range(-10000.0..10000.0),
+                rng.gen_range(-10000.0..10000.0),
             );
-            let d = Vector2::new(rng.gen_range(-1., 1.), rng.gen_range(-1., 1.)).normalize();
+            let d = Vector2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize();
             Ray2::new(p, d)
         })
         .collect();

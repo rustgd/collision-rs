@@ -1,12 +1,12 @@
 use std::fmt;
 
-use cgmath::{BaseFloat, Point3, Vector3, Vector4};
-use cgmath::{AbsDiffEq, RelativeEq, UlpsEq};
-use cgmath::prelude::*;
 use approx::{ulps_eq, ulps_ne};
+use cgmath::prelude::*;
+use cgmath::{AbsDiffEq, RelativeEq, UlpsEq};
+use cgmath::{BaseFloat, Point3, Vector3, Vector4};
 
-use crate::Ray3;
 use crate::prelude::*;
+use crate::Ray3;
 
 /// A 3-dimensional plane formed from the equation: `A*x + B*y + C*z - D = 0`.
 ///
@@ -108,9 +108,9 @@ impl<S: BaseFloat> Plane<S> {
 }
 
 impl<S: AbsDiffEq> AbsDiffEq for Plane<S>
-    where
-        S::Epsilon: Copy,
-        S: BaseFloat,
+where
+    S::Epsilon: Copy,
+    S: BaseFloat,
 {
     type Epsilon = S::Epsilon;
 
@@ -127,9 +127,9 @@ impl<S: AbsDiffEq> AbsDiffEq for Plane<S>
 }
 
 impl<S: RelativeEq> RelativeEq for Plane<S>
-    where
-        S::Epsilon: Copy,
-        S: BaseFloat,
+where
+    S::Epsilon: Copy,
+    S: BaseFloat,
 {
     #[inline]
     fn default_max_relative() -> S::Epsilon {
@@ -143,9 +143,9 @@ impl<S: RelativeEq> RelativeEq for Plane<S>
     }
 }
 impl<S: UlpsEq> UlpsEq for Plane<S>
-    where
-        S::Epsilon: Copy,
-        S: BaseFloat,
+where
+    S::Epsilon: Copy,
+    S: BaseFloat,
 {
     #[inline]
     fn default_max_ulps() -> u32 {

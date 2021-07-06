@@ -1,10 +1,10 @@
 use std::marker;
 use std::ops::Neg;
 
-use cgmath::{BaseFloat, Point3, Vector3};
-use cgmath::prelude::*;
-use cgmath::num_traits::cast;
 use approx::ulps_eq;
+use cgmath::num_traits::cast;
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
 use super::{Simplex, SimplexProcessor};
 use crate::primitive::util::{barycentric_vector, get_closest_point_on_edge};
@@ -223,8 +223,8 @@ fn check_side<S>(
 mod tests {
     use std::ops::Neg;
 
-    use cgmath::{Point3, Vector3};
     use approx::assert_ulps_eq;
+    use cgmath::{Point3, Vector3};
 
     use super::*;
     use crate::algorithm::minkowski::SupportPoint;

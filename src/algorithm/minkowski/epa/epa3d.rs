@@ -1,14 +1,14 @@
 use std::marker;
 
-use cgmath::{BaseFloat, Point3, Vector3};
-use cgmath::prelude::*;
 use cgmath::num_traits::NumCast;
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
-use super::*;
 use super::SupportPoint;
-use crate::{CollisionStrategy, Contact};
+use super::*;
 use crate::prelude::*;
 use crate::primitive::util::barycentric_vector;
+use crate::{CollisionStrategy, Contact};
 
 /// EPA algorithm implementation for 3D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -220,8 +220,8 @@ fn remove_or_add_edge(edges: &mut Vec<(usize, usize)>, edge: (usize, usize)) {
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Decomposed, Quaternion, Rad, Vector3};
     use approx::assert_ulps_eq;
+    use cgmath::{Decomposed, Quaternion, Rad, Vector3};
 
     use super::*;
     use crate::primitive::*;
@@ -253,25 +253,11 @@ mod tests {
         let faces = Face::new(&simplex);
         assert_eq!(4, faces.len());
         assert_face(
-            &faces[0],
-            3,
-            2,
-            1,
-            -0.8728715,
-            0.43643576,
-            0.21821788,
-            1.0910894,
+            &faces[0], 3, 2, 1, -0.8728715, 0.43643576, 0.21821788, 1.0910894,
         );
         assert_face(&faces[1], 3, 1, 0, 0., -0.89442724, 0.44721362, 2.236068);
         assert_face(
-            &faces[2],
-            3,
-            0,
-            2,
-            0.8728715,
-            0.43643576,
-            0.21821788,
-            1.0910894,
+            &faces[2], 3, 0, 2, 0.8728715, 0.43643576, 0.21821788, 1.0910894,
         );
         assert_face(&faces[3], 2, 0, 1, 0., 0., -1., 1.0);
     }

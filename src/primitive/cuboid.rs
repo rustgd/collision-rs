@@ -1,10 +1,10 @@
-use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
-use crate::{Aabb3, Ray3};
 use crate::prelude::*;
 use crate::primitive::util::get_max_point;
 use crate::volume::Sphere;
+use crate::{Aabb3, Ray3};
 
 /// Cuboid primitive.
 ///
@@ -73,6 +73,13 @@ where
     {
         get_max_point(self.corners.iter(), direction, transform)
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        unimplemented!("closest_valid_normal_local is only implemented for 2D primitives for now")
+    }
 }
 
 impl<S> ComputeBound<Aabb3<S>> for Cuboid<S>
@@ -108,7 +115,8 @@ where
         Aabb3::new(
             Point3::from_vec(-self.half_dim),
             Point3::from_vec(self.half_dim),
-        ).intersects(ray)
+        )
+        .intersects(ray)
     }
 }
 
@@ -122,7 +130,8 @@ where
         Aabb3::new(
             Point3::from_vec(-self.half_dim),
             Point3::from_vec(self.half_dim),
-        ).intersection(ray)
+        )
+        .intersection(ray)
     }
 }
 
@@ -169,6 +178,13 @@ where
     {
         self.cuboid.support_point(direction, transform)
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        unimplemented!("closest_valid_normal_local is only implemented for 2D primitives for now")
+    }
 }
 
 impl<S> ComputeBound<Aabb3<S>> for Cube<S>
@@ -212,8 +228,8 @@ where
 #[cfg(test)]
 mod tests {
 
-    use cgmath::{Decomposed, Point3, Quaternion, Rad, Vector3};
     use approx::assert_ulps_eq;
+    use cgmath::{Decomposed, Point3, Quaternion, Rad, Vector3};
 
     use super::*;
     use Ray3;

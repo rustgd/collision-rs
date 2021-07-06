@@ -4,9 +4,9 @@
 use std::ops::Neg;
 
 use crate::{Aabb, Ray3};
-use cgmath::{BaseFloat, BaseNum, Vector2};
-use cgmath::prelude::*;
 use cgmath::num_traits::Float;
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, BaseNum, Vector2};
 
 pub(crate) fn get_max_point<'a, P: 'a, T, I>(vertices: I, direction: &P::Diff, transform: &T) -> P
 where
@@ -35,6 +35,17 @@ where
     I: Iterator<Item = &'a A::Point>,
 {
     vertices.fold(A::zero(), |bound, p| bound.grow(*p))
+}
+
+/// Gets normal of counterclockwise vector by rotating it 90 degrees.
+/// The result is the same length as the vector.
+#[allow(dead_code)]
+#[inline]
+pub(crate) fn vector_normal<S>(a: &Vector2<S>) -> Vector2<S>
+where
+    S: BaseNum,
+{
+    Vector2::new(a.y, S::zero() - a.x)
 }
 
 #[allow(dead_code)]
@@ -138,8 +149,8 @@ where
 mod tests {
     use std;
 
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
     use approx::assert_ulps_eq;
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;
     use crate::Aabb2;

@@ -100,9 +100,9 @@ use rand::Rng;
 
 use crate::prelude::*;
 
-mod wrapped;
-mod visitor;
 mod util;
+mod visitor;
+mod wrapped;
 
 const SURFACE_AREA_IMPROVEMENT_FOR_ROTATION: f32 = 0.3;
 const PERFORM_ROTATION_PERCENTAGE: u32 = 10;
@@ -505,11 +505,13 @@ where
 
                 // if we encounter a branch, do intersection test, and push the children if the
                 // branch intersected
-                Node::Branch(ref branch) => if visitor.accept(&branch.bound, false).is_some() {
-                    stack[stack_pointer] = branch.left;
-                    stack[stack_pointer + 1] = branch.right;
-                    stack_pointer += 2;
-                },
+                Node::Branch(ref branch) => {
+                    if visitor.accept(&branch.bound, false).is_some() {
+                        stack[stack_pointer] = branch.left;
+                        stack[stack_pointer + 1] = branch.right;
+                        stack_pointer += 2;
+                    }
+                }
                 Node::Nil => (),
             }
         }
@@ -561,7 +563,8 @@ where
     /// all insert/remove/updates have been performed this frame.
     ///
     pub fn update(&mut self) {
-        let nodes = self.updated_list
+        let nodes = self
+            .updated_list
             .iter()
             .filter_map(|&index| {
                 if let Node::Leaf(ref l) = self.nodes[index] {

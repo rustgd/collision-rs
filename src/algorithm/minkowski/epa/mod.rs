@@ -1,5 +1,6 @@
 //! Expanding Polytope Algorithm
 
+pub use self::epa2d::EPALeft2;
 pub use self::epa2d::EPA2;
 pub use self::epa3d::EPA3;
 
@@ -9,8 +10,8 @@ mod epa3d;
 use cgmath::prelude::*;
 
 use super::SupportPoint;
-use crate::Contact;
 use crate::prelude::*;
+use crate::Contact;
 
 pub const EPA_TOLERANCE: f32 = 0.00001;
 pub const MAX_ITERATIONS: u32 = 100;

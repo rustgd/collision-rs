@@ -1,11 +1,11 @@
 //! Rectangle primitive
 
-use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
-use crate::{Aabb2, Ray2};
 use crate::prelude::*;
 use crate::primitive::util::get_max_point;
+use crate::{Aabb2, Ray2};
 
 /// Rectangle primitive.
 ///
@@ -69,6 +69,17 @@ where
         T: Transform<Point2<S>>,
     {
         get_max_point(self.corners.iter(), direction, transform)
+    }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        if normal.x.abs() > normal.y.abs() {
+            Vector2::new(normal.x.signum(), Zero::zero())
+        } else {
+            Vector2::new(Zero::zero(), normal.y.signum())
+        }
     }
 }
 
@@ -149,6 +160,13 @@ where
     {
         self.rectangle.support_point(direction, transform)
     }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        self.rectangle.closest_valid_normal_local(normal)
+    }
 }
 
 impl<S> ComputeBound<Aabb2<S>> for Square<S>
@@ -184,8 +202,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
     use approx::assert_ulps_eq;
+    use cgmath::{vec2, Basis2, Decomposed, Point2, Rad, Vector2};
 
     use super::*;
 
@@ -193,6 +211,27 @@ mod tests {
     fn test_rectangle_bound() {
         let r = Rectangle::new(10., 10.);
         assert_eq!(bound(-5., -5., 5., 5.), r.compute_bound())
+    }
+
+    #[test]
+    fn test_rectangle_closest_valid_normal() {
+        let r = Rectangle::new(1., 1.);
+        assert_eq!(
+            vec2(1., 0.),
+            r.closest_valid_normal_local(&vec2(0.75f64.sqrt(), 0.5))
+        );
+        assert_eq!(
+            vec2(0., 1.),
+            r.closest_valid_normal_local(&vec2(-0.5, 0.75f64.sqrt()))
+        );
+        assert_eq!(
+            vec2(-1., 0.),
+            r.closest_valid_normal_local(&vec2(-0.75f64.sqrt(), -0.5))
+        );
+        assert_eq!(
+            vec2(0., -1.),
+            r.closest_valid_normal_local(&vec2(0.5, -0.75f64.sqrt()))
+        );
     }
 
     #[test]

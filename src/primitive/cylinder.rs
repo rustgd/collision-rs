@@ -1,10 +1,10 @@
-use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
-use crate::{Aabb3, Ray3};
 use crate::prelude::*;
 use crate::primitive::util::cylinder_ray_quadratic_solve;
 use crate::volume::Sphere;
+use crate::{Aabb3, Ray3};
 
 /// Cylinder primitive
 /// Cylinder body is aligned with the Y axis, with local origin in the center of the cylinders.
@@ -70,6 +70,13 @@ where
             result.y = self.half_height;
         }
         transform.transform_point(Point3::from_vec(result))
+    }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        unimplemented!("closest_valid_normal_local is only implemented for 2D primitives for now")
     }
 }
 
@@ -231,8 +238,8 @@ where
 mod tests {
     use std;
 
-    use cgmath::{Decomposed, Quaternion, Rad, Vector3};
     use approx::assert_ulps_eq;
+    use cgmath::{Decomposed, Quaternion, Rad, Vector3};
 
     use super::*;
 

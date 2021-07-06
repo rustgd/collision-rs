@@ -1,10 +1,10 @@
 //! Bounding sphere
 
-use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
-use crate::{Aabb3, Line3, Plane, Ray3};
 use crate::prelude::*;
+use crate::{Aabb3, Line3, Plane, Ray3};
 
 /// Bounding sphere.
 #[derive(Copy, Clone, PartialEq, Debug)]

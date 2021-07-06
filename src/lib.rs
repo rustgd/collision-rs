@@ -1,7 +1,13 @@
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
-#![deny(missing_docs, trivial_casts, unsafe_code, unstable_features, unused_import_braces,
-unused_qualifications)]
+#![deny(
+    missing_docs,
+    trivial_casts,
+    unsafe_code,
+    unstable_features,
+    unused_import_braces,
+    unused_qualifications
+)]
 
 //! Companion library to cgmath, dealing with collision detection centric data structures and
 //! algorithms.
@@ -22,8 +28,6 @@ extern crate serde;
 #[cfg_attr(test, macro_use)]
 extern crate smallvec;
 
-
-
 // Re-exports
 
 pub use bound::*;
@@ -35,18 +39,18 @@ pub use ray::*;
 pub use traits::*;
 pub use volume::*;
 
-pub mod prelude;
-pub mod dbvt;
-pub mod primitive;
 pub mod algorithm;
+pub mod dbvt;
+pub mod prelude;
+pub mod primitive;
 
 // Modules
 
 mod bound;
+mod contact;
 mod frustum;
-mod traits;
+mod line;
 mod plane;
 mod ray;
-mod line;
+mod traits;
 mod volume;
-mod contact;

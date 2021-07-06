@@ -13,18 +13,18 @@ pub use self::quad::Quad;
 pub use self::rectangle::{Rectangle, Square};
 pub use self::sphere::Sphere;
 
-mod circle;
-mod cylinder;
 mod capsule;
+mod circle;
 mod cuboid;
+mod cylinder;
 mod line;
 mod particle;
 mod polygon;
 mod polyhedron;
 mod primitive2;
 mod primitive3;
-mod rectangle;
 mod quad;
+mod rectangle;
 mod sphere;
 
 pub(crate) mod util;
@@ -61,5 +61,12 @@ where
         T: Transform<Self::Point>,
     {
         self.0.support_point(direction, transform)
+    }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        self.0.closest_valid_normal_local(normal)
     }
 }

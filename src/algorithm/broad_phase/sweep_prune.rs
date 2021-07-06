@@ -126,7 +126,8 @@ where
         }
 
         // compute sweep axis for the next iteration
-        let (axis, _) = self.variance
+        let (axis, _) = self
+            .variance
             .compute_axis(NumCast::from(shapes.len()).unwrap());
         self.sweep_axis = axis;
 
@@ -138,8 +139,8 @@ mod variance {
     use std::marker;
 
     use crate::Bound;
-    use cgmath::{BaseFloat, Point2, Point3, Vector2, Vector3};
     use cgmath::prelude::*;
+    use cgmath::{BaseFloat, Point2, Point3, Vector2, Vector3};
 
     /// Trait for variance calculation in sweep and prune algorithm
     pub trait Variance {

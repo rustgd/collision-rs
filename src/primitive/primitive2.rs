@@ -1,11 +1,11 @@
 //! Wrapper enum for 2D primitives
 
-use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
-use crate::{Aabb2, Line2, Ray2};
 use crate::prelude::*;
 use crate::primitive::{Circle, ConvexPolygon, Particle2, Rectangle, Square};
+use crate::{Aabb2, Line2, Ray2};
 
 /// Wrapper enum for 2D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.
@@ -95,6 +95,23 @@ where
             Primitive2::Rectangle(ref rectangle) => rectangle.support_point(direction, transform),
             Primitive2::Square(ref square) => square.support_point(direction, transform),
             Primitive2::ConvexPolygon(ref polygon) => polygon.support_point(direction, transform),
+        }
+    }
+
+    fn closest_valid_normal_local(
+        &self,
+        normal: &<Self::Point as EuclideanSpace>::Diff,
+    ) -> <Self::Point as EuclideanSpace>::Diff {
+        match *self {
+            Primitive2::Particle(_) => panic!(concat!(
+                "Particles don't have valid normals. ",
+                "Please don't use GJKLeft2 where the left collider is a particle"
+            )),
+            Primitive2::Line(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::Circle(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::Rectangle(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::Square(ref shape) => shape.closest_valid_normal_local(normal),
+            Primitive2::ConvexPolygon(ref shape) => shape.closest_valid_normal_local(normal),
         }
     }
 }

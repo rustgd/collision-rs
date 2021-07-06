@@ -6,15 +6,15 @@ pub use self::simplex::SimplexProcessor;
 use std::cmp::Ordering;
 use std::ops::{Neg, Range};
 
-use cgmath::BaseFloat;
-use cgmath::prelude::*;
 use cgmath::num_traits::NumCast;
+use cgmath::prelude::*;
+use cgmath::BaseFloat;
 use cgmath::UlpsEq;
 
 use self::simplex::{Simplex, SimplexProcessor2, SimplexProcessor3};
-use crate::{CollisionStrategy, Contact};
-use crate::algorithm::minkowski::{EPA2, EPA3, SupportPoint, EPA};
+use crate::algorithm::minkowski::{EPALeft2, SupportPoint, EPA, EPA2, EPA3};
 use crate::prelude::*;
+use crate::{CollisionStrategy, Contact};
 use approx::ulps_eq;
 
 mod simplex;
@@ -25,6 +25,11 @@ const GJK_CONTINUOUS_TOLERANCE: f32 = 0.000001;
 
 /// GJK algorithm for 2D, see [GJK](struct.GJK.html) for more information.
 pub type GJK2<S> = GJK<SimplexProcessor2<S>, EPA2<S>, S>;
+
+/// GJK algorithm for 2D, see [GJK](struct.GJK.html) for more information.
+/// This one guarantees that the normal returned in the case of full resolution
+/// is from the left collider.
+pub type GJKLeft2<S> = GJK<SimplexProcessor2<S>, EPALeft2<S>, S>;
 
 /// GJK algorithm for 3D, see [GJK](struct.GJK.html) for more information.
 pub type GJK3<S> = GJK<SimplexProcessor3<S>, EPA3<S>, S>;
@@ -133,7 +138,8 @@ where
                 return None;
             } else {
                 simplex.push(a);
-                if self.simplex_processor
+                if self
+                    .simplex_processor
                     .reduce_to_closest_feature(&mut simplex, &mut d)
                 {
                     return Some(simplex);
@@ -233,7 +239,8 @@ where
             }
             // we construct the simplex around the current ray origin (if we can)
             simplex.push(p - ray_origin);
-            v = self.simplex_processor
+            v = self
+                .simplex_processor
                 .get_closest_point_to_origin(&mut simplex);
         }
         if v.magnitude2() <= self.continuous_tolerance {
@@ -300,7 +307,8 @@ where
             ));
         }
         for _ in 0..self.max_iterations {
-            let d = self.simplex_processor
+            let d = self
+                .simplex_processor
                 .get_closest_point_to_origin(&mut simplex);
             if ulps_eq!(d, zero) {
                 return None;
@@ -587,9 +595,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Basis2, Decomposed, Point2, Point3, Quaternion, Rad, Rotation2, Rotation3,
-                 Vector2, Vector3};
     use approx::assert_ulps_eq;
+    use cgmath::{
+        Basis2, Decomposed, Point2, Point3, Quaternion, Rad, Rotation2, Rotation3, Vector2, Vector3,
+    };
 
     use super::*;
     use crate::primitive::*;
@@ -655,17 +664,18 @@ mod tests {
         let right = Rectangle::new(10., 10.);
         let right_transform = transform(-15., 0., 0.);
         let gjk = GJK2::new();
-        assert!(
-            gjk.intersect(&left, &left_transform, &right, &right_transform)
-                .is_none()
-        );
-        assert!(gjk.intersection(
-            &CollisionStrategy::FullResolution,
-            &left,
-            &left_transform,
-            &right,
-            &right_transform
-        ).is_none())
+        assert!(gjk
+            .intersect(&left, &left_transform, &right, &right_transform)
+            .is_none());
+        assert!(gjk
+            .intersection(
+                &CollisionStrategy::FullResolution,
+                &left,
+                &left_transform,
+                &right,
+                &right_transform
+            )
+            .is_none())
     }
 
     #[test]
@@ -692,6 +702,83 @@ mod tests {
     }
 
     #[test]
+    fn test_gjk_either_2d_hit() {
+        // Make sure only GJKLeft is changed
+        let left = Rectangle::new(2.0, 2.0);
+        let left_transform = transform(0., 0., 0.);
+        let right = ConvexPolygon::new(vec![
+            Point2::new(-2.0, 0.0),
+            Point2::new(0.0, -1.0),
+            Point2::new(2.0, 0.0),
+        ]);
+        let right_transform = transform(-1.5, 1.5, 0.);
+        let gjk = GJK2::new();
+        let contact = gjk.intersection(
+            &CollisionStrategy::FullResolution,
+            &left,
+            &left_transform,
+            &right,
+            &right_transform,
+        );
+        assert!(contact.is_some());
+        let contact = contact.unwrap();
+        // This is a normal GJK. The normal should point slightly to the left.
+        assert!(contact.normal.x < -0.4);
+    }
+
+    #[test]
+    fn test_gjk_left_2d_hit() {
+        let left = Rectangle::new(2.0, 2.0);
+        let left_transform = transform(0., 0., 0.);
+        let right = ConvexPolygon::new(vec![
+            Point2::new(-2.0, 0.0),
+            Point2::new(0.0, -1.0),
+            Point2::new(2.0, 0.0),
+        ]);
+        let right_transform = transform(-1.5, 1.5, 0.);
+        let gjk = GJKLeft2::new();
+        let contact = gjk.intersection(
+            &CollisionStrategy::FullResolution,
+            &left,
+            &left_transform,
+            &right,
+            &right_transform,
+        );
+        assert!(contact.is_some());
+        let contact = contact.unwrap();
+        // If this were a normal GJK2, the normal would point slightly to the left
+        assert_eq!(Vector2::new(0., 1.), contact.normal);
+        assert_ulps_eq!(0.25, contact.penetration_depth);
+    }
+
+    #[test]
+    fn test_gjk_left_2d_hit_vertex() {
+        // Case where the penetration causes a vertex of the triangle
+        // to hit the rectangle instead of an edge.
+        // Penetration depth is especially important to check.
+        let left = Rectangle::new(2.0, 2.0);
+        let left_transform = transform(0., 0., 0.);
+        let right = ConvexPolygon::new(vec![
+            Point2::new(-2.0, 0.0),
+            Point2::new(0.0, -1.0),
+            Point2::new(2.0, 0.0),
+        ]);
+        let right_transform = transform(-0.99, 1.5, 0.);
+        let gjk = GJKLeft2::new();
+        let contact = gjk.intersection(
+            &CollisionStrategy::FullResolution,
+            &left,
+            &left_transform,
+            &right,
+            &right_transform,
+        );
+        assert!(contact.is_some());
+        let contact = contact.unwrap();
+        assert_eq!(Vector2::new(0., 1.), contact.normal);
+        assert_ulps_eq!(0.5, contact.penetration_depth);
+    }
+
+    #[test]
     fn test_gjk_3d_hit() {
         let left = Cuboid::new(10., 10., 10.);
         let left_transform = transform_3d(15., 0., 0., 0.);
@@ -712,6 +799,127 @@ mod tests {
         assert_eq!(Vector3::new(-1., 0., 0.), contact.normal);
         assert_eq!(2., contact.penetration_depth);
         assert_ulps_eq!(Point3::new(10., 1., 5.), contact.contact_point);
+    }
+
+    /// Test for [issue #115](https://github.com/rustgd/collision-rs/issues/115)
+    #[test]
+    fn test_gjk_hit_rounding_edge_case() {
+        use cgmath::Matrix3;
+
+        let left = Rectangle::new(0.75, 1.);
+        // We must use the full power of the f64 to replicate the bug.
+        // Not using `transform()` because it takes `f32`s
+        let left_transform =
+            Matrix3::new(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.858333333333344, 0.0, 1.0);
+        let right = ConvexPolygon::new(vec![
+            Point2::new(0.5, 0.5),
+            Point2::new(-0.5, 0.5),
+            Point2::new(-0.5, -0.5),
+        ]);
+        let right_transform = Matrix3::new(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+        let gjk = GJK2::new();
+        let contact = gjk.intersection(
+            &CollisionStrategy::FullResolution,
+            &left,
+            &left_transform,
+            &right,
+            &right_transform,
+        );
+        assert!(contact.is_some());
+        let contact = contact.unwrap();
+        assert!(
+            contact.penetration_depth < 0.5,
+            format!(
+                "Penetration depth is {}, which is too big",
+                contact.penetration_depth
+            )
+        );
+    }
+    #[test]
+    fn test_gjk_hit_regression_1() {
+        use cgmath::Matrix3;
+
+        let left = ConvexPolygon::new(vec![
+            Point2::new(0.5, -0.5),
+            Point2::new(0.5, 0.5),
+            Point2::new(-0.5, 0.5),
+        ]);
+        let left_transform = Matrix3::new(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 12.5, 6.5, 1.0);
+        let right = ConvexPolygon::new(vec![
+            Point2::new(0.375, -1.0),
+            Point2::new(0.375, -0.01),
+            Point2::new(0.0, 0.0),
+            Point2::new(-0.375, -0.01),
+            Point2::new(-0.375, -1.0),
+        ]);
+        let right_transform = Matrix3::new(
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            12.404999999999987,
+            6.230000000000013,
+            1.0,
+        );
+        let gjk = GJK2::new();
+        let contact = gjk.intersection(
+            &CollisionStrategy::FullResolution,
+            &left,
+            &left_transform,
+            &right,
+            &right_transform,
+        );
+        assert!(contact.is_some());
+        let contact = contact.unwrap();
+        assert_ulps_eq!(contact.normal, Vector2::new(-0.5f64.sqrt(), -0.5f64.sqrt()));
+        assert!(
+            contact.penetration_depth < 0.1,
+            format!(
+                "Penetration depth is {}, which is too big",
+                contact.penetration_depth
+            )
+        );
+    }
+
+    #[test]
+    fn test_gjk_hit_regression_2() {
+        use cgmath::Matrix3;
+
+        let left = ConvexPolygon::new(vec![
+            Point2::new(0.5, 0.5),
+            Point2::new(-0.5, 0.5),
+            Point2::new(-0.5, -0.5),
+        ]);
+        let left_transform = Matrix3::new(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 13.5, 6.5, 1.0);
+        let right = ConvexPolygon::new(vec![
+            Point2::new(0.375, -1.0),
+            Point2::new(0.375, -0.01),
+            Point2::new(0.0, 0.0),
+            Point2::new(-0.375, -0.01),
+            Point2::new(-0.375, -1.0),
+        ]);
+        let right_transform = Matrix3::new(
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            13.585769040132476,
+            6.154102373465809,
+            1.0,
+        );
+        let gjk = GJK2::new();
+        let contact = gjk.intersection(
+            &CollisionStrategy::FullResolution,
+            &left,
+            &left_transform,
+            &right,
+            &right_transform,
+        );
+        assert!(contact.is_none());
     }
 
     #[test]
@@ -762,24 +970,28 @@ mod tests {
         let right_transform = transform(15., 0., 0.);
         let gjk = GJK2::new();
 
-        let contact = gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_end_transform,
-            &right,
-            &right_transform..&right_transform,
-        ).unwrap();
+        let contact = gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_end_transform,
+                &right,
+                &right_transform..&right_transform,
+            )
+            .unwrap();
 
         assert_ulps_eq!(0.1666667, contact.time_of_impact);
         assert_eq!(Vector2::new(-1., 0.), contact.normal);
         assert_eq!(0., contact.penetration_depth);
         assert_eq!(Point2::new(10., 0.), contact.contact_point);
 
-        assert!(gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_start_transform,
-            &right,
-            &right_transform..&right_transform
-        ).is_none());
+        assert!(gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_start_transform,
+                &right,
+                &right_transform..&right_transform
+            )
+            .is_none());
     }
 
     #[test]
@@ -791,23 +1003,27 @@ mod tests {
         let right_transform = transform_3d(15., 0., 0., 0.);
         let gjk = GJK3::new();
 
-        let contact = gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_end_transform,
-            &right,
-            &right_transform..&right_transform,
-        ).unwrap();
+        let contact = gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_end_transform,
+                &right,
+                &right_transform..&right_transform,
+            )
+            .unwrap();
 
         assert_ulps_eq!(0.1666667, contact.time_of_impact);
         assert_eq!(Vector3::new(-1., 0., 0.), contact.normal);
         assert_eq!(0., contact.penetration_depth);
         assert_eq!(Point3::new(10., 0., 0.), contact.contact_point);
 
-        assert!(gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_start_transform,
-            &right,
-            &right_transform..&right_transform
-        ).is_none());
+        assert!(gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_start_transform,
+                &right,
+                &right_transform..&right_transform
+            )
+            .is_none());
     }
 }

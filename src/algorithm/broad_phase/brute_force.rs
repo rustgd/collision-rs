@@ -82,7 +82,7 @@ mod tests {
         let right = coll(2, 12., 13., 18., 18.);
 
         let brute = BruteForce::default();
-        let potentials = brute.find_collider_pairs(&vec![left, right]);
+        let potentials = brute.find_collider_pairs(&[left, right]);
         assert_eq!(0, potentials.len());
     }
 
@@ -93,7 +93,7 @@ mod tests {
         let right = coll(2, 12., 13., 18., 18.);
 
         let brute = BruteForce::default();
-        let potentials = brute.find_collider_pairs(&vec![right, left]);
+        let potentials = brute.find_collider_pairs(&[right, left]);
         assert_eq!(0, potentials.len());
     }
 
@@ -104,7 +104,7 @@ mod tests {
         let right = coll(2, 9., 10., 18., 18.);
 
         let brute = BruteForce::default();
-        let potentials = brute.find_collider_pairs(&vec![left.clone(), right.clone()]);
+        let potentials = brute.find_collider_pairs(&[left, right]);
         assert_eq!(1, potentials.len());
         assert_eq!((0, 1), potentials[0]);
     }
@@ -116,7 +116,7 @@ mod tests {
         let right = coll(222, 9., 10., 18., 18.);
 
         let brute = BruteForce::default();
-        let potentials = brute.find_collider_pairs(&vec![right.clone(), left.clone()]);
+        let potentials = brute.find_collider_pairs(&[right, left]);
         assert_eq!(1, potentials.len());
         assert_eq!((0, 1), potentials[0]);
     }

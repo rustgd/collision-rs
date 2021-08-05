@@ -1,8 +1,8 @@
-use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
-use crate::{Aabb3, Ray3};
 use crate::prelude::*;
+use crate::{Aabb3, Ray3};
 
 /// Sphere primitive
 #[derive(Debug, Clone, PartialEq)]
@@ -101,8 +101,8 @@ where
 mod tests {
     use std;
 
-    use cgmath::{Decomposed, Point3, Quaternion, Rad, Rotation3, Vector3};
     use approx::assert_ulps_eq;
+    use cgmath::{Decomposed, Point3, Quaternion, Rad, Rotation3, Vector3};
 
     use super::*;
 

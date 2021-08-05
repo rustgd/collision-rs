@@ -2,13 +2,13 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 
 use bit_set::BitSet;
-use cgmath::{BaseFloat, Point3, Vector3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point3, Vector3};
 
-use crate::{Aabb3, Plane, Ray3};
 use crate::prelude::*;
 use crate::primitive::util::barycentric_point;
 use crate::volume::Sphere;
+use crate::{Aabb3, Plane, Ray3};
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -131,7 +131,7 @@ where
     }
 
     /// Return an iterator that will yield tuples of the 3 vertices of each face
-    pub fn faces_iter(&self) -> FaceIterator<S> {
+    pub fn faces_iter(&self) -> FaceIterator<'_, S> {
         assert_eq!(self.mode, PolyhedronMode::HalfEdge);
         FaceIterator {
             polyhedron: self,
@@ -141,7 +141,8 @@ where
 
     #[inline]
     fn brute_force_support_point(&self, direction: Vector3<S>) -> Point3<S> {
-        let (p, _) = self.vertices
+        let (p, _) = self
+            .vertices
             .iter()
             .map(|v| (v.position, v.position.dot(direction)))
             .fold(
@@ -193,7 +194,7 @@ where
 
 /// Iterate over polyhedron faces.
 /// Yields a tuple with the positions of the 3 vertices of each face
-pub struct FaceIterator<'a, S: 'a>
+pub struct FaceIterator<'a, S>
 where
     S: BaseFloat,
 {
@@ -287,7 +288,8 @@ where
                 vertices[a].position,
                 vertices[b].position,
                 vertices[c].position,
-            ).unwrap(),
+            )
+            .unwrap(),
             ready: false,
         };
         let face_index = faces.len();
@@ -370,13 +372,11 @@ where
         T: Transform<Point3<S>>,
     {
         let p = match self.mode {
-            PolyhedronMode::VertexOnly => self.brute_force_support_point(
-                transform.inverse_transform_vector(*direction).unwrap(),
-            ),
+            PolyhedronMode::VertexOnly => self
+                .brute_force_support_point(transform.inverse_transform_vector(*direction).unwrap()),
 
-            PolyhedronMode::HalfEdge => self.hill_climb_support_point(
-                transform.inverse_transform_vector(*direction).unwrap(),
-            ),
+            PolyhedronMode::HalfEdge => self
+                .hill_climb_support_point(transform.inverse_transform_vector(*direction).unwrap()),
         };
         transform.transform_point(p)
     }
@@ -427,7 +427,8 @@ where
             let v0 = f.vertices.0;
             let v1 = f.vertices.1;
             let v2 = f.vertices.2;
-            let p = (self.vertices[v0].position * u) + (self.vertices[v1].position.to_vec() * v)
+            let p = (self.vertices[v0].position * u)
+                + (self.vertices[v1].position.to_vec() * v)
                 + (self.vertices[v2].position.to_vec() * w);
             Some(p)
         })
@@ -575,13 +576,13 @@ where
 #[cfg(test)]
 mod tests {
 
-    use cgmath::{Decomposed, Point3, Quaternion, Rad, Vector3};
-    use cgmath::prelude::*;
     use approx::assert_ulps_eq;
+    use cgmath::prelude::*;
+    use cgmath::{Decomposed, Point3, Quaternion, Rad, Vector3};
 
     use super::ConvexPolyhedron;
-    use crate::{Aabb3, Ray3};
     use crate::prelude::*;
+    use crate::{Aabb3, Ray3};
 
     #[test]
     fn test_polytope_half_edge() {
@@ -629,7 +630,7 @@ mod tests {
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
 
-        let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
+        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
         assert_eq!(
             Aabb3::new(Point3::new(0., 0., 0.), Point3::new(1., 1., 1.)),
             polytope.compute_bound()
@@ -646,7 +647,7 @@ mod tests {
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
 
-        let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
+        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         assert!(polytope.intersects(&ray));
         let ray = Ray3::new(Point3::new(0.5, 5., 0.5), Vector3::new(0., 1., 0.));
@@ -662,7 +663,7 @@ mod tests {
             Point3::<f32>::new(0., 0., 0.),
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
-        let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
+        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
         let t = transform(0., 0., 0., 0.);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         assert!(polytope.intersects_transformed(&ray, &t));
@@ -685,7 +686,7 @@ mod tests {
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
 
-        let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
+        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         let p = polytope.intersection(&ray).unwrap();
         assert_ulps_eq!(0.25000018, p.x);
@@ -706,7 +707,7 @@ mod tests {
             Point3::<f32>::new(0., 0., 0.),
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
-        let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
+        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
         let t = transform(0., 0., 0., 0.);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         let p = polytope.intersection_transformed(&ray, &t).unwrap();
@@ -737,7 +738,7 @@ mod tests {
             Point3::<f32>::new(0., 0., 0.),
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
-        let polytope = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
+        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
         let ray = Ray3::new(Point3::new(1., -1., 1.), Vector3::new(0., 1., 0.));
         polytope.intersection(&ray);
     }

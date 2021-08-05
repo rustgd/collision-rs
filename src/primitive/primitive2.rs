@@ -1,11 +1,11 @@
 //! Wrapper enum for 2D primitives
 
-use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
-use crate::{Aabb2, Line2, Ray2};
 use crate::prelude::*;
 use crate::primitive::{Circle, ConvexPolygon, Particle2, Rectangle, Square};
+use crate::{Aabb2, Line2, Ray2};
 
 /// Wrapper enum for 2D primitives, that also implements the `Primitive` trait, making it easier
 /// to use many different primitives in algorithms.

@@ -1,10 +1,10 @@
 //! Circle primitive
 
-use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
-use crate::{Aabb2, Ray2};
 use crate::prelude::*;
+use crate::{Aabb2, Ray2};
 
 /// Circle primitive
 #[derive(Debug, Clone, PartialEq)]
@@ -91,10 +91,10 @@ where
 mod tests {
     use std;
 
-    use crate::Ray2;
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
     use crate::prelude::*;
+    use crate::Ray2;
     use approx::assert_ulps_eq;
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;
 

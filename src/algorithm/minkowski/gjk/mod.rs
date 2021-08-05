@@ -6,15 +6,15 @@ pub use self::simplex::SimplexProcessor;
 use std::cmp::Ordering;
 use std::ops::{Neg, Range};
 
-use cgmath::BaseFloat;
-use cgmath::prelude::*;
 use cgmath::num_traits::NumCast;
+use cgmath::prelude::*;
+use cgmath::BaseFloat;
 use cgmath::UlpsEq;
 
 use self::simplex::{Simplex, SimplexProcessor2, SimplexProcessor3};
-use crate::{CollisionStrategy, Contact};
-use crate::algorithm::minkowski::{EPA2, EPA3, SupportPoint, EPA};
+use crate::algorithm::minkowski::{SupportPoint, EPA, EPA2, EPA3};
 use crate::prelude::*;
+use crate::{CollisionStrategy, Contact};
 use approx::ulps_eq;
 
 mod simplex;
@@ -133,7 +133,8 @@ where
                 return None;
             } else {
                 simplex.push(a);
-                if self.simplex_processor
+                if self
+                    .simplex_processor
                     .reduce_to_closest_feature(&mut simplex, &mut d)
                 {
                     return Some(simplex);
@@ -233,7 +234,8 @@ where
             }
             // we construct the simplex around the current ray origin (if we can)
             simplex.push(p - ray_origin);
-            v = self.simplex_processor
+            v = self
+                .simplex_processor
                 .get_closest_point_to_origin(&mut simplex);
         }
         if v.magnitude2() <= self.continuous_tolerance {
@@ -300,7 +302,8 @@ where
             ));
         }
         for _ in 0..self.max_iterations {
-            let d = self.simplex_processor
+            let d = self
+                .simplex_processor
                 .get_closest_point_to_origin(&mut simplex);
             if ulps_eq!(d, zero) {
                 return None;
@@ -587,9 +590,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Basis2, Decomposed, Point2, Point3, Quaternion, Rad, Rotation2, Rotation3,
-                 Vector2, Vector3};
     use approx::assert_ulps_eq;
+    use cgmath::{
+        Basis2, Decomposed, Point2, Point3, Quaternion, Rad, Rotation2, Rotation3, Vector2, Vector3,
+    };
 
     use super::*;
     use crate::primitive::*;
@@ -655,17 +659,18 @@ mod tests {
         let right = Rectangle::new(10., 10.);
         let right_transform = transform(-15., 0., 0.);
         let gjk = GJK2::new();
-        assert!(
-            gjk.intersect(&left, &left_transform, &right, &right_transform)
-                .is_none()
-        );
-        assert!(gjk.intersection(
-            &CollisionStrategy::FullResolution,
-            &left,
-            &left_transform,
-            &right,
-            &right_transform
-        ).is_none())
+        assert!(gjk
+            .intersect(&left, &left_transform, &right, &right_transform)
+            .is_none());
+        assert!(gjk
+            .intersection(
+                &CollisionStrategy::FullResolution,
+                &left,
+                &left_transform,
+                &right,
+                &right_transform
+            )
+            .is_none())
     }
 
     #[test]
@@ -687,7 +692,7 @@ mod tests {
         assert!(contact.is_some());
         let contact = contact.unwrap();
         assert_eq!(Vector2::new(-1., 0.), contact.normal);
-        assert_eq!(2., contact.penetration_depth);
+        assert!(2. - contact.penetration_depth <= f32::EPSILON);
         assert_eq!(Point2::new(10., 1.), contact.contact_point);
     }
 
@@ -710,7 +715,7 @@ mod tests {
         assert!(contact.is_some());
         let contact = contact.unwrap();
         assert_eq!(Vector3::new(-1., 0., 0.), contact.normal);
-        assert_eq!(2., contact.penetration_depth);
+        assert!(2. - contact.penetration_depth <= f32::EPSILON);
         assert_ulps_eq!(Point3::new(10., 1., 5.), contact.contact_point);
     }
 
@@ -762,24 +767,28 @@ mod tests {
         let right_transform = transform(15., 0., 0.);
         let gjk = GJK2::new();
 
-        let contact = gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_end_transform,
-            &right,
-            &right_transform..&right_transform,
-        ).unwrap();
+        let contact = gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_end_transform,
+                &right,
+                &right_transform..&right_transform,
+            )
+            .unwrap();
 
         assert_ulps_eq!(0.1666667, contact.time_of_impact);
         assert_eq!(Vector2::new(-1., 0.), contact.normal);
-        assert_eq!(0., contact.penetration_depth);
+        assert!(0. - contact.penetration_depth <= f32::EPSILON);
         assert_eq!(Point2::new(10., 0.), contact.contact_point);
 
-        assert!(gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_start_transform,
-            &right,
-            &right_transform..&right_transform
-        ).is_none());
+        assert!(gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_start_transform,
+                &right,
+                &right_transform..&right_transform
+            )
+            .is_none());
     }
 
     #[test]
@@ -791,23 +800,27 @@ mod tests {
         let right_transform = transform_3d(15., 0., 0., 0.);
         let gjk = GJK3::new();
 
-        let contact = gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_end_transform,
-            &right,
-            &right_transform..&right_transform,
-        ).unwrap();
+        let contact = gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_end_transform,
+                &right,
+                &right_transform..&right_transform,
+            )
+            .unwrap();
 
         assert_ulps_eq!(0.1666667, contact.time_of_impact);
         assert_eq!(Vector3::new(-1., 0., 0.), contact.normal);
-        assert_eq!(0., contact.penetration_depth);
+        assert!(0. - contact.penetration_depth <= f32::EPSILON);
         assert_eq!(Point3::new(10., 0., 0.), contact.contact_point);
 
-        assert!(gjk.intersection_time_of_impact(
-            &left,
-            &left_start_transform..&left_start_transform,
-            &right,
-            &right_transform..&right_transform
-        ).is_none());
+        assert!(gjk
+            .intersection_time_of_impact(
+                &left,
+                &left_start_transform..&left_start_transform,
+                &right,
+                &right_transform..&right_transform
+            )
+            .is_none());
     }
 }

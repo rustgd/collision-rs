@@ -3,11 +3,11 @@
 use std::marker;
 use std::ops::Range;
 
-use cgmath::{BaseFloat, Point2, Point3};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Point3};
 
-use crate::Ray;
 use crate::prelude::*;
+use crate::Ray;
 
 /// Represents a particle in space.
 ///
@@ -161,9 +161,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
-    use cgmath::prelude::*;
     use approx::assert_ulps_eq;
+    use cgmath::prelude::*;
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
 
     use super::*;
     use crate::primitive::Circle;

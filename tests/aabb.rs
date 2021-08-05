@@ -1,9 +1,9 @@
 extern crate cgmath;
 extern crate collision;
 
+use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
-use cgmath::InnerSpace;
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Contains, Continuous, Discrete, SurfaceArea, Union};
 use collision::{Line2, Line3, Ray2, Ray3, Sphere};
@@ -224,7 +224,8 @@ fn test_corners() {
     let corners = Aabb3::new(
         Point3::new(-20isize, 30isize, 5isize),
         Point3::new(10isize, -10isize, -5isize),
-    ).to_corners();
+    )
+    .to_corners();
     assert!(corners.contains(&Point3::new(-20isize, 30isize, -5isize)));
     assert!(corners.contains(&Point3::new(10isize, 30isize, 5isize)));
     assert!(corners.contains(&Point3::new(10isize, -10isize, 5isize)));
@@ -496,14 +497,14 @@ fn test_aabb3_union_sphere() {
 #[test]
 fn test_aabb2_surface_area() {
     let aabb = Aabb2::new(Point2::new(0., 0.), Point2::new(10., 20.));
-    assert_eq!(200., aabb.surface_area());
+    assert!(200. - aabb.surface_area() <= f32::EPSILON);
 }
 
 #[test]
 fn test_aabb3_surface_area() {
     let aabb = Aabb3::new(Point3::new(0., 0., 0.), Point3::new(10., 20., 30.));
     // 2 * (x*y + x*z + y*z)
-    assert_eq!(2200., aabb.surface_area());
+    assert!(2200. - aabb.surface_area() <= f32::EPSILON);
 }
 
 #[test]

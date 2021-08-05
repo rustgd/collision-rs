@@ -3,12 +3,12 @@
 
 use std::fmt;
 
-use cgmath::{BaseFloat, BaseNum, Point2, Vector2};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, BaseNum, Point2, Vector2};
 
 use super::{max, min};
-use crate::{Line2, Ray2};
 use crate::prelude::*;
+use crate::{Line2, Ray2};
 
 /// A two-dimensional AABB, aka a rectangle.
 #[derive(Copy, Clone, PartialEq)]
@@ -85,7 +85,7 @@ impl<S: BaseNum> Aabb for Aabb2<S> {
 }
 
 impl<S: BaseNum> fmt::Debug for Aabb2<S> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[{:?} - {:?}]", self.min, self.max)
     }
 }
@@ -103,7 +103,9 @@ impl<S: BaseNum> Contains<Aabb2<S>> for Aabb2<S> {
         let other_min = other.min();
         let other_max = other.max();
 
-        other_min.x >= self.min.x && other_min.y >= self.min.y && other_max.x <= self.max.x
+        other_min.x >= self.min.x
+            && other_min.y >= self.min.y
+            && other_max.x <= self.max.x
             && other_max.y <= self.max.y
     }
 }

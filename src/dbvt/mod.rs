@@ -100,9 +100,9 @@ use rand::Rng;
 
 use crate::prelude::*;
 
-mod wrapped;
-mod visitor;
 mod util;
+mod visitor;
+mod wrapped;
 
 const SURFACE_AREA_IMPROVEMENT_FOR_ROTATION: f32 = 0.3;
 const PERFORM_ROTATION_PERCENTAGE: u32 = 10;
@@ -272,7 +272,7 @@ where
     T: TreeValue,
     T::Bound: fmt::Debug,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "graph tree {{")?;
         for n_index in 1..self.nodes.len() {
             match self.nodes[n_index] {
@@ -505,11 +505,13 @@ where
 
                 // if we encounter a branch, do intersection test, and push the children if the
                 // branch intersected
-                Node::Branch(ref branch) => if visitor.accept(&branch.bound, false).is_some() {
-                    stack[stack_pointer] = branch.left;
-                    stack[stack_pointer + 1] = branch.right;
-                    stack_pointer += 2;
-                },
+                Node::Branch(ref branch) => {
+                    if visitor.accept(&branch.bound, false).is_some() {
+                        stack[stack_pointer] = branch.left;
+                        stack[stack_pointer + 1] = branch.right;
+                        stack_pointer += 2;
+                    }
+                }
                 Node::Nil => (),
             }
         }
@@ -561,7 +563,8 @@ where
     /// all insert/remove/updates have been performed this frame.
     ///
     pub fn update(&mut self) {
-        let nodes = self.updated_list
+        let nodes = self
+            .updated_list
             .iter()
             .filter_map(|&index| {
                 if let Node::Leaf(ref l) = self.nodes[index] {
@@ -1264,10 +1267,7 @@ fn get_right_index<B>(node: &Node<B>) -> usize {
 
 #[inline]
 fn is_leaf<B>(node: &Node<B>) -> bool {
-    match *node {
-        Node::Leaf(_) => true,
-        _ => false,
-    }
+    matches!(*node, Node::Leaf(_))
 }
 
 /// Get the height of the node, regardless of node type. Leafs have height 1, nil height 0.

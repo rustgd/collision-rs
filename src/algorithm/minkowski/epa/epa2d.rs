@@ -1,14 +1,14 @@
 use std::marker;
 
-use cgmath::{BaseFloat, Point2, Vector2};
-use cgmath::prelude::*;
-use cgmath::num_traits::NumCast;
 use approx::assert_ulps_ne;
+use cgmath::num_traits::NumCast;
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
 use super::*;
-use crate::{CollisionStrategy, Contact};
 use crate::prelude::*;
 use crate::primitive::util::triple_product;
+use crate::{CollisionStrategy, Contact};
 
 /// EPA algorithm implementation for 2D. Only to be used in [`GJK`](struct.GJK.html).
 #[derive(Debug)]
@@ -157,8 +157,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
     use approx::assert_ulps_eq;
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;
     use crate::algorithm::minkowski::SupportPoint;
@@ -166,22 +166,22 @@ mod tests {
 
     #[test]
     fn test_closest_edge_0() {
-        assert_eq!(None, closest_edge::<f32>(&vec![]))
+        assert_eq!(None, closest_edge::<f32>(&[]))
     }
 
     #[test]
     fn test_closest_edge_1() {
-        assert_eq!(None, closest_edge(&vec![sup(10., 10.)]))
+        assert_eq!(None, closest_edge(&[sup(10., 10.)]))
     }
 
     #[test]
     fn test_closest_edge_2() {
-        assert_eq!(None, closest_edge(&vec![sup(10., 10.), sup(-10., 5.)]))
+        assert_eq!(None, closest_edge(&[sup(10., 10.), sup(-10., 5.)]))
     }
 
     #[test]
     fn test_closest_edge_3() {
-        let edge = closest_edge(&vec![sup(10., 10.), sup(-10., 5.), sup(2., -5.)]);
+        let edge = closest_edge(&[sup(10., 10.), sup(-10., 5.), sup(2., -5.)]);
         assert!(edge.is_some());
         let edge = edge.unwrap();
         assert_eq!(2, edge.index);
@@ -196,17 +196,15 @@ mod tests {
         let left_transform = transform(15., 0., 0.);
         let right = Rectangle::new(10., 10.);
         let right_transform = transform(7., 2., 0.);
-        assert!(
-            EPA2::new()
-                .process(
-                    &mut vec![],
-                    &left,
-                    &left_transform,
-                    &right,
-                    &right_transform
-                )
-                .is_none()
-        );
+        assert!(EPA2::new()
+            .process(
+                &mut vec![],
+                &left,
+                &left_transform,
+                &right,
+                &right_transform
+            )
+            .is_none());
     }
 
     #[test]
@@ -216,17 +214,15 @@ mod tests {
         let right = Rectangle::new(10., 10.);
         let right_transform = transform(7., 2., 0.);
         let mut simplex = vec![sup(-2., 8.)];
-        assert!(
-            EPA2::new()
-                .process(
-                    &mut simplex,
-                    &left,
-                    &left_transform,
-                    &right,
-                    &right_transform
-                )
-                .is_none()
-        );
+        assert!(EPA2::new()
+            .process(
+                &mut simplex,
+                &left,
+                &left_transform,
+                &right,
+                &right_transform
+            )
+            .is_none());
     }
 
     #[test]
@@ -236,17 +232,15 @@ mod tests {
         let right = Rectangle::new(10., 10.);
         let right_transform = transform(7., 2., 0.);
         let mut simplex = vec![sup(-2., 8.), sup(18., -12.)];
-        assert!(
-            EPA2::new()
-                .process(
-                    &mut simplex,
-                    &left,
-                    &left_transform,
-                    &right,
-                    &right_transform
-                )
-                .is_none()
-        );
+        assert!(EPA2::new()
+            .process(
+                &mut simplex,
+                &left,
+                &left_transform,
+                &right,
+                &right_transform
+            )
+            .is_none());
     }
 
     #[test]
@@ -266,7 +260,7 @@ mod tests {
         assert!(contact.is_some());
         let contact = contact.unwrap();
         assert_eq!(Vector2::new(-1., 0.), contact.normal);
-        assert_eq!(2., contact.penetration_depth);
+        assert!(2. - contact.penetration_depth <= f32::EPSILON);
     }
 
     fn sup(x: f32, y: f32) -> SupportPoint<Point2<f32>> {

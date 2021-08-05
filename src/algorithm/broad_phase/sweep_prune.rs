@@ -126,7 +126,8 @@ where
         }
 
         // compute sweep axis for the next iteration
-        let (axis, _) = self.variance
+        let (axis, _) = self
+            .variance
             .compute_axis(NumCast::from(shapes.len()).unwrap());
         self.sweep_axis = axis;
 
@@ -138,8 +139,8 @@ mod variance {
     use std::marker;
 
     use crate::Bound;
-    use cgmath::{BaseFloat, Point2, Point3, Vector2, Vector3};
     use cgmath::prelude::*;
+    use cgmath::{BaseFloat, Point2, Point3, Vector2, Vector3};
 
     /// Trait for variance calculation in sweep and prune algorithm
     pub trait Variance {
@@ -319,7 +320,7 @@ mod tests {
         let right = coll(2, 12., 13., 18., 18.);
 
         let mut sweep = SweepAndPrune2::new();
-        let potentials = sweep.find_collider_pairs(&mut vec![left, right]);
+        let potentials = sweep.find_collider_pairs(&mut [left, right]);
         assert_eq!(0, potentials.len());
     }
 
@@ -330,7 +331,7 @@ mod tests {
         let right = coll(2, 12., 13., 18., 18.);
 
         let mut sweep = SweepAndPrune2::new();
-        let potentials = sweep.find_collider_pairs(&mut vec![right, left]);
+        let potentials = sweep.find_collider_pairs(&mut [right, left]);
         assert_eq!(0, potentials.len());
     }
 
@@ -341,7 +342,7 @@ mod tests {
         let right = coll(2, 9., 10., 18., 18.);
 
         let mut sweep = SweepAndPrune2::new();
-        let potentials = sweep.find_collider_pairs(&mut vec![left.clone(), right.clone()]);
+        let potentials = sweep.find_collider_pairs(&mut [left, right]);
         assert_eq!(1, potentials.len());
         assert_eq!((0, 1), potentials[0]);
     }
@@ -353,7 +354,7 @@ mod tests {
         let right = coll(222, 9., 10., 18., 18.);
 
         let mut sweep = SweepAndPrune2::new();
-        let potentials = sweep.find_collider_pairs(&mut vec![right.clone(), left.clone()]);
+        let potentials = sweep.find_collider_pairs(&mut [right, left]);
         assert_eq!(1, potentials.len());
         assert_eq!((0, 1), potentials[0]);
     }

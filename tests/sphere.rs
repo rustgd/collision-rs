@@ -216,5 +216,5 @@ fn test_surface_area() {
     };
 
     // 4 * pi * r^2
-    assert_eq!(4. * std::f64::consts::PI * 2. * 2., base.surface_area());
+    assert!((4. * std::f64::consts::PI * 2. * 2.) - base.surface_area() <= f64::EPSILON);
 }

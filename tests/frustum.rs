@@ -11,7 +11,8 @@ fn test_contains() {
         aspect: 1f32,
         near: 1f32,
         far: 10f32,
-    }.to_frustum();
+    }
+    .to_frustum();
     assert_eq!(
         frustum.contains(&Sphere {
             center: Point3::new(0f32, 0f32, -5f32),

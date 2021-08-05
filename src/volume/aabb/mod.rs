@@ -10,8 +10,8 @@ pub use self::aabb3::Aabb3;
 
 use std::cmp::{Ordering, PartialOrd};
 
-use cgmath::{BaseNum, Point2, Point3};
 use cgmath::prelude::*;
+use cgmath::{BaseNum, Point2, Point3};
 
 use crate::traits::Bound;
 

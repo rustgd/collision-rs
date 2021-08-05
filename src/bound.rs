@@ -1,8 +1,8 @@
 //! Generic spatial bounds.
 
-use cgmath::{EuclideanSpace, Point3};
 use cgmath::BaseFloat;
 use cgmath::Matrix4;
+use cgmath::{EuclideanSpace, Point3};
 use std::{cmp, fmt};
 
 use crate::frustum::Frustum;
@@ -37,14 +37,15 @@ pub trait PlaneBound<S: BaseFloat>: fmt::Debug {
             frustum.bottom,
             frustum.near,
             frustum.far,
-        ].iter()
-            .fold(Relation::In, |cur, p| {
-                let r = self.relate_plane(*p);
-                // If any of the planes are `Out`, the bound is outside.
-                // Otherwise, if any are `Cross`, the bound is crossing.
-                // Otherwise, the bound is fully inside.
-                cmp::max(cur, r)
-            })
+        ]
+        .iter()
+        .fold(Relation::In, |cur, p| {
+            let r = self.relate_plane(*p);
+            // If any of the planes are `Out`, the bound is outside.
+            // Otherwise, if any are `Cross`, the bound is crossing.
+            // Otherwise, the bound is fully inside.
+            cmp::max(cur, r)
+        })
     }
 }
 

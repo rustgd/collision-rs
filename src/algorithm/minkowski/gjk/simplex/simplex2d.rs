@@ -1,9 +1,9 @@
 use std::marker;
 use std::ops::Neg;
 
-use cgmath::{BaseFloat, Point2, Vector2};
-use cgmath::prelude::*;
 use approx::ulps_eq;
+use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
 use super::{Simplex, SimplexProcessor};
 use crate::primitive::util::{get_closest_point_on_edge, triple_product};
@@ -102,6 +102,7 @@ mod tests {
     use super::*;
     use crate::algorithm::minkowski::SupportPoint;
     use approx::assert_ulps_eq;
+    use smallvec::smallvec;
 
     #[test]
     fn test_check_origin_empty() {
@@ -130,7 +131,7 @@ mod tests {
         let mut simplex = smallvec![sup(40., 10.), sup(-10., 10.)];
         assert!(!processor.reduce_to_closest_feature(&mut simplex, &mut direction));
         assert_eq!(2, simplex.len());
-        assert_eq!(0., direction.x);
+        assert!(0. - direction.x <= f32::EPSILON);
         assert!(direction.y < 0.);
     }
 

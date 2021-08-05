@@ -4,12 +4,12 @@
 
 use std::marker::PhantomData;
 
-use cgmath::BaseFloat;
 use cgmath::prelude::*;
+use cgmath::BaseFloat;
 
 use super::{ContinuousVisitor, DynamicBoundingVolumeTree, TreeValue, Visitor};
-use crate::Ray;
 use crate::prelude::*;
+use crate::Ray;
 
 struct RayClosestVisitor<S, P, T>
 where

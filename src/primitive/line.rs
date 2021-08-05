@@ -1,8 +1,8 @@
 use cgmath::{BaseFloat, InnerSpace, Point2, Transform, Vector2};
 
-use crate::Aabb2;
 use crate::line::Line2;
 use crate::traits::{ComputeBound, Primitive};
+use crate::Aabb2;
 
 impl<S> Primitive for Line2<S>
 where
@@ -38,8 +38,8 @@ mod tests {
 
     use super::*;
     use crate::algorithm::minkowski::GJK2;
-    use cgmath::{Basis2, Decomposed, Rad, Rotation2};
     use crate::primitive::Rectangle;
+    use cgmath::{Basis2, Decomposed, Rad, Rotation2};
 
     fn transform(x: f32, y: f32, angle: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {
         Decomposed {
@@ -56,9 +56,8 @@ mod tests {
         let transform_1 = transform(1., 0., 0.);
         let transform_2 = transform(1.1, 0., 0.);
         let gjk = GJK2::new();
-        assert!(
-            gjk.intersect(&line, &transform_1, &rectangle, &transform_2)
-                .is_some()
-        );
+        assert!(gjk
+            .intersect(&line, &transform_1, &rectangle, &transform_2)
+            .is_some());
     }
 }

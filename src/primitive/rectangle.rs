@@ -1,11 +1,11 @@
 //! Rectangle primitive
 
-use cgmath::{BaseFloat, Point2, Vector2};
 use cgmath::prelude::*;
+use cgmath::{BaseFloat, Point2, Vector2};
 
-use crate::{Aabb2, Ray2};
 use crate::prelude::*;
 use crate::primitive::util::get_max_point;
+use crate::{Aabb2, Ray2};
 
 /// Rectangle primitive.
 ///
@@ -184,8 +184,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
     use approx::assert_ulps_eq;
+    use cgmath::{Basis2, Decomposed, Point2, Rad, Vector2};
 
     use super::*;
 

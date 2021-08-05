@@ -2,13 +2,13 @@
 
 use std::marker::PhantomData;
 
+use cgmath::prelude::*;
 use cgmath::{BaseFloat, BaseNum};
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
-use cgmath::prelude::*;
 
-use crate::Ray2;
 use crate::prelude::*;
+use crate::Ray2;
 
 /// A generic directed line segment from `origin` to `dest`.
 #[derive(Copy, Clone, PartialEq, Debug)]

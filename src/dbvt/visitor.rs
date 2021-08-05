@@ -7,8 +7,8 @@ use std::marker::PhantomData;
 use cgmath::BaseFloat;
 
 use super::{TreeValue, Visitor};
-use crate::{Frustum, PlaneBound, Relation};
 use crate::prelude::*;
+use crate::{Frustum, PlaneBound, Relation};
 
 /// Visitor for doing continuous intersection testing on the DBVT.
 ///
@@ -17,7 +17,7 @@ use crate::prelude::*;
 /// of bound.intersection(self.bound).
 ///
 #[derive(Debug)]
-pub struct ContinuousVisitor<'a, B: 'a, T> {
+pub struct ContinuousVisitor<'a, B, T> {
     bound: &'a B,
     marker: PhantomData<T>,
 }
@@ -57,7 +57,7 @@ where
 /// of bound.intersects(self.bound).
 ///
 #[derive(Debug)]
-pub struct DiscreteVisitor<'a, B: 'a, T> {
+pub struct DiscreteVisitor<'a, B, T> {
     bound: &'a B,
     marker: PhantomData<T>,
 }
@@ -100,7 +100,7 @@ where
 /// of self.frustum.contains(bound).
 ///
 #[derive(Debug)]
-pub struct FrustumVisitor<'a, S: 'a, T>
+pub struct FrustumVisitor<'a, S, T>
 where
     S: BaseFloat,
 {

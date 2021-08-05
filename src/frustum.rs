@@ -1,11 +1,11 @@
 //! View frustum for visibility determination
 
-use crate::Plane;
 use crate::bound::*;
-use cgmath::{Matrix, Matrix4};
-use cgmath::{Ortho, Perspective, PerspectiveFov};
+use crate::Plane;
 use cgmath::BaseFloat;
 use cgmath::Point3;
+use cgmath::{Matrix, Matrix4};
+use cgmath::{Ortho, Perspective, PerspectiveFov};
 
 /// View frustum, used for frustum culling
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -84,15 +84,16 @@ impl<S: BaseFloat> Frustum<S> {
             self.bottom,
             self.near,
             self.far,
-        ].iter()
-            .fold(Relation::In, |cur, p| {
-                use std::cmp::max;
-                let r = bound.relate_plane(*p);
-                // If any of the planes are `Out`, the bound is outside.
-                // Otherwise, if any are `Cross`, the bound is crossing.
-                // Otherwise, the bound is fully inside.
-                max(cur, r)
-            })
+        ]
+        .iter()
+        .fold(Relation::In, |cur, p| {
+            use std::cmp::max;
+            let r = bound.relate_plane(*p);
+            // If any of the planes are `Out`, the bound is outside.
+            // Otherwise, if any are `Cross`, the bound is crossing.
+            // Otherwise, the bound is fully inside.
+            max(cur, r)
+        })
     }
 }
 
@@ -127,14 +128,14 @@ pub trait Projection<S: BaseFloat>: Into<Matrix4<S>> {
 impl<S: BaseFloat> Projection<S> for PerspectiveFov<S> {
     fn to_frustum(&self) -> Frustum<S> {
         // TODO: Could this be faster?
-        Frustum::from_matrix4(self.clone().into()).unwrap()
+        Frustum::from_matrix4((*self).into()).unwrap()
     }
 }
 
 impl<S: BaseFloat> Projection<S> for Perspective<S> {
     fn to_frustum(&self) -> Frustum<S> {
         // TODO: Could this be faster?
-        Frustum::from_matrix4(self.clone().into()).unwrap()
+        Frustum::from_matrix4((*self).into()).unwrap()
     }
 }
 

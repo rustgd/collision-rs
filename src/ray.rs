@@ -2,10 +2,10 @@
 
 use std::marker::PhantomData;
 
+use cgmath::prelude::*;
 use cgmath::{BaseFloat, BaseNum};
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
-use cgmath::prelude::*;
 
 use crate::traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransformed};
 

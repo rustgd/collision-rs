@@ -41,7 +41,8 @@ fn test_ray_intersection() {
         Point3::new(5f64, 0f64, 5f64),
         Point3::new(5f64, 5f64, 5f64),
         Point3::new(5f64, 0f64, -1f64),
-    ).unwrap();
+    )
+    .unwrap();
     let r1: Ray3<f64> = Ray::new(
         Point3::new(0f64, 0f64, 0f64),
         Vector3::new(-1f64, 0f64, 0f64).normalize(),

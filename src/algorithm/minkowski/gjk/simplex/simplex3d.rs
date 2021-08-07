@@ -1,9 +1,9 @@
 use std::marker;
 use std::ops::Neg;
 
-use approx::ulps_eq;
 use cgmath::num_traits::cast;
 use cgmath::prelude::*;
+use cgmath::ulps_eq;
 use cgmath::{BaseFloat, Point3, Vector3};
 
 use super::{Simplex, SimplexProcessor};
@@ -223,7 +223,7 @@ fn check_side<S>(
 mod tests {
     use std::ops::Neg;
 
-    use approx::assert_ulps_eq;
+    use cgmath::assert_ulps_eq;
     use cgmath::{Point3, Vector3};
     use smallvec::smallvec;
 

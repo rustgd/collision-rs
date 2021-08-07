@@ -1,8 +1,5 @@
 #![cfg(feature = "serde")]
 
-extern crate cgmath;
-extern crate serde;
-
 use cgmath::Point1;
 use serde::Serialize;
 

@@ -1,7 +1,3 @@
-extern crate cgmath;
-extern crate collision;
-extern crate rand;
-
 use cgmath::prelude::*;
 use cgmath::{Deg, PerspectiveFov, Point2, Point3, Vector2, Vector3};
 use collision::dbvt::*;

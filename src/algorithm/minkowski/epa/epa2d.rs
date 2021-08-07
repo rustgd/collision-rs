@@ -1,6 +1,6 @@
 use std::marker;
 
-use approx::assert_ulps_ne;
+use cgmath::assert_ulps_ne;
 use cgmath::num_traits::NumCast;
 use cgmath::prelude::*;
 use cgmath::{BaseFloat, Point2, Vector2};
@@ -157,7 +157,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use approx::assert_ulps_eq;
+    use cgmath::assert_ulps_eq;
     use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;

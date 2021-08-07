@@ -1,7 +1,7 @@
 use std::fmt;
 
-use approx::{ulps_eq, ulps_ne};
 use cgmath::prelude::*;
+use cgmath::{ulps_eq, ulps_ne};
 use cgmath::{AbsDiffEq, RelativeEq, UlpsEq};
 use cgmath::{BaseFloat, Point3, Vector3, Vector4};
 

@@ -1,6 +1,3 @@
-extern crate cgmath;
-extern crate collision;
-
 use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};

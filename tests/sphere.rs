@@ -1,8 +1,3 @@
-extern crate approx;
-
-extern crate cgmath;
-extern crate collision;
-
 use cgmath::*;
 use collision::*;
 

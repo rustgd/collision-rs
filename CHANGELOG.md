@@ -2,7 +2,7 @@
 
 ### v0.20
   - No actual API change, but updated to Rust2018 and synced with cgmath 0.17
-  - Uses latest versions of rand and approx for compatibility with other libraries
+  - Uses the latest versions of rand and approx for compatibility with other libraries
 
 ### v0.19
   - Updated version of num library to 0.2

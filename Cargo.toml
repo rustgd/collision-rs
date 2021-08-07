@@ -33,7 +33,6 @@ name = "collision"
 
 [dependencies]
 rand = "0.8.4"
-approx = "0.4" # Only for the macros; for all other instances use the re-exported cgmath ones.
 cgmath = "0.18.0"
 serde = { version = "1.0.126", optional = true, features = ["derive"] }
 bit-set = "0.5.2"

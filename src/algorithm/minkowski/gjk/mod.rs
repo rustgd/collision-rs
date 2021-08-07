@@ -15,7 +15,7 @@ use self::simplex::{Simplex, SimplexProcessor2, SimplexProcessor3};
 use crate::algorithm::minkowski::{SupportPoint, EPA, EPA2, EPA3};
 use crate::prelude::*;
 use crate::{CollisionStrategy, Contact};
-use approx::ulps_eq;
+use cgmath::ulps_eq;
 
 mod simplex;
 
@@ -590,7 +590,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use approx::assert_ulps_eq;
+    use cgmath::assert_ulps_eq;
     use cgmath::{
         Basis2, Decomposed, Point2, Point3, Quaternion, Rad, Rotation2, Rotation3, Vector2, Vector3,
     };

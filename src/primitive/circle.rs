@@ -93,7 +93,7 @@ mod tests {
 
     use crate::prelude::*;
     use crate::Ray2;
-    use approx::assert_ulps_eq;
+    use cgmath::assert_ulps_eq;
     use cgmath::{Basis2, Decomposed, Point2, Rad, Rotation2, Vector2};
 
     use super::*;

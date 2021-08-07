@@ -101,7 +101,7 @@ where
 mod tests {
     use std;
 
-    use approx::assert_ulps_eq;
+    use cgmath::assert_ulps_eq;
     use cgmath::{Decomposed, Point3, Quaternion, Rad, Rotation3, Vector3};
 
     use super::*;

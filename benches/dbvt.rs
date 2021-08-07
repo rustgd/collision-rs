@@ -1,8 +1,5 @@
 #![feature(test)]
 
-extern crate cgmath;
-extern crate collision;
-extern crate rand;
 extern crate test;
 
 use cgmath::prelude::*;

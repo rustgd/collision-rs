@@ -1,6 +1,3 @@
-extern crate cgmath;
-extern crate collision;
-
 use cgmath::{PerspectiveFov, Point3, Rad};
 use collision::{Projection, Relation, Sphere};
 

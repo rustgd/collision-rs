@@ -1,8 +1,8 @@
 use std::marker;
 use std::ops::Neg;
 
-use approx::ulps_eq;
 use cgmath::prelude::*;
+use cgmath::ulps_eq;
 use cgmath::{BaseFloat, Point2, Vector2};
 
 use super::{Simplex, SimplexProcessor};
@@ -101,7 +101,7 @@ mod tests {
 
     use super::*;
     use crate::algorithm::minkowski::SupportPoint;
-    use approx::assert_ulps_eq;
+    use cgmath::assert_ulps_eq;
     use smallvec::smallvec;
 
     #[test]

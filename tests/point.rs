@@ -1,9 +1,4 @@
-#[macro_use]
-extern crate approx;
-
-extern crate cgmath;
-extern crate collision;
-
+use cgmath::assert_ulps_eq;
 use cgmath::{Point3, Vector3};
 use collision::{Continuous, Plane, PlaneBound, Ray3, Relation};
 

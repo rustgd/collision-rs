@@ -220,7 +220,7 @@ fn remove_or_add_edge(edges: &mut Vec<(usize, usize)>, edge: (usize, usize)) {
 
 #[cfg(test)]
 mod tests {
-    use approx::assert_ulps_eq;
+    use cgmath::assert_ulps_eq;
     use cgmath::{Decomposed, Quaternion, Rad, Vector3};
 
     use super::*;

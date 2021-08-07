@@ -41,7 +41,7 @@ at your option.
 
 ## Contributing
 
-Use [CONTRIBUTING.md](https://github.com/rustgd/collision-rs/blob/master/CONTRIBUTING.md) for futher information.
+Use [CONTRIBUTING.md](https://github.com/rustgd/collision-rs/blob/master/CONTRIBUTING.md) for further information.
 
 Pull requests are most welcome, especially in the realm of performance
 enhancements and fixing any mistakes. Unit tests and benchmarks are also 

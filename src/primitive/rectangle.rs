@@ -192,7 +192,7 @@ mod tests {
     #[test]
     fn test_rectangle_bound() {
         let r = Rectangle::new(10., 10.);
-        assert_eq!(bound(-5., -5., 5., 5.), r.compute_bound())
+        assert_eq!(bound(-5., -5., 5., 5.), r.compute_bound());
     }
 
     #[test]
@@ -238,7 +238,7 @@ mod tests {
         assert_eq!(None, rectangle.intersection_transformed(&ray, &t));
         let t = transform(0., 0., 0.3);
         let p = rectangle.intersection_transformed(&ray, &t).unwrap();
-        assert_ulps_eq!(5.233758, p.x);
+        assert_ulps_eq!(5.233_758, p.x);
         assert_ulps_eq!(0., p.y);
     }
 

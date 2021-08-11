@@ -231,22 +231,22 @@ mod tests {
         let end = Vector2::new(-1., 3.);
         let point = Vector2::zero();
         let p = get_closest_point_on_edge(&start, &end, &point);
-        assert_ulps_eq!(Vector2::new(1f32, 1f32), p);
+        assert_ulps_eq!(Vector2::new(1_f32, 1_f32), p);
 
         let start = Vector2::new(2., -2.);
         let end = Vector2::new(2., 2.);
         let p = get_closest_point_on_edge(&start, &end, &point);
-        assert_ulps_eq!(Vector2::new(2f32, 0f32), p);
+        assert_ulps_eq!(Vector2::new(2_f32, 0_f32), p);
 
         let start = Vector2::new(2., 4.);
         let end = Vector2::new(2., 2.);
         let p = get_closest_point_on_edge(&start, &end, &point);
-        assert_ulps_eq!(Vector2::new(2f32, 2f32), p);
+        assert_ulps_eq!(Vector2::new(2_f32, 2_f32), p);
 
         let start = Vector2::new(2., -2.);
         let end = Vector2::new(2., -4.);
         let p = get_closest_point_on_edge(&start, &end, &point);
-        assert_ulps_eq!(Vector2::new(2f32, -2f32), p);
+        assert_ulps_eq!(Vector2::new(2_f32, -2_f32), p);
     }
 
     fn transform(dx: f32, dy: f32, rot: f32) -> Decomposed<Vector2<f32>, Basis2<f32>> {

@@ -77,7 +77,7 @@ where
     S: BaseFloat,
 {
     /// Create a new convex polyhedron from the given vertices.
-    pub fn new(vertices: Vec<Point3<S>>) -> Self {
+    pub fn new(vertices: &[Point3<S>]) -> Self {
         Self {
             mode: PolyhedronMode::VertexOnly,
             vertices: vertices
@@ -102,8 +102,8 @@ where
     }
 
     /// Create a new convex polyhedron from the given vertices and faces.
-    pub fn new_with_faces(vertices: Vec<Point3<S>>, faces: Vec<(usize, usize, usize)>) -> Self {
-        let (vertices, edges, faces) = build_half_edges(&vertices, &faces);
+    pub fn new_with_faces(vertices: &[Point3<S>], faces: &[(usize, usize, usize)]) -> Self {
+        let (vertices, edges, faces) = build_half_edges(vertices, faces);
         Self {
             mode: PolyhedronMode::HalfEdge,
             bound: vertices
@@ -122,12 +122,9 @@ where
 
     /// Create a new convex polyhedron from the given vertices and faces. Will remove any duplicate
     /// vertices.
-    pub fn new_with_faces_dedup(
-        vertices: Vec<Point3<S>>,
-        faces: Vec<(usize, usize, usize)>,
-    ) -> Self {
-        let (vertices, map) = dedup_vertices(&vertices);
-        Self::new_with_faces(vertices, dedup_faces(&faces, &map))
+    pub fn new_with_faces_dedup(vertices: &[Point3<S>], faces: &[(usize, usize, usize)]) -> Self {
+        let (vertices, map) = dedup_vertices(vertices);
+        Self::new_with_faces(&vertices, &dedup_faces(faces, &map))
     }
 
     /// Return an iterator that will yield tuples of the 3 vertices of each face
@@ -594,8 +591,8 @@ mod tests {
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
 
-        let polytope_with_faces = ConvexPolyhedron::new_with_faces(vertices.clone(), faces);
-        let polytope = ConvexPolyhedron::new(vertices);
+        let polytope_with_faces = ConvexPolyhedron::new_with_faces(&vertices, &faces);
+        let polytope = ConvexPolyhedron::new(&vertices);
 
         let t = transform(0., 0., 0., 0.);
 
@@ -630,7 +627,7 @@ mod tests {
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
 
-        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
+        let polytope = ConvexPolyhedron::new_with_faces(&vertices, &faces);
         assert_eq!(
             Aabb3::new(Point3::new(0., 0., 0.), Point3::new(1., 1., 1.)),
             polytope.compute_bound()
@@ -647,7 +644,7 @@ mod tests {
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
 
-        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
+        let polytope = ConvexPolyhedron::new_with_faces(&vertices, &faces);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         assert!(polytope.intersects(&ray));
         let ray = Ray3::new(Point3::new(0.5, 5., 0.5), Vector3::new(0., 1., 0.));
@@ -663,7 +660,7 @@ mod tests {
             Point3::<f32>::new(0., 0., 0.),
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
-        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
+        let polytope = ConvexPolyhedron::new_with_faces(&vertices, &faces);
         let t = transform(0., 0., 0., 0.);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         assert!(polytope.intersects_transformed(&ray, &t));
@@ -686,12 +683,12 @@ mod tests {
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
 
-        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
+        let polytope = ConvexPolyhedron::new_with_faces(&vertices, &faces);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         let p = polytope.intersection(&ray).unwrap();
-        assert_ulps_eq!(0.25000018, p.x);
-        assert_ulps_eq!(0.4999997, p.y);
-        assert_ulps_eq!(0.25000018, p.z);
+        assert_ulps_eq!(0.250_000_18, p.x);
+        assert_ulps_eq!(0.499_999_7, p.y);
+        assert_ulps_eq!(0.250_000_18, p.z);
         let ray = Ray3::new(Point3::new(0.5, 5., 0.5), Vector3::new(0., 1., 0.));
         assert_eq!(None, polytope.intersection(&ray));
         let ray = Ray3::new(Point3::new(0., 5., 0.), Vector3::new(0., -1., 0.));
@@ -707,25 +704,25 @@ mod tests {
             Point3::<f32>::new(0., 0., 0.),
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
-        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
+        let polytope = ConvexPolyhedron::new_with_faces(&vertices, &faces);
         let t = transform(0., 0., 0., 0.);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         let p = polytope.intersection_transformed(&ray, &t).unwrap();
-        assert_ulps_eq!(0.25000018, p.x);
-        assert_ulps_eq!(0.4999997, p.y);
-        assert_ulps_eq!(0.25000018, p.z);
+        assert_ulps_eq!(0.250_000_18, p.x);
+        assert_ulps_eq!(0.499_999_7, p.y);
+        assert_ulps_eq!(0.250_000_18, p.z);
         let ray = Ray3::new(Point3::new(0.5, 5., 0.5), Vector3::new(0., 1., 0.));
         assert_eq!(None, polytope.intersection_transformed(&ray, &t));
         let t = transform(0., 1., 0., 0.);
         let ray = Ray3::new(Point3::new(0.25, 5., 0.25), Vector3::new(0., -1., 0.));
         let p = polytope.intersection_transformed(&ray, &t).unwrap();
-        assert_ulps_eq!(0.25000018, p.x);
-        assert_ulps_eq!(1.4999997, p.y);
-        assert_ulps_eq!(0.25000018, p.z);
+        assert_ulps_eq!(0.250_000_18, p.x);
+        assert_ulps_eq!(1.499_999_7, p.y);
+        assert_ulps_eq!(0.250_000_18, p.z);
         let t = transform(0., 0., 0., 0.3);
         let p = polytope.intersection_transformed(&ray, &t).unwrap();
         assert_ulps_eq!(0.25, p.x);
-        assert_ulps_eq!(0.4677162, p.y);
+        assert_ulps_eq!(0.467_716_2, p.y);
         assert_ulps_eq!(0.25, p.z);
     }
 
@@ -738,7 +735,7 @@ mod tests {
             Point3::<f32>::new(0., 0., 0.),
         ];
         let faces = vec![(1, 3, 2), (3, 1, 0), (2, 0, 1), (0, 2, 3)];
-        let polytope = ConvexPolyhedron::new_with_faces(vertices, faces);
+        let polytope = ConvexPolyhedron::new_with_faces(&vertices, &faces);
         let ray = Ray3::new(Point3::new(1., -1., 1.), Vector3::new(0., 1., 0.));
         polytope.intersection(&ray);
     }

@@ -204,7 +204,7 @@ mod tests {
     fn test_continuous() {
         let circle = Circle::new(4.);
         assert_ulps_eq!(
-            Point2::new(-2.8284271247461903, -2.8284271247461903),
+            Point2::new(-2.828_427_124_746_190_3, -2.828_427_124_746_190_3),
             circle
                 .intersection(&(Particle::new(), Point2::new(-5., -5.)..Point2::new(5., 5.)))
                 .unwrap()
@@ -223,7 +223,7 @@ mod tests {
         let circle = Circle::new(4.);
         let t = transform(0., 0., 0.);
         assert_ulps_eq!(
-            Point2::new(-2.8284271247461903, -2.8284271247461903),
+            Point2::new(-2.828_427_124_746_190_3, -2.828_427_124_746_190_3),
             circle
                 .intersection_transformed(
                     &(Particle::new(), Point2::new(-5., -5.)..Point2::new(5., 5.)),

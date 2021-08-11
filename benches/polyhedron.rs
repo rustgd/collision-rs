@@ -101,8 +101,8 @@ fn sphere(n: usize, with_faces: bool) -> ConvexPolyhedron<f32> {
             .map(|f| (f.x, f.y, f.z))
             .collect::<Vec<_>>();
 
-        ConvexPolyhedron::new_with_faces(vertices, faces)
+        ConvexPolyhedron::new_with_faces(&vertices, &faces)
     } else {
-        ConvexPolyhedron::new(vertices)
+        ConvexPolyhedron::new(&vertices)
     }
 }

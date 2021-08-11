@@ -2,9 +2,7 @@ name: CI
 
 on:
   push:
-    paths-ignore: [ CONTRIBUTING.md, CHANGELOG.md, README.md, LICENSE, .gitignore ]
   pull_request:
-    paths-ignore: [ CONTRIBUTING.md, CHANGELOG.md, README.md, LICENSE, .gitignore ]
 
 env:
   CARGO_TERM_COLOR: always

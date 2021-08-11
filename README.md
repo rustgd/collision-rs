@@ -1,6 +1,6 @@
 # collision-rs
 
-[![Build Status](https://travis-ci.org/rustgd/collision-rs.svg?branch=master)](https://travis-ci.org/rustgd/collision-rs)
+[![CI](https://github.com/rustgd/collision-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/rustgd/collision-rs/actions/workflows/ci.yml)
 [![Documentation](https://docs.rs/collision/badge.svg)](https://docs.rs/collision)
 [![Version](https://img.shields.io/crates/v/collision.svg)](https://crates.io/crates/collision)
 [![License](https://img.shields.io/crates/l/collision.svg)](https://github.com/rustgd/collision-rs/blob/master/LICENSE)

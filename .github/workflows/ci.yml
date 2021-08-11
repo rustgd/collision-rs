@@ -22,6 +22,7 @@ jobs:
         os: [ubuntu-20.04, macos-10.15, windows-2019]
 
     steps:
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -30,9 +31,9 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all-targets --all-features --verbose
+          args: --all-features --verbose
       - name: Run cargo tests
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all-targets --all-features --verbose
+          args: --all-features --verbose

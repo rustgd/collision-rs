@@ -1,10 +1,11 @@
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
+#![forbid(unsafe_code, unstable_features)]
 #![deny(
     missing_docs,
+    missing_copy_implementations,
+    missing_debug_implementations,
     trivial_casts,
-    unsafe_code,
-    unstable_features,
     unused_import_braces,
     unused_qualifications,
     rust_2018_compatibility,

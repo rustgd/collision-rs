@@ -8,6 +8,7 @@ use crate::prelude::*;
 
 /// [`Dynamic Bounding Volume Tree`](../../dbvt/struct.DynamicBoundingVolumeTree.html) accelerated
 /// broad phase collision detection algorithm
+#[derive(Copy, Clone, Debug)]
 pub struct DbvtBroadPhase;
 
 impl DbvtBroadPhase {

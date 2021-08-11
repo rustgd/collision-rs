@@ -12,7 +12,11 @@
     rust_2018_idioms,
     nonstandard_style,
     unused,
-    future_incompatible
+    future_incompatible,
+    clippy::semicolon_if_nothing_returned,
+    clippy::unreadable_literal,
+    clippy::unseparated_literal_suffix,
+    clippy::needless_pass_by_value
 )]
 #![allow(clippy::excessive_precision)]
 

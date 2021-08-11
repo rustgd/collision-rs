@@ -106,7 +106,7 @@ mod tests {
 
     #[test]
     fn test_circle_far_2() {
-        test_circle(1., 1., 7.0710677, 7.0710677, 0.);
+        test_circle(1., 1., 7.071_067_7, 7.071_067_7, 0.);
     }
 
     #[test]
@@ -126,7 +126,7 @@ mod tests {
     #[test]
     fn test_circle_bound() {
         let circle = Circle::new(10.);
-        assert_eq!(bound(-10., -10., 10., 10.), circle.compute_bound())
+        assert_eq!(bound(-10., -10., 10., 10.), circle.compute_bound());
     }
 
     #[test]

@@ -223,7 +223,7 @@ mod tests {
     #[test]
     fn test_rectangle_bound() {
         let r = Cuboid::new(10., 10., 10.);
-        assert_eq!(bound(-5., -5., -5., 5., 5., 5.), r.compute_bound())
+        assert_eq!(bound(-5., -5., -5., 5., 5., 5.), r.compute_bound());
     }
 
     #[test]
@@ -271,7 +271,7 @@ mod tests {
         let ray = Ray3::new(Point3::new(10., 0., 0.), Vector3::new(-1., 0., 0.));
         let t = transform(0., 0., 0., 0.3);
         let p = cuboid.intersection_transformed(&ray, &t).unwrap();
-        assert_ulps_eq!(5.233758, p.x);
+        assert_ulps_eq!(5.233_758, p.x);
         assert_ulps_eq!(0., p.y);
         assert_ulps_eq!(0., p.z);
     }

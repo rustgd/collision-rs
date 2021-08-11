@@ -38,7 +38,7 @@ where
     }
 
     /// Create a new ray by applying a transform.
-    pub fn transform<T>(&self, transform: T) -> Self
+    pub fn transform<T>(&self, transform: &T) -> Self
     where
         T: Transform<P>,
     {
@@ -102,7 +102,7 @@ where
     where
         T: Transform<P>,
     {
-        self.intersects(&ray.transform(transform.inverse_transform().unwrap()))
+        self.intersects(&ray.transform(&transform.inverse_transform().unwrap()))
     }
 }
 
@@ -123,7 +123,7 @@ where
     where
         T: Transform<P>,
     {
-        self.intersection(&ray.transform(transform.inverse_transform().unwrap()))
+        self.intersection(&ray.transform(&transform.inverse_transform().unwrap()))
             .map(|p| transform.transform_point(p))
     }
 }

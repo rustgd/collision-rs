@@ -166,17 +166,17 @@ mod tests {
 
     #[test]
     fn test_closest_edge_0() {
-        assert_eq!(None, closest_edge::<f32>(&[]))
+        assert_eq!(None, closest_edge::<f32>(&[]));
     }
 
     #[test]
     fn test_closest_edge_1() {
-        assert_eq!(None, closest_edge(&[sup(10., 10.)]))
+        assert_eq!(None, closest_edge(&[sup(10., 10.)]));
     }
 
     #[test]
     fn test_closest_edge_2() {
-        assert_eq!(None, closest_edge(&[sup(10., 10.), sup(-10., 5.)]))
+        assert_eq!(None, closest_edge(&[sup(10., 10.), sup(-10., 5.)]));
     }
 
     #[test]
@@ -185,9 +185,9 @@ mod tests {
         assert!(edge.is_some());
         let edge = edge.unwrap();
         assert_eq!(2, edge.index);
-        assert_ulps_eq!(2.5607374, edge.distance);
-        assert_ulps_eq!(-0.6401844, edge.normal.x);
-        assert_ulps_eq!(-0.7682213, edge.normal.y);
+        assert_ulps_eq!(2.560_737_4, edge.distance);
+        assert_ulps_eq!(-0.640_184_4, edge.normal.x);
+        assert_ulps_eq!(-0.768_221_3, edge.normal.y);
     }
 
     #[test]

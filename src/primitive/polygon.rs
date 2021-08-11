@@ -408,7 +408,7 @@ mod tests {
         assert_eq!(None, polygon.intersection_transformed(&ray, &t));
         let t = transform(0., 0., 0.3);
         let p = polygon.intersection_transformed(&ray, &t).unwrap();
-        assert_ulps_eq!(0.38913357, p.x);
+        assert_ulps_eq!(0.389_133_57, p.x);
         assert_ulps_eq!(6.8, p.y);
     }
 

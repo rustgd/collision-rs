@@ -20,8 +20,8 @@ use cgmath::ulps_eq;
 mod simplex;
 
 const MAX_ITERATIONS: u32 = 100;
-const GJK_DISTANCE_TOLERANCE: f32 = 0.000001;
-const GJK_CONTINUOUS_TOLERANCE: f32 = 0.000001;
+const GJK_DISTANCE_TOLERANCE: f32 = 0.000_001;
+const GJK_CONTINUOUS_TOLERANCE: f32 = 0.000_001;
 
 /// GJK algorithm for 2D, see [GJK](struct.GJK.html) for more information.
 pub type GJK2<S> = GJK<SimplexProcessor2<S>, EPA2<S>, S>;
@@ -163,9 +163,9 @@ where
     pub fn intersection_time_of_impact<P, PL, PR, TL, TR>(
         &self,
         left: &PL,
-        left_transform: Range<&TL>,
+        left_transform: &Range<&TL>,
         right: &PR,
-        right_transform: Range<&TR>,
+        right_transform: &Range<&TR>,
     ) -> Option<Contact<P>>
     where
         P: EuclideanSpace<Scalar = S>,
@@ -506,7 +506,7 @@ where
                         min_distance = Some(
                             min_distance
                                 .map_or(distance, |min_distance| distance.min(min_distance)),
-                        )
+                        );
                     }
                 }
             }
@@ -539,9 +539,9 @@ where
         &self,
         strategy: &CollisionStrategy,
         left: &[(PL, TL)],
-        left_transform: Range<&TL>,
+        left_transform: &Range<&TL>,
         right: &[(PR, TR)],
-        right_transform: Range<&TR>,
+        right_transform: &Range<&TR>,
     ) -> Option<Contact<P>>
     where
         P: EuclideanSpace<Scalar = S>,
@@ -562,9 +562,9 @@ where
                 let right_end_transform = right_transform.end.concat(right_local_transform);
                 if let Some(mut contact) = self.intersection_time_of_impact(
                     left_primitive,
-                    &left_start_transform..&left_end_transform,
+                    &(&left_start_transform..&left_end_transform),
                     right_primitive,
-                    &right_start_transform..&right_end_transform,
+                    &(&right_start_transform..&right_end_transform),
                 ) {
                     match *strategy {
                         CollisionOnly => {
@@ -670,7 +670,7 @@ mod tests {
                 &right,
                 &right_transform
             )
-            .is_none())
+            .is_none());
     }
 
     #[test]
@@ -770,13 +770,13 @@ mod tests {
         let contact = gjk
             .intersection_time_of_impact(
                 &left,
-                &left_start_transform..&left_end_transform,
+                &(&left_start_transform..&left_end_transform),
                 &right,
-                &right_transform..&right_transform,
+                &(&right_transform..&right_transform),
             )
             .unwrap();
 
-        assert_ulps_eq!(0.1666667, contact.time_of_impact);
+        assert_ulps_eq!(0.166_666_7, contact.time_of_impact);
         assert_eq!(Vector2::new(-1., 0.), contact.normal);
         assert!(0. - contact.penetration_depth <= f32::EPSILON);
         assert_eq!(Point2::new(10., 0.), contact.contact_point);
@@ -784,9 +784,9 @@ mod tests {
         assert!(gjk
             .intersection_time_of_impact(
                 &left,
-                &left_start_transform..&left_start_transform,
+                &(&left_start_transform..&left_start_transform),
                 &right,
-                &right_transform..&right_transform
+                &(&right_transform..&right_transform)
             )
             .is_none());
     }
@@ -803,13 +803,13 @@ mod tests {
         let contact = gjk
             .intersection_time_of_impact(
                 &left,
-                &left_start_transform..&left_end_transform,
+                &(&left_start_transform..&left_end_transform),
                 &right,
-                &right_transform..&right_transform,
+                &(&right_transform..&right_transform),
             )
             .unwrap();
 
-        assert_ulps_eq!(0.1666667, contact.time_of_impact);
+        assert_ulps_eq!(0.166_666_7, contact.time_of_impact);
         assert_eq!(Vector3::new(-1., 0., 0.), contact.normal);
         assert!(0. - contact.penetration_depth <= f32::EPSILON);
         assert_eq!(Point3::new(10., 0., 0.), contact.contact_point);
@@ -817,9 +817,9 @@ mod tests {
         assert!(gjk
             .intersection_time_of_impact(
                 &left,
-                &left_start_transform..&left_start_transform,
+                &(&left_start_transform..&left_start_transform),
                 &right,
-                &right_transform..&right_transform
+                &(&right_transform..&right_transform)
             )
             .is_none());
     }

@@ -230,7 +230,7 @@ mod tests {
         let direction = Vector3::new(0.5, -1., 0.).normalize();
         let transform = transform(0., 0., 0., 0.);
         let point = capsule.support_point(&direction, &transform);
-        assert_ulps_eq!(Point3::new(0.44721365, -2.8944273, 0.), point);
+        assert_ulps_eq!(Point3::new(0.447_213_65, -2.894_427_3, 0.), point);
     }
 
     #[test]
@@ -327,9 +327,9 @@ mod tests {
         );
         assert_eq!(
             Some(Point3::new(
-                0.10102588514869944,
-                2.989741148513006,
-                0.10102588514869944
+                0.101_025_885_148_699_44,
+                2.989_741_148_513_006,
+                0.101_025_885_148_699_44
             )),
             capsule.intersection(&ray)
         );

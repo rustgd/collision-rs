@@ -701,7 +701,7 @@ where
                     };
 
                     // if the old leaf node wasn't the root of tree, we update it's parent to point
-                    // to the new branch node insteaf of the old leaf node
+                    // to the new branch node instead of the old leaf node
                     branch_parent_index = branch.parent;
                     if branch.parent != 0 {
                         if let Node::Branch(ref mut n) = self.nodes[branch.parent] {
@@ -979,7 +979,7 @@ where
             );
 
             // we now know which rotation will give us the best surface area
-            // only do actual rotation if the surface area is reduced by atleast 25%
+            // only do actual rotation if the surface area is reduced by at least 25%
             if (my_surface_area - min_sa) / my_surface_area > improvement_percentage {
                 match rot {
                     // do nothing

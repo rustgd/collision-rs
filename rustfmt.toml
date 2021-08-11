@@ -1,1 +1,5 @@
-reorder_imports=true
+edition = "2018"
+use_try_shorthand = true
+use_field_init_shorthand = true
+hard_tabs = false
+reorder_imports = true

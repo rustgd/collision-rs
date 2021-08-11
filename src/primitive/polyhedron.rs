@@ -194,6 +194,7 @@ where
 
 /// Iterate over polyhedron faces.
 /// Yields a tuple with the positions of the 3 vertices of each face
+#[derive(Debug)]
 pub struct FaceIterator<'a, S>
 where
     S: BaseFloat,
@@ -422,15 +423,14 @@ where
 
     /// Ray must be in object space
     fn intersection(&self, ray: &Ray3<S>) -> Option<Point3<S>> {
-        find_intersecting_face(self, ray).and_then(|(face_index, (u, v, w))| {
+        find_intersecting_face(self, ray).map(|(face_index, (u, v, w))| {
             let f = &self.faces[face_index];
             let v0 = f.vertices.0;
             let v1 = f.vertices.1;
             let v2 = f.vertices.2;
-            let p = (self.vertices[v0].position * u)
+            (self.vertices[v0].position * u)
                 + (self.vertices[v1].position.to_vec() * v)
-                + (self.vertices[v2].position.to_vec() * w);
-            Some(p)
+                + (self.vertices[v2].position.to_vec() * w)
         })
     }
 }

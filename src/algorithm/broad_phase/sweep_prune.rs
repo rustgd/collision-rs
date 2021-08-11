@@ -30,6 +30,7 @@ pub type SweepAndPrune3<S, B> = SweepAndPrune<Variance3<S, B>>;
 ///        [SweepAndPrune2](type.SweepAndPrune2.html) and [SweepAndPrune3](type.SweepAndPrune3.html)
 ///        provide a variance type for you, so they should be used if you do not have a custom type
 ///        implementing [Variance](trait.Variance.html).
+#[derive(Debug)]
 pub struct SweepAndPrune<V> {
     sweep_axis: usize,
     variance: V,

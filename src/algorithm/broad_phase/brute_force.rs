@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Broad phase collision detection brute force implementation.
 ///
 /// Will simply do bounding box intersection tests for all shape combinations.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct BruteForce;
 
 impl BruteForce {

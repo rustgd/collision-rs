@@ -7,7 +7,7 @@ use cgmath::prelude::*;
 /// This is used both to specify what collision strategy to use for each shape, and also each
 /// found contact will have this returned on it, detailing what data is relevant in the
 /// [`Contact`](struct.Contact.html).
-#[derive(Debug, PartialEq, Clone, PartialOrd)]
+#[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CollisionStrategy {
     /// Compute full contact manifold for the collision

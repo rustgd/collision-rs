@@ -41,7 +41,7 @@ impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff 
 impl<S, V, P:Debug> Debug for Line<S,V,P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Line")?;
-        <[&P; 2] as fmt::Debug>::fmt(&[&self.origin, &self.dest], f)
+        <(&P, &P) as fmt::Debug>::fmt(&(&self.origin, &self.dest), f)
     }
 }
 

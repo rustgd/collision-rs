@@ -17,7 +17,7 @@ use crate::Ray;
 /// These intersection tests can be used with any primitive that has `Ray` intersection tests
 /// implemented.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
 pub struct Particle<P> {
     m: marker::PhantomData<P>,
 }

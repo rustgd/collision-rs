@@ -8,7 +8,7 @@ use crate::{Aabb2, Ray2};
 
 /// Circle primitive
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
 pub struct Circle<S> {
     /// Radius of the circle
     pub radius: S,

@@ -12,7 +12,7 @@ use crate::traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransfo
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
 pub struct Ray<S, P, V> {
     /// Ray origin
     pub origin: P,

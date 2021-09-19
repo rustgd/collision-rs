@@ -1,8 +1,7 @@
 //! Line segments
 
-use std::marker::PhantomData;
 use std::fmt;
-use std::fmt::Debug;
+use std::marker::PhantomData;
 
 use cgmath::prelude::*;
 use cgmath::{BaseFloat, BaseNum};
@@ -38,10 +37,12 @@ impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff 
     }
 }
 
-impl<S, V, P:Debug> Debug for Line<S,V,P> {
+impl<S, V, P: fmt::Debug> fmt::Debug for Line<S, V, P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Line")?;
-        <(&P, &P) as fmt::Debug>::fmt(&(&self.origin, &self.dest), f)
+        f.debug_tuple("Line")
+            .field(&self.origin)
+            .field(&self.dest)
+            .finish()
     }
 }
 

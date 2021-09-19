@@ -26,37 +26,37 @@ pub enum Primitive2<S:cgmath::BaseNum> {
     ConvexPolygon(ConvexPolygon<S>),
 }
 
-impl<S:cgmath::BaseNum> From<Particle2<S>> for Primitive2<S> {
+impl<S: cgmath::BaseNum> From<Particle2<S>> for Primitive2<S> {
     fn from(particle: Particle2<S>) -> Primitive2<S> {
         Primitive2::Particle(particle)
     }
 }
 
-impl<S:cgmath::BaseNum> From<Line2<S>> for Primitive2<S> {
+impl<S: cgmath::BaseNum> From<Line2<S>> for Primitive2<S> {
     fn from(line: Line2<S>) -> Primitive2<S> {
         Primitive2::Line(line)
     }
 }
 
-impl<S:cgmath::BaseNum> From<Circle<S>> for Primitive2<S> {
+impl<S: cgmath::BaseNum> From<Circle<S>> for Primitive2<S> {
     fn from(circle: Circle<S>) -> Primitive2<S> {
         Primitive2::Circle(circle)
     }
 }
 
-impl<S:cgmath::BaseNum> From<Rectangle<S>> for Primitive2<S> {
+impl<S: cgmath::BaseNum> From<Rectangle<S>> for Primitive2<S> {
     fn from(rectangle: Rectangle<S>) -> Primitive2<S> {
         Primitive2::Rectangle(rectangle)
     }
 }
 
-impl<S:cgmath::BaseNum> From<Square<S>> for Primitive2<S> {
+impl<S: cgmath::BaseNum> From<Square<S>> for Primitive2<S> {
     fn from(rectangle: Square<S>) -> Primitive2<S> {
         Primitive2::Square(rectangle)
     }
 }
 
-impl<S:cgmath::BaseNum> From<ConvexPolygon<S>> for Primitive2<S> {
+impl<S: cgmath::BaseNum> From<ConvexPolygon<S>> for Primitive2<S> {
     fn from(polygon: ConvexPolygon<S>) -> Primitive2<S> {
         Primitive2::ConvexPolygon(polygon)
     }

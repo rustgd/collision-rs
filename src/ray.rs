@@ -1,8 +1,7 @@
 //! Generic rays
 
-use std::marker::PhantomData;
 use core::fmt;
-use core::fmt::Debug;
+use std::marker::PhantomData;
 
 use cgmath::prelude::*;
 use cgmath::{BaseFloat, BaseNum};
@@ -51,10 +50,12 @@ where
     }
 }
 
-impl<S, P:Debug, V:Debug> Debug for Ray<S,P,V> {
+impl<S, P: fmt::Debug, V: fmt::Debug> fmt::Debug for Ray<S, P, V> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Ray")?;
-        <(&P,&V) as fmt::Debug>::fmt(&(&self.origin, &self.direction), f)
+        f.debug_tuple("Ray")
+            .field(&self.origin)
+            .field(&self.direction)
+            .finish()
     }
 }
 

@@ -31,16 +31,16 @@ keywords = ["gamedev", "cgmath", "collision"]
 [lib]
 name = "collision"
 
+[features]
+serde = ["serde_crate", "cgmath/serde", "num/serde"]
+
 [dependencies]
 rand = "0.8.4"
 cgmath = "0.18.0"
-serde = { version = "1.0.126", optional = true, features = ["derive"] }
+serde_crate = { version = "1.0.126", package="serde", optional = true, features = ["derive"] }
 bit-set = "0.5.2"
 smallvec = "1.6.1"
-
-[target.'cfg(feature="serde")'.dependencies]
-cgmath = { version = "0.18.0", features = ["serde"] }
-num = { version = "0.4.0", features = ["serde"] }
+num = "0.4.0"
 
 [dev-dependencies]
 genmesh = "0.5"

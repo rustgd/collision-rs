@@ -1,5 +1,6 @@
 //! Line segments
 
+use std::fmt;
 use std::marker::PhantomData;
 
 use cgmath::prelude::*;
@@ -11,7 +12,7 @@ use crate::prelude::*;
 use crate::Ray2;
 
 /// A generic directed line segment from `origin` to `dest`.
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
 pub struct Line<S, V, P> {
     /// Origin of the line
@@ -33,6 +34,15 @@ impl<S: BaseNum, V: VectorSpace<Scalar = S>, P: EuclideanSpace<Scalar = S, Diff 
             phantom_v: PhantomData,
             phantom_s: PhantomData,
         }
+    }
+}
+
+impl<S, V, P: fmt::Debug> fmt::Debug for Line<S, V, P> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Line")
+            .field(&self.origin)
+            .field(&self.dest)
+            .finish()
     }
 }
 

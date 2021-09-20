@@ -1,5 +1,6 @@
 //! Generic rays
 
+use core::fmt;
 use std::marker::PhantomData;
 
 use cgmath::prelude::*;
@@ -11,7 +12,7 @@ use crate::traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransfo
 
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
 pub struct Ray<S, P, V> {
     /// Ray origin
@@ -46,6 +47,15 @@ where
             transform.transform_point(self.origin),
             transform.transform_vector(self.direction),
         )
+    }
+}
+
+impl<S, P: fmt::Debug, V: fmt::Debug> fmt::Debug for Ray<S, P, V> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Ray")
+            .field(&self.origin)
+            .field(&self.direction)
+            .finish()
     }
 }
 

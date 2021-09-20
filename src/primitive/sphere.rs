@@ -6,7 +6,11 @@ use crate::{Aabb3, Ray3};
 
 /// Sphere primitive
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct Sphere<S> {
     /// Radius of the sphere
     pub radius: S,

@@ -8,7 +8,11 @@ use cgmath::{Vector2, Vector3};
 /// Generic object bounding box, centered on `center`, aligned with `axis`,
 /// and with size `extents`.
 #[derive(Copy, Clone, PartialEq, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct Obb<S, V, P> {
     /// OBB center point in world space
     pub center: P,

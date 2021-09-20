@@ -12,7 +12,11 @@ use crate::{Aabb2, Line2, Ray2};
 /// Can contain any number of vertices, but a high number of vertices will
 /// affect performance of course. Vertices need to be in CCW order.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct ConvexPolygon<S> {
     /// Vertices of the convex polygon.
     pub vertices: Vec<Point2<S>>,

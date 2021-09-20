@@ -8,7 +8,11 @@ use cgmath::prelude::*;
 /// found contact will have this returned on it, detailing what data is relevant in the
 /// [`Contact`](struct.Contact.html).
 #[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub enum CollisionStrategy {
     /// Compute full contact manifold for the collision
     FullResolution,

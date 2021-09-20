@@ -24,7 +24,11 @@ use crate::Ray3;
 /// alternative, `A*x + B*y + C*z + D = 0`, because it tends to avoid
 /// superfluous negations (see _Real Time Collision Detection_, p. 55).
 #[derive(Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct Plane<S> {
     /// Plane normal
     pub n: Vector3<S>,

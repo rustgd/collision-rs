@@ -9,7 +9,11 @@ use crate::{Aabb3, Ray3};
 /// Capsule primitive
 /// Capsule body is aligned with the Y axis, with local origin in the center of the capsule.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct Capsule<S> {
     half_height: S,
     radius: S,

@@ -11,7 +11,11 @@ use crate::{Aabb3, Ray3, Sphere};
 ///
 /// Have a cached set of corner points to speed up computation.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct Quad<S> {
     /// Dimensions of the rectangle
     dim: Vector2<S>,

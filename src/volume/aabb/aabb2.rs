@@ -12,7 +12,11 @@ use crate::{Line2, Ray2};
 
 /// A two-dimensional AABB, aka a rectangle.
 #[derive(Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct Aabb2<S> {
     /// Minimum point of the AABB
     pub min: Point2<S>,

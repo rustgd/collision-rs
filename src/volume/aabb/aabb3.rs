@@ -12,7 +12,11 @@ use crate::{Line3, Plane, Ray3, Sphere};
 
 /// A three-dimensional AABB, aka a rectangular prism.
 #[derive(Copy, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate="serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub struct Aabb3<S> {
     /// Minimum point of the AABB
     pub min: Point3<S>,

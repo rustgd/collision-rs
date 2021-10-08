@@ -1,5 +1,6 @@
 //! Generic rays
 
+use core::convert::TryFrom;
 use core::fmt;
 use std::marker::PhantomData;
 
@@ -9,6 +10,7 @@ use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 
 use crate::traits::{Continuous, ContinuousTransformed, Discrete, DiscreteTransformed};
+use crate::Line;
 
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
@@ -139,5 +141,35 @@ where
     {
         self.intersection(&ray.transform(&transform.inverse_transform().unwrap()))
             .map(|p| transform.transform_point(p))
+    }
+}
+
+impl<S, V, P> TryFrom<&Line<S, V, P>> for Ray<S, P, V>
+where
+    S: BaseFloat,
+    V: InnerSpace + VectorSpace<Scalar = S>,
+    P: EuclideanSpace<Scalar = S, Diff = V> + cgmath::UlpsEq + cgmath::AbsDiffEq<Epsilon = S>,
+{
+    type Error = ();
+
+    #[inline]
+    /// Converts an euclidean Line into an euclidean Ray. The created ray will inherit the origin
+    /// and direction of the line. This conversion will fail if the line describes a single point.
+    ///```
+    /// use collision::{Line3,Ray};
+    /// use cgmath::Point3;
+    /// use std::convert::TryFrom;
+    /// let line: Line3<f32> = Line3::new(Point3::new(1f32, 2., 3.), Point3::new(5f32, 56., 6.));
+    /// assert!(Ray::try_from(&line).is_ok());
+    ///```
+    fn try_from(l: &Line<S, V, P>) -> Result<Self, Self::Error> {
+        if l.dest
+            .ulps_eq(&l.origin, S::epsilon(), S::default_max_ulps())
+        {
+            // Can't build a ray from a single point
+            Err(())
+        } else {
+            Ok(Self::new(l.origin, (l.dest - l.origin).normalize()))
+        }
     }
 }
